@@ -1,0 +1,13 @@
+{
+  "rewrites": [
+    {
+      "source": "/geogame",
+      "destination": "/geogame.html"
+    },
+ {
+      "source": "/pikamed",
+      "destination": "/pikamed.html"
+    }
+
+  ]
+}
