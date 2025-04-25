@@ -14,9 +14,11 @@ const Navbar = () => {
 
         {/* Sağ Taraf - Menü Linkleri */}
         <div className="flex items-center space-x-6">
+          {/*
           <Link href="/projeler" className="text-gray-600 hover:text-gray-900 dark:text-gray-50 dark:hover:text-gray-400">
             Projeler
           </Link>
+          */}
           <Link href="/about" className="text-gray-600 hover:text-gray-900 dark:text-gray-50 dark:hover:text-gray-400">
             Hakkımda
           </Link>
