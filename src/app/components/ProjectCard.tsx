@@ -135,7 +135,7 @@ const ProjelerSection: React.FC = () => {
       title: "Pikamed - Sağlık Takip Sistemi",
       features: [
         "Yapay Zeka Destekli",
-        "Şuanlık Kapalı Kaynak",
+        "Açık Kaynak",
         "Android",
         "Performanslı",
       ],
