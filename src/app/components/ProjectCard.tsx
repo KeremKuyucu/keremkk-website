@@ -130,7 +130,7 @@ const ProjelerSection: React.FC = () => {
     {
       imageUrl: "/imgs/pikamed.png",
       altText: "Pikamed",
-      isNew: true,
+      isNew: false,
       isDeveloping: true,
       title: "Pikamed - Sağlık Takip Sistemi",
       features: [
@@ -142,22 +142,6 @@ const ProjelerSection: React.FC = () => {
       featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
       viewLink: "https://pikamed.keremkk.com.tr",
       githubLink: "https://github.com/keremlolgg/pikamed",
-    },
-    {
-      imageUrl: "/imgs/pikamed-panel.png",
-      altText: "PikaMed-Panel",
-      isNew: true,
-      isDeveloping: true,
-      title: "Pikamed - Doktor ve Admin paneli",
-      features: [
-        "Firebase Entegerasyonu",
-        "Açık Kaynak",
-        "Web",
-        "Performanslı",
-      ],
-      featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
-      viewLink: "https://pikamed-panel.keremkk.com.tr",
-      githubLink: "https://github.com/keremlolgg/pikamed-panel",
     },
     {
       imageUrl: "/imgs/discordstorage.png",
