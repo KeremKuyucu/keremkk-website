@@ -14,7 +14,6 @@
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@iconify/react": "^5.2.1",
-    "@vercel/speed-insights": "^1.2.0",
     "fontawesome": "^5.6.3",
     "lucide-react": "^0.501.0",
     "next": "^15.3.1",
