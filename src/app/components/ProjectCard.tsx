@@ -124,8 +124,8 @@ const ProjelerSection: React.FC = () => {
         "Performanslı",
       ],
       featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
-      viewLink: "https://geogame.keremkk.com.tr",
-      githubLink: "https://keremkk.glitch.me/keremlolgg/geogame",
+      viewLink: "https://keremkk.com.tr/geogame",
+      githubLink: "https://keremkk.glitch.me/KeremKuyucu/geogame",
     },
     {
       imageUrl: "/imgs/pikamed.png",
@@ -141,7 +141,7 @@ const ProjelerSection: React.FC = () => {
       ],
       featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
       viewLink: "https://pikamed.keremkk.com.tr",
-      githubLink: "https://github.com/keremlolgg/pikamed",
+      githubLink: "https://github.com/KeremKuyucu/pikamed",
     },
     {
       imageUrl: "/imgs/discordstorage.png",
@@ -157,7 +157,7 @@ const ProjelerSection: React.FC = () => {
       ],
       featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
       viewLink: "#",
-      githubLink: "https://github.com/keremlolgg/DiscordStorage",
+      githubLink: "https://github.com/KeremKuyucu/DiscordStorage",
     },
   ];
 
