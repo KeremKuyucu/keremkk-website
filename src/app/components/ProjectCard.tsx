@@ -124,8 +124,8 @@ const ProjelerSection: React.FC = () => {
         "Performanslı",
       ],
       featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
-      viewLink: "https://keremkk.com.tr/geogame",
-      githubLink: "https://keremkk.glitch.me/KeremKuyucu/geogame",
+      viewLink: "https://geogame.keremkk.com.tr",
+      githubLink: "https://github.com/KeremKuyucu/geogame",
     },
     {
       imageUrl: "/imgs/pikamed.png",

@@ -47,14 +47,13 @@ export default function Hakkimda() {
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Hakkımda</h2>
           <div>
             <p className="text-2xl mb-4">
-              Hobi olarak yazılım geliştirme, Arduino, C++ ve Flutter gibi teknolojileri kullanarak yeni projeler geliştiriyorum.
+              Merhaba, ben Kerem Kuyucu. Bilecik Ertuğrulgazi Lisesi 11. sınıf öğrencisiyim ve teknolojiye büyük bir ilgi duyuyorum. Kendi başıma hobi projeleri geliştirerek kendimi sürekli ilerletmeye çalışıyorum. Geçmişte satranç ve robotik kodlama alanlarıyla ilgilendim ve bu alanlardaki etkinliklere katıldım.
               <br />
               <br />
-             Boş zamanlarımda müzik dinleyerek, oyunlar oynayarak eğleniyorum.
+              Bilecik Deneyap Teknoloji Atölyeleri'nde de öğrenim gördüm. Dart, Javascript, C++ dillerini kullanıyorum.
               <br />
               <br />
-              Yaptığımda programlarda Discord API kullanarak apiler geliştiriyorum.
-              <br />
+              Ayrıca, 2025 yılında TÜBİTAK 2204-A yarışmasında 'Küresel Isınmanın Arktik Bölge ve Türkiye Üzerindeki Etkilerinin Karşılaştırılması' projesi ile coğrafya alanında Bursa Bölge 3. oldum.
             </p>
           </div>
 
