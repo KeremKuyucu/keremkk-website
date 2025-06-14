@@ -1,5 +1,5 @@
-"use client"
-import React, { useEffect, useRef } from "react";
+"use client";
+import React, { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCheckCircle,
@@ -25,10 +25,7 @@ interface Project {
   githubLink?: string;
 }
 
-interface ProjectGroup {
-  groupTitle: string;
-  projects: Project[];
-}
+const fallbackImage = "/imgs/errorimage.jpg";
 
 const ProjectCard: React.FC<Project> = ({
   imageUrl,
@@ -43,11 +40,17 @@ const ProjectCard: React.FC<Project> = ({
 }) => {
   return (
     <div className="rounded-3xl overflow-hidden flex flex-col md:flex-row mb-8 transform transition-all duration-500 ease-out">
-      <div className="relative w-full md:w-1/2 h-64 md:h-auto ">
+      <div
+        className="relative w-full md:w-1/2 max-w-[512px] mx-auto"
+        style={{ aspectRatio: "16 / 9" }}
+      >
         <img
           src={imageUrl}
           alt={altText}
-          className="w-full h-full object-cover rounded-3xl max-w-128"
+          className="absolute top-0 left-0 w-full h-full object-cover object-center rounded-3xl"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = fallbackImage;
+          }}
         />
       </div>
       <div className="p-4 md:p-8 flex-1">
@@ -67,10 +70,7 @@ const ProjectCard: React.FC<Project> = ({
         <ul className="space-y-3 mb-6 stagger-reveal">
           {features.map((feature, index) => (
             <li className="flex items-center text-lg" key={index}>
-              <FontAwesomeIcon
-                icon={featureIcons[index]}
-                className="mr-3 fa-fw"
-              />
+              <FontAwesomeIcon icon={featureIcons[index]} className="mr-3 fa-fw" />
               {feature}
             </li>
           ))}
@@ -113,81 +113,124 @@ const ProjectCard: React.FC<Project> = ({
 };
 
 const ProjelerSection: React.FC = () => {
-  const projectsGroups: ProjectGroup[] = [
-    {
-      groupTitle: "GeoGame Serisi",
-      projects: [
-        {
-          imageUrl: "/imgs/geogame.png",
-          altText: "GeoGame",
-          title: "GeoGame - Flutter",
-          features: ["Çevrimiçi/Çevrimdışı", "Açık kaynak", "Android/Windows", "Flutter"],
-          featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
-          viewLink: "https://geogame.keremkk.com.tr",
-          githubLink: "https://github.com/KeremKuyucu/geogame",
-        },
-        {
-          imageUrl: "/imgs/geogamecpp.png",
-          altText: "GeoGameCPP",
-          title: "GeoGame - C++",
-          features: ["Çevrimdışı kullanım", "Açık kaynak", "Windows", "C++"],
-          featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
-          githubLink: "https://github.com/KeremKuyucu/geogameCpp",
-        },
-        {
-          imageUrl: "/imgs/geogame-api.png",
-          altText: "GeoGameAPI",
-          title: "GeoGame API",
-          features: ["REST API", "Node.js", "Express"],
-          featureIcons: [faCodeBranch, faFilePen, faLaptop],
-          githubLink: "https://github.com/KeremKuyucu/geogame-api",
-        },
-        {
-          imageUrl: "/imgs/geogame-cdn.png",
-          altText: "GeoGameCDN",
-          title: "GeoGame CDN",
-          features: ["Statik içerik sunucu", "Hızlı Erişim", "CDN"],
-          featureIcons: [faCheckCircle, faGaugeHigh, faLaptop],
-          githubLink: "https://github.com/KeremKuyucu/geogame-cdn",
-        },
-      ],
-    },
-    {
-      groupTitle: "DiscordStorage",
-      projects: [
-        {
-          imageUrl: "/imgs/discordstorage.png",
-          altText: "DiscordStorage",
-          title: "DiscordStorage - Flutter",
-          features: ["Bot Tokeni ile çalışır", "Açık kaynak", "Android/Windows", "Flutter"],
-          featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
-          githubLink: "https://github.com/KeremKuyucu/DiscordStorage",
-        },
-        {
-          imageUrl: "/imgs/discordstoragecpp.png",
-          altText: "DiscordStorageCPP",
-          title: "DiscordStorage - C++",
-          features: ["Bot Tokeni ile çalışır", "Açık kaynak", "Windows", "C++"],
-          featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
-          githubLink: "https://github.com/KeremKuyucu/DiscordStorageCPP",
-        },
-      ],
-    },
-    {
-      groupTitle: "Diğer Projeler",
-      projects: [
-        {
-          imageUrl: "/imgs/pikamed.png",
-          altText: "Pikamed",
-          title: "Pikamed - Sağlık Takip Sistemi",
-          features: ["Yapay Zeka Destekli", "Açık Kaynak", "Android", "Flutter"],
-          featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
-          viewLink: "https://pikamed.keremkk.com.tr",
-          githubLink: "https://github.com/KeremKuyucu/pikamed",
-        },
-      ],
-    },
-  ];
+  const projectsByCategory: { [key: string]: Project[] } = {
+    GeoGame: [
+      {
+        imageUrl: "/imgs/geogamecpp.png",
+        altText: "GeoGame C++",
+        title: "GeoGame - C++ Versiyonu",
+        features: ["Çevrimdışı", "C++", "Windows", "Açık kaynak"],
+        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        githubLink: "https://github.com/KeremKuyucu/GeoGameCPP",
+        viewLink: "https://github.com/KeremKuyucu/GeoGameCPP/releases/latest",
+      },
+      {
+        imageUrl: "/imgs/geogame.png",
+        altText: "GeoGame",
+        title: "GeoGame - Flutter Versiyonu",
+        features: ["Çevrim içi/çevrimdışı", "Flutter", "Android ve Windows", "Açık kaynak"],
+        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        githubLink: "https://github.com/KeremKuyucu/GeoGame",
+        viewLink: "https://geogame.keremkk.com.tr",
+      },
+      {
+        imageUrl: "/imgs/geogameapi.png",
+        altText: "GeoGame API",
+        title: "GeoGame API",
+        features: ["REST API", "Next.js", "Backend", "Açık kaynak"],
+        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        githubLink: "https://github.com/KeremKuyucu/geogame-api",
+        viewLink: "https://geogame-api.keremkk.com.tr",
+      },
+      {
+        imageUrl: "/imgs/geogamecdn.png",
+        altText: "GeoGame CDN",
+        title: "GeoGame CDN",
+        features: ["Statik içerik", "Next.js", "Backend", "Açık kaynak"],
+        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        githubLink: "https://github.com/KeremKuyucu/geogame-cdn",
+        viewLink: "https://geogame-cdn.keremkk.com.tr",
+      },
+      {
+        imageUrl: "/imgs/geogamewebsite.png",
+        altText: "GeoGame Website",
+        title: "GeoGame Website",
+        features: ["Frontend", "Next.js", "Web", "Açık kaynak"],
+        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        githubLink: "https://github.com/KeremKuyucu/geogame-website",
+        viewLink: "https://geogame.keremkk.com.tr",
+      },
+      {
+        imageUrl: "/imgs/geogameauth.png",
+        altText: "GeoGame Auth",
+        title: "GeoGame Authentication Web",
+        features: ["Kullanıcı Girişi", "Next.js", "Web", "Açık kaynak"],
+        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        githubLink: "https://github.com/KeremKuyucu/geogame-auth-web",
+        viewLink: "https://geogame-auth.keremkk.com.tr",
+      },
+    ],
+    PikaMed: [
+      {
+        imageUrl: "/imgs/pikamed.png",
+        altText: "PikaMed",
+        title: "PikaMed - Sağlık Takip Sistemi",
+        features: ["Yapay Zeka Destekli", "Flutter", "Android", "Açık kaynak"],
+        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        githubLink: "https://github.com/KeremKuyucu/PikaMed",
+        viewLink: "https://pikamed.keremkk.com.tr",
+      },
+      {
+        imageUrl: "/imgs/pikamedwebsite.png",
+        altText: "PikaMed Website",
+        title: "PikaMed Website",
+        features: ["Frontend", "Next.js", "Web", "Açık kaynak"],
+        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        githubLink: "https://github.com/KeremKuyucu/PikaMed-website",
+        viewLink: "https://pikamed.keremkk.com.tr",
+      },
+      {
+        imageUrl: "/imgs/pikamedapi.png",
+        altText: "PikaMed API",
+        title: "PikaMed API Server",
+        features: ["REST API", "Next.js", "Backend", "Açık kaynak"],
+        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        githubLink: "https://github.com/KeremKuyucu/pikamed-api",
+        viewLink: "https://pikamed-api.keremkk.com.tr",
+      },
+      {
+        imageUrl: "/imgs/pikamedpanel.png",
+        altText: "PikaMed Panel",
+        title: "PikaMed Yönetim Paneli",
+        features: ["Yönetici Arayüzü", "Next.js", "Web", "Açık kaynak"],
+        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        githubLink: "https://github.com/KeremKuyucu/pikamed-panel",
+        viewLink: "https://pikamed-panel.keremkk.com.tr",
+      },
+    ],
+    DiscordStorage: [
+      {
+        imageUrl: "/imgs/discordstoragecpp.png",
+        altText: "DiscordStorageCPP",
+        title: "DiscordStorage - C++ Versiyonu",
+        features: ["Discord Bot API", "C++", "Windows", "Açık kaynak"],
+        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        githubLink: "https://github.com/KeremKuyucu/DiscordStorageCPP",
+        viewLink: "https://github.com/KeremKuyucu/DiscordStorageCPP/releases/latest",
+      },
+      {
+        imageUrl: "/imgs/discordstorage.png",
+        altText: "DiscordStorage",
+        title: "DiscordStorage - Flutter Versiyonu",
+        features: ["Discord Bot API", "Flutter", "Android ve Windows", "Açık kaynak"],
+        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        githubLink: "https://github.com/KeremKuyucu/DiscordStorage",
+        viewLink: "https://github.com/KeremKuyucu/DiscordStorage/releases/latest",
+      },
+    ],
+  };
+
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -204,27 +247,43 @@ const ProjelerSection: React.FC = () => {
     );
 
     const scrollElements = document.querySelectorAll(".scroll-reveal");
-    scrollElements.forEach((el) => observer.observe(el));
+    scrollElements.forEach((el) => {
+      observer.observe(el);
+    });
 
     return () => {
-      scrollElements.forEach((el) => observer.unobserve(el));
+      scrollElements.forEach((el) => {
+        observer.unobserve(el);
+      });
     };
-  }, []);
+  }, [activeCategory]);
 
   return (
     <div
-      ref={sectionRef}
-      className="min-h-screen px-4 py-16 md:py-0 md:flex md:flex-col md:justify-center md:items-center"
-    >
-      <div className="mx-auto w-full max-w-6xl">
-        <h2 className="text-3xl md:text-4xl font-normal mb-8 md:mb-12 scroll-reveal">
-          Projelerim
-        </h2>
-        {projectsGroups.map((group, i) => (
-          <div key={i} className="mb-12">
-            <h3 className="text-2xl font-semibold mb-6 scroll-reveal">{group.groupTitle}</h3>
+        ref={sectionRef}
+        className="min-h-auto px-4 py-0 md:py-0 md:flex md:flex-col md:justify-center md:items-center"
+      >
+        <div className="mx-auto w-full max-w-6xl p-0 m-0">
+          <h2 className="text-3xl md:text-4xl font-normal mb-8 md:mb-12">Projelerim</h2>
+          <div className="flex justify-center gap-6 mb-12">
+            {Object.keys(projectsByCategory).map((category) => (
+              <button
+                key={category}
+                onClick={() => setActiveCategory(category)}
+                className={`px-6 py-2 rounded-full text-lg font-medium transition-colors duration-300
+                  ${
+                    activeCategory === category
+                      ? "bg-blue-600 text-white shadow-lg"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+          {activeCategory && (
             <div className="space-y-8 md:space-y-12">
-              {group.projects.map((project, index) => (
+              {projectsByCategory[activeCategory].map((project, index) => (
                 <div
                   key={index}
                   className="scroll-reveal"
@@ -234,10 +293,10 @@ const ProjelerSection: React.FC = () => {
                 </div>
               ))}
             </div>
-          </div>
-        ))}
+          )}
+        </div>
       </div>
-    </div>
+
   );
 };
 
