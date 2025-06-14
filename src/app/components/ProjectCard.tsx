@@ -25,6 +25,11 @@ interface Project {
   githubLink?: string;
 }
 
+interface ProjectGroup {
+  groupTitle: string;
+  projects: Project[];
+}
+
 const ProjectCard: React.FC<Project> = ({
   imageUrl,
   altText,
@@ -60,17 +65,15 @@ const ProjectCard: React.FC<Project> = ({
         </div>
         <h3 className="text-3xl font-normal mb-4">{title}</h3>
         <ul className="space-y-3 mb-6 stagger-reveal">
-          {features.map((feature, index) => {
-            return (
-              <li className="flex items-center text-lg" key={index}>
-                <FontAwesomeIcon
-                  icon={featureIcons[index]}
-                  className="mr-3 fa-fw"
-                />
-                {feature}
-              </li>
-            );
-          })}
+          {features.map((feature, index) => (
+            <li className="flex items-center text-lg" key={index}>
+              <FontAwesomeIcon
+                icon={featureIcons[index]}
+                className="mr-3 fa-fw"
+              />
+              {feature}
+            </li>
+          ))}
         </ul>
         <div className="flex gap-4 mt-4">
           {viewLink && (
@@ -110,86 +113,79 @@ const ProjectCard: React.FC<Project> = ({
 };
 
 const ProjelerSection: React.FC = () => {
-  const projectsData: Project[] = [
+  const projectsGroups: ProjectGroup[] = [
     {
-      imageUrl: "/imgs/geogamecpp.png",
-      altText: "GeoGameCPP",
-      isNew: false,
-      isDeveloping: false,
-      title: "GeoGame - Ülkeler ve Başkentler C++ Versiyonu",
-      features: [
-        "Çevrimdışı kullanım",
-        "Açık kaynak",
-        "Windows",
-        "C++",
+      groupTitle: "GeoGame Serisi",
+      projects: [
+        {
+          imageUrl: "/imgs/geogame.png",
+          altText: "GeoGame",
+          title: "GeoGame - Flutter",
+          features: ["Çevrimiçi/Çevrimdışı", "Açık kaynak", "Android/Windows", "Flutter"],
+          featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+          viewLink: "https://geogame.keremkk.com.tr",
+          githubLink: "https://github.com/KeremKuyucu/geogame",
+        },
+        {
+          imageUrl: "/imgs/geogamecpp.png",
+          altText: "GeoGameCPP",
+          title: "GeoGame - C++",
+          features: ["Çevrimdışı kullanım", "Açık kaynak", "Windows", "C++"],
+          featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+          githubLink: "https://github.com/KeremKuyucu/geogameCpp",
+        },
+        {
+          imageUrl: "/imgs/geogame-api.png",
+          altText: "GeoGameAPI",
+          title: "GeoGame API",
+          features: ["REST API", "Node.js", "Express"],
+          featureIcons: [faCodeBranch, faFilePen, faLaptop],
+          githubLink: "https://github.com/KeremKuyucu/geogame-api",
+        },
+        {
+          imageUrl: "/imgs/geogame-cdn.png",
+          altText: "GeoGameCDN",
+          title: "GeoGame CDN",
+          features: ["Statik içerik sunucu", "Hızlı Erişim", "CDN"],
+          featureIcons: [faCheckCircle, faGaugeHigh, faLaptop],
+          githubLink: "https://github.com/KeremKuyucu/geogame-cdn",
+        },
       ],
-      featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
-      viewLink: "#",
-      githubLink: "https://github.com/KeremKuyucu/geogameCpp",
     },
     {
-      imageUrl: "/imgs/geogame.png",
-      altText: "GeoGame",
-      isNew: false,
-      isDeveloping: false,
-      title: "GeoGame - Ülkeler ve Başkentler Flutter İle Yeniden Yapıldı",
-      features: [
-        "Çevrimiçi veya çevrimdışı kullanım",
-        "Açık kaynak",
-        "Android ve Windows",
-        "Flutter",
+      groupTitle: "DiscordStorage",
+      projects: [
+        {
+          imageUrl: "/imgs/discordstorage.png",
+          altText: "DiscordStorage",
+          title: "DiscordStorage - Flutter",
+          features: ["Bot Tokeni ile çalışır", "Açık kaynak", "Android/Windows", "Flutter"],
+          featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+          githubLink: "https://github.com/KeremKuyucu/DiscordStorage",
+        },
+        {
+          imageUrl: "/imgs/discordstoragecpp.png",
+          altText: "DiscordStorageCPP",
+          title: "DiscordStorage - C++",
+          features: ["Bot Tokeni ile çalışır", "Açık kaynak", "Windows", "C++"],
+          featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+          githubLink: "https://github.com/KeremKuyucu/DiscordStorageCPP",
+        },
       ],
-      featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
-      viewLink: "https://geogame.keremkk.com.tr",
-      githubLink: "https://github.com/KeremKuyucu/geogame",
     },
     {
-      imageUrl: "/imgs/pikamed.png",
-      altText: "Pikamed",
-      isNew: false,
-      isDeveloping: false,
-      title: "Pikamed - Sağlık Takip Sistemi",
-      features: [
-        "Yapay Zeka Destekli",
-        "Açık Kaynak",
-        "Android",
-        "Flutter",
+      groupTitle: "Diğer Projeler",
+      projects: [
+        {
+          imageUrl: "/imgs/pikamed.png",
+          altText: "Pikamed",
+          title: "Pikamed - Sağlık Takip Sistemi",
+          features: ["Yapay Zeka Destekli", "Açık Kaynak", "Android", "Flutter"],
+          featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+          viewLink: "https://pikamed.keremkk.com.tr",
+          githubLink: "https://github.com/KeremKuyucu/pikamed",
+        },
       ],
-      featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
-      viewLink: "https://pikamed.keremkk.com.tr",
-      githubLink: "https://github.com/KeremKuyucu/pikamed",
-    },
-    {
-      imageUrl: "/imgs/discordstoragecpp.png",
-      altText: "DiscordStorageCPP",
-      isNew: false,
-      isDeveloping: false,
-      title: "DiscordStorage - Discord Dosya Depolama - C++ Versiyonu",
-      features: [
-        "Bot Tokeni İle Çalışır",
-        "Açık Kaynak",
-        "Windows",
-        "C++",
-      ],
-      featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
-      viewLink: "#",
-      githubLink: "https://github.com/KeremKuyucu/DiscordStorageCPP",
-    },
-    {
-      imageUrl: "/imgs/discordstorage.png",
-      altText: "DiscordStorage",
-      isNew: false,
-      isDeveloping: false,
-      title: "DiscordStorage - Discord Dosya Depolama - Flutter İle Yeniden Yapıldı",
-      features: [
-        "Bot Tokeni İle Çalışır",
-        "Açık Kaynak",
-        "Android ve Windows",
-        "Flutter",
-      ],
-      featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
-      viewLink: "#",
-      githubLink: "https://github.com/KeremKuyucu/DiscordStorage",
     },
   ];
 
@@ -208,19 +204,15 @@ const ProjelerSection: React.FC = () => {
     );
 
     const scrollElements = document.querySelectorAll(".scroll-reveal");
-    scrollElements.forEach((el) => {
-      observer.observe(el);
-    });
+    scrollElements.forEach((el) => observer.observe(el));
 
     return () => {
-      scrollElements.forEach((el) => {
-        observer.unobserve(el);
-      });
+      scrollElements.forEach((el) => observer.unobserve(el));
     };
   }, []);
 
   return (
-    <div 
+    <div
       ref={sectionRef}
       className="min-h-screen px-4 py-16 md:py-0 md:flex md:flex-col md:justify-center md:items-center"
     >
@@ -228,13 +220,22 @@ const ProjelerSection: React.FC = () => {
         <h2 className="text-3xl md:text-4xl font-normal mb-8 md:mb-12 scroll-reveal">
           Projelerim
         </h2>
-        <div className="space-y-8 md:space-y-12">
-          {projectsData.map((project, index) => (
-            <div key={index} className="scroll-reveal" style={{ transitionDelay: `${index * 0.15}s` }}>
-              <ProjectCard {...project} />
+        {projectsGroups.map((group, i) => (
+          <div key={i} className="mb-12">
+            <h3 className="text-2xl font-semibold mb-6 scroll-reveal">{group.groupTitle}</h3>
+            <div className="space-y-8 md:space-y-12">
+              {group.projects.map((project, index) => (
+                <div
+                  key={index}
+                  className="scroll-reveal"
+                  style={{ transitionDelay: `${index * 0.15}s` }}
+                >
+                  <ProjectCard {...project} />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );
