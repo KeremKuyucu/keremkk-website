@@ -41,6 +41,9 @@ importers:
       react-fontawesome:
         specifier: ^1.7.1
         version: 1.7.1(react@19.1.0)
+      react-icons:
+        specifier: ^5.5.0
+        version: 5.5.0(react@19.1.0)
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3
@@ -1512,6 +1515,11 @@ packages:
     engines: {node: '>=0.10.0'}
     peerDependencies:
       react: '>=0.12.0'
+
+  react-icons@5.5.0:
+    resolution: {integrity: sha512-MEFcXdkP3dLo8uumGI5xN3lDFNsRtrjbOEKDLD7yv76v4wpnEq2Lt2qeHaQOr34I/wPN3s3+N08WkQ+CW37Xiw==}
+    peerDependencies:
+      react: '*'
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -3313,6 +3321,10 @@ snapshots:
   react-fontawesome@1.7.1(react@19.1.0):
     dependencies:
       prop-types: 15.8.1
+      react: 19.1.0
+
+  react-icons@5.5.0(react@19.1.0):
+    dependencies:
       react: 19.1.0
 
   react-is@16.13.1: {}
