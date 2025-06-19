@@ -1,0 +1,10 @@
+{
+    "redirects": [
+      {
+        "source": "/geogame",
+        "destination": "https://geogame.keremkk.com.tr",
+        "permanent": true
+      }
+    ]
+  }
+  
