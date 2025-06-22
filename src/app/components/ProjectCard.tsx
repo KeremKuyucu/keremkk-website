@@ -228,6 +228,17 @@ const ProjelerSection: React.FC = () => {
         viewLink: "https://github.com/KeremKuyucu/DiscordStorage/releases/latest",
       },
     ],
+    analytics: [
+      {
+        imageUrl: "/imgs/analytics.png",
+        altText: "Analytics",
+        title: "Analytics - Web Paneli",
+        features: ["REST API", "Flutter", "Web", "Açık kaynak"],
+        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        githubLink: "https://github.com/KeremKuyucu/analytics-dashboard",
+        viewLink: "https://analytics.keremkk.com.tr",
+      }
+    ]
   };
 
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
