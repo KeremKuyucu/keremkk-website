@@ -228,7 +228,7 @@ const ProjelerSection: React.FC = () => {
         viewLink: "https://github.com/KeremKuyucu/DiscordStorage/releases/latest",
       },
     ],
-    analytics: [
+    Analytics: [
       {
         imageUrl: "/imgs/analytics.png",
         altText: "Analytics",
