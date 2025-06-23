@@ -246,7 +246,27 @@ const ProjelerSection: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // ... (IntersectionObserver ve scrollElements kısmı)
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+  
+    const scrollElements = document.querySelectorAll(".scroll-reveal");
+    scrollElements.forEach((el) => {
+      observer.observe(el);
+    });
+  
+    return () => {
+      scrollElements.forEach((el) => {
+        observer.unobserve(el);
+      });
+    };
   }, [activeCategory]);
 
   return (
