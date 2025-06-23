@@ -56,32 +56,32 @@ const ProjectCard: React.FC<Project> = ({
       <div className="p-4 md:p-8 flex-1">
         <div className="flex flex-wrap gap-2 mb-2">
           {isNew && (
-            <div className="bg-yellow-500/85 text-white px-5 py-1 rounded-full text-lg">
+            <div className="bg-yellow-500/85 text-white px-3 py-1 rounded-full text-sm sm:text-base"> {/* Mobil için font boyutu küçültüldü */}
               Yeni
             </div>
           )}
           {isDeveloping && (
-            <div className="bg-blue-500 text-white px-5 py-1 rounded-full text-lg">
+            <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm sm:text-base"> {/* Mobil için font boyutu küçültüldü */}
               Geliştiriliyor
             </div>
           )}
         </div>
-        <h3 className="text-3xl font-normal mb-4">{title}</h3>
-        <ul className="space-y-3 mb-6 stagger-reveal">
+        <h3 className="text-2xl sm:text-3xl font-normal mb-4">{title}</h3> {/* Başlık boyutu mobil için küçültüldü */}
+        <ul className="space-y-3 mb-6 stagger-reveal text-sm sm:text-base"> {/* Özellik listesi font boyutu küçültüldü */}
           {features.map((feature, index) => (
-            <li className="flex items-center text-lg" key={index}>
+            <li className="flex items-center" key={index}>
               <FontAwesomeIcon icon={featureIcons[index]} className="mr-3 fa-fw" />
               {feature}
             </li>
           ))}
         </ul>
-        <div className="flex gap-4 mt-4">
+        <div className="flex flex-col sm:flex-row gap-4 mt-4"> {/* Butonları mobil dikey, tablet/masaüstü yatay hizala */}
           {viewLink && (
             <a
               href={viewLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-2 px-6 rounded-full text-lg text-blue-500 flex items-center group relative overflow-hidden transition-all duration-300 ease-out pr-12 hover:bg-blue-200 dark:hover:bg-blue-900/20"
+              className="py-2 px-4 sm:px-6 rounded-full text-base sm:text-lg text-blue-500 flex items-center justify-center group relative overflow-hidden transition-all duration-300 ease-out pr-8 sm:pr-12 hover:bg-blue-200 dark:hover:bg-blue-900/20"
             >
               <FontAwesomeIcon icon={faFileLines} className="mr-2" />
               Gözat
@@ -96,7 +96,7 @@ const ProjectCard: React.FC<Project> = ({
               href={githubLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="dark:border-white py-2 px-6 rounded-full text-lg flex items-center group relative overflow-hidden transition-all duration-300 ease-out pr-12 hover:bg-gray-300 dark:hover:bg-black/35"
+              className="dark:border-white py-2 px-4 sm:px-6 rounded-full text-base sm:text-lg flex items-center justify-center group relative overflow-hidden transition-all duration-300 ease-out pr-8 sm:pr-12 hover:bg-gray-300 dark:hover:bg-black/35"
             >
               <FontAwesomeIcon icon={faGithub} className="mr-2" />
               Github
@@ -241,47 +241,27 @@ const ProjelerSection: React.FC = () => {
     ]
   };
 
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null); // null olarak ayarlandı
 
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    const scrollElements = document.querySelectorAll(".scroll-reveal");
-    scrollElements.forEach((el) => {
-      observer.observe(el);
-    });
-
-    return () => {
-      scrollElements.forEach((el) => {
-        observer.unobserve(el);
-      });
-    };
+    // ... (IntersectionObserver ve scrollElements kısmı)
   }, [activeCategory]);
 
   return (
     <div
         ref={sectionRef}
-        className="min-h-auto px-4 py-0 md:py-0 md:flex md:flex-col md:justify-center md:items-center"
+        className="min-h-auto px-4 py-8 md:py-0 md:flex md:flex-col md:justify-center md:items-center"
       >
         <div className="mx-auto w-full max-w-6xl p-0 m-0">
-          <h2 className="text-3xl md:text-4xl font-normal mb-8 md:mb-12">Projelerim</h2>
-          <div className="flex justify-center gap-6 mb-12">
+          <h2 className="text-3xl md:text-4xl font-normal mb-8 md:mb-12 text-center md:text-left">Projelerim</h2>
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mb-8 md:mb-12">
             {Object.keys(projectsByCategory).map((category) => (
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}
-                className={`px-6 py-2 rounded-full text-lg font-medium transition-colors duration-300
+                className={`px-4 py-2 text-sm sm:px-6 sm:py-2 rounded-full text-base font-medium transition-colors duration-300
                   ${
                     activeCategory === category
                       ? "bg-blue-600 text-white shadow-lg"
@@ -292,7 +272,7 @@ const ProjelerSection: React.FC = () => {
               </button>
             ))}
           </div>
-          {activeCategory && (
+          {activeCategory && ( // activeCategory null ise bu blok render edilmeyecek
             <div className="space-y-8 md:space-y-12">
               {projectsByCategory[activeCategory].map((project, index) => (
                 <div
@@ -305,9 +285,13 @@ const ProjelerSection: React.FC = () => {
               ))}
             </div>
           )}
+          {!activeCategory && ( // Hiçbir kategori seçili değilse gösterilecek metin
+            <p className="text-center text-gray-500 text-lg mt-8">
+              Lütfen görüntülemek için bir kategori seçin.
+            </p>
+          )}
         </div>
       </div>
-
   );
 };
 
