@@ -233,7 +233,7 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/analytics.png",
         altText: "Analytics",
         title: "Analytics - Web Paneli",
-        features: ["REST API", "Flutter", "Web", "Açık kaynak"],
+        features: ["REST API", "Next.js", "Web", "Açık kaynak"],
         featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
         githubLink: "https://github.com/KeremKuyucu/analytics-dashboard",
         viewLink: "https://analytics.keremkk.com.tr",
