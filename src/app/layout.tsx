@@ -30,9 +30,39 @@ const productSans = localFont({
   ],
 });
 export const metadata: Metadata = {
-  title: "Kerem Kuyucu",
-  description: "",
+  title: "Kerem Kuyucu - Yazılım Geliştirici & Öğrenci",
+  authors: [{ name: "Kerem Kuyucu", url: "https://keremkk.com.tr" }],
+  description: "Kerem Kuyucu'nun kişisel web sitesi. Yazılım geliştirme, projeler, blog ve teknoloji üzerine paylaşımlar.",
+  keywords: ["Kerem Kuyucu", "Yazılım Geliştirici", "Programlama", "Projeler", "Teknoloji", "Blog"],
+  robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+    googleBot: {
+      index: true,
+      follow: true,
+      noimageindex: false,
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    title: "Kerem Kuyucu - Yazılım Geliştirici & Öğrenci",
+    description: "Kerem Kuyucu'nun kişisel web sitesi. Yazılım geliştirme, projeler, blog ve teknoloji üzerine paylaşımlar.",
+    url: "https://keremkk.com.tr",
+    siteName: "Kerem Kuyucu",
+    images: [
+      {
+        url: "https://keremkk.com.tr/imgs/ben.png",
+        width: 1200,
+        height: 630,
+        alt: "Kerem Kuyucu",
+      },
+    ],
+    locale: "tr_TR",
+    type: "website",
+  }
 };
+
 
 export default function RootLayout({
   children,
