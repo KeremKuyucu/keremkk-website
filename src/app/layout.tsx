@@ -31,9 +31,6 @@ const productSans = localFont({
 });
 export const metadata: Metadata = {
   title: "Kerem Kuyucu - Yazılım Geliştirici & Öğrenci",
-  icons: {
-    icon: "/favicon.png",
-  },
   authors: [{ name: "Kerem Kuyucu", url: "https://keremkk.com.tr" }],
   description: "Kerem Kuyucu'nun kişisel web sitesi. Yazılım geliştirme, projeler, blog ve teknoloji üzerine paylaşımlar.",
   keywords: ["Kerem Kuyucu", "Yazılım Geliştirici", "Programlama", "Projeler", "Teknoloji", "Blog"],
