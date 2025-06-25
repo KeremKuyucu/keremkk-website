@@ -238,6 +238,17 @@ const ProjelerSection: React.FC = () => {
         githubLink: "https://github.com/KeremKuyucu/analytics-dashboard",
         viewLink: "https://analytics.keremkk.com.tr",
       }
+    ],
+    kısaLink: [
+      {
+        imageUrl: "/imgs/kısalink.png",
+        altText: "kısaLink",
+        title: "kısaLink - Açık Kaynak URL Kısaltma Servisi",
+        features: ["Firebase", "Next.js", "Web", "Açık kaynak"],
+        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        githubLink: "https://github.com/KeremKuyucu/shortlink",
+        viewLink: "https://kisalink.icu",
+      }
     ]
   };
 
