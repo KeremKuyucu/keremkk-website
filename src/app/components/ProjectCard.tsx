@@ -227,6 +227,15 @@ const ProjelerSection: React.FC = () => {
         githubLink: "https://github.com/KeremKuyucu/DiscordStorage",
         viewLink: "https://github.com/KeremKuyucu/DiscordStorage/releases/latest",
       },
+      {    
+        imageUrl: "/imgs/discordstoragedart.png",
+        altText: "DiscordStorageDart",
+        title: "DiscordStorage - Dart CLI Versiyonu",
+        features: ["Discord Bot API", "Dart", "Windows", "Açık kaynak"],
+        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        githubLink: "https://github.com/KeremKuyucu/DiscordStorageDart",
+        viewLink: "https://github.com/KeremKuyucu/DiscordStorageDart/releases/latest",
+      },
     ],
     Analytics: [
       {
