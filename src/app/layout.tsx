@@ -30,10 +30,10 @@ const productSans = localFont({
   ],
 });
 export const metadata: Metadata = {
-  title: "Kerem Kuyucu - Yazılım Geliştirici & Öğrenci",
+  title: "Kerem Kuyucu",
   authors: [{ name: "Kerem Kuyucu", url: "https://keremkk.com.tr" }],
-  description: "Kerem Kuyucu'nun kişisel web sitesi. Yazılım geliştirme, projeler, blog ve teknoloji üzerine paylaşımlar.",
-  keywords: ["Kerem Kuyucu", "Yazılım Geliştirici", "Programlama", "Projeler", "Teknoloji", "Blog"],
+  description: "Kerem Kuyucu'nun kişisel web sitesi.",
+  keywords: ["Kerem Kuyucu", "Yazılım Geliştirici", "Programlama", "Projeler", "Teknoloji"],
   robots: {
     index: true,
     follow: true,
@@ -46,8 +46,8 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Kerem Kuyucu - Yazılım Geliştirici & Öğrenci",
-    description: "Kerem Kuyucu'nun kişisel web sitesi. Yazılım geliştirme, projeler, blog ve teknoloji üzerine paylaşımlar.",
+    title: "Kerem Kuyucu",
+    description: "Kerem Kuyucu'nun kişisel web sitesi.",
     url: "https://keremkk.com.tr",
     siteName: "Kerem Kuyucu",
     images: [
