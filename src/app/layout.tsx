@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     siteName: "Kerem Kuyucu",
     images: [
       {
-        url: "https://keremkk.com.tr/imgs/ben.png",
+        url: "https://keremkk.com.tr/imgs/image.jpg",
         width: 1200,
         height: 630,
         alt: "Kerem Kuyucu",
