@@ -32,7 +32,7 @@ const productSans = localFont({
 export const metadata: Metadata = {
   title: "Kerem Kuyucu",
   authors: [{ name: "Kerem Kuyucu", url: "https://keremkk.com.tr" }],
-  description: "Kerem Kuyucu'nun kişisel web sitesi.",
+  description: "Merhaba, Ben Kerem. Kendi başıma hobi projeleri üreterek kendimi geliştiriyorum.",
   keywords: ["Kerem Kuyucu", "Yazılım Geliştirici", "Programlama", "Projeler", "Teknoloji"],
   robots: {
     index: true,
@@ -47,17 +47,9 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Kerem Kuyucu",
-    description: "Kerem Kuyucu'nun kişisel web sitesi.",
+    description: "Merhaba, Ben Kerem. Kendi başıma hobi projeleri üreterek kendimi geliştiriyorum.",
     url: "https://keremkk.com.tr",
     siteName: "Kerem Kuyucu",
-    images: [
-      {
-        url: "https://keremkk.com.tr/imgs/1758910751670.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Kerem Kuyucu",
-      },
-    ],
     locale: "tr_TR",
     type: "website",
   }
