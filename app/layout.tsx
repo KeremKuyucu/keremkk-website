@@ -8,22 +8,22 @@ config.autoAddCss = false;
 const productSans = localFont({
   src: [
     {
-      path: "../../public/fonts/product-sans/Product Sans Regular.ttf",
+      path: "../public/fonts/product-sans/Product Sans Regular.ttf",
       weight: "400",
       style: "normal",
     },
     {
-      path: "../../public/fonts/product-sans/Product Sans Italic.ttf",
+      path: "../public/fonts/product-sans/Product Sans Italic.ttf",
       weight: "400",
       style: "italic",
     },
     {
-      path: "../../public/fonts/product-sans/Product Sans Bold.ttf",
+      path: "../public/fonts/product-sans/Product Sans Bold.ttf",
       weight: "700",
       style: "normal",
     },
     {
-      path: "../../public/fonts/product-sans/Product Sans Bold Italic.ttf",
+      path: "../public/fonts/product-sans/Product Sans Bold Italic.ttf",
       weight: "700",
       style: "italic",
     },
