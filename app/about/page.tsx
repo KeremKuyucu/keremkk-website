@@ -100,7 +100,7 @@ export default function Hakkimda() {
           <div className="md:w-3/5 text-center md:text-left space-y-6">
             <h2 className="text-4xl font-bold mb-4">Hakkımda</h2>
             <p className="text-xl max-w-3xl leading-relaxed mx-auto md:mx-0">
-              Merhaba, ben Kerem Kuyucu. Bilecik Ertuğrulgazi Lisesi 11. sınıf öğrencisiyim ve teknolojiye büyük bir ilgi duyuyorum. Kendi başıma hobi projeleri geliştirerek kendimi sürekli ilerletmeye çalışıyorum. Geçmişte satranç ve robotik kodlama alanlarıyla ilgilendim ve bu alanlardaki etkinliklere katıldım.
+              Merhaba, ben Kerem Kuyucu. Bilecik Ertuğrulgazi Lisesi 12. sınıf öğrencisiyim ve teknolojiye büyük bir ilgi duyuyorum. Kendi başıma hobi projeleri geliştirerek kendimi sürekli ilerletmeye çalışıyorum. Geçmişte satranç ve robotik kodlama alanlarıyla ilgilendim ve bu alanlardaki etkinliklere katıldım.
               <br /><br />
               Bilecik Deneyap Teknoloji Atölyeleri'nde de öğrenim gördüm. Dart, Javascript, C++ dillerini kullanıyorum.
               <br /><br />
