@@ -1,7 +1,7 @@
 import FooterComponent from "../components/Footer";
 import Navbar from "../components/Navbar";
 import Image from "next/image";
-import profilePic from "../../../public/imgs/1758910751670.jpg";
+import profilePic from "../../public/imgs/1758910751670.jpg";
 import { Icon } from "@iconify/react";
 
 export default function Hakkimda() {
