@@ -7,6 +7,7 @@ import {
   FaLinkedin,
   FaInstagram,
 } from "react-icons/fa";
+import { FaSignalMessenger } from "react-icons/fa6";
 
 const socialLinks = [
   {
@@ -35,9 +36,9 @@ const socialLinks = [
     bgHover: "hover:bg-blue-700",
   },
   {
-    href: "https://instagram.com/keremxkuyucu",
-    label: "Instagram",
-    icon: <FaInstagram />,
+    href: "https://signal.me/#eu/ARcpLe2E-_qPXnH6-I26hgbYj_Qco2bpvsoBu7Be67wvl5fAzPxLWIMrJulQBptb",
+    label: "Signal",
+    icon: <FaSignalMessenger />,
     bgHover: "hover:bg-pink-600",
   },
 ];
