@@ -19,12 +19,6 @@ const Navbar = () => {
           >
             Hakkımda
           </Link>
-          <Link
-            href="/blog"
-            className="text-gray-600 hover:text-gray-900 dark:text-gray-50 dark:hover:text-gray-400"
-          >
-            Blog
-          </Link>
         </div>
 
         {/* Sağ Taraf - İleride başka linkler eklenebilir */}

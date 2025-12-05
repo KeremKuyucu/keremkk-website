@@ -88,6 +88,12 @@ export default function Hakkimda() {
       link: "https://drdogrulama.sanayi.gov.tr/tr/verify/27701996921054/",
       image: "https://drdepo.sanayi.gov.tr/verified-bucket/cert/27701996921054.png",
     },
+    {
+      title: "Yapay Zeka",
+      issuedBy: "Deneyap Teknoloji Atölyeleri",
+      link: "https://drdogrulama.sanayi.gov.tr/tr/verify/29435665655018/",
+      image: "https://drdepo.sanayi.gov.tr/verified-bucket/cert/29435665655018.png",
+    },
   ];
 
   return (
