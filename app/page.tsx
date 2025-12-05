@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useRef } from "react";
 import ProjelerSection from "./components/ProjectCard";
-import FooterComponent from "./components/Footer";
-import Navbar from "./components/Navbar";
+import Navbar from "@/app/components/Navbar"
+import FooterComponent from "@/app/components/Footer"
+
 
 export default function Home() {
   useEffect(() => {
