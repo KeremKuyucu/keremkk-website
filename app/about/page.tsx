@@ -1,5 +1,5 @@
-import FooterComponent from "../components/Footer";
-import Navbar from "../components/Navbar";
+import Navbar from "@/app/components/Navbar"
+import FooterComponent from "@/app/components/Footer"
 import Image from "next/image";
 import profilePic from "../../public/imgs/1758910751670.jpg";
 import { Icon } from "@iconify/react";
@@ -31,7 +31,7 @@ export default function Hakkimda() {
       country: "Türkiye",
     },
   ];
-  
+
 
   const certificates = [
     {
@@ -107,7 +107,7 @@ export default function Hakkimda() {
               Ayrıca, 2025 yılında TÜBİTAK 2204-A yarışmasında 'Küresel Isınmanın Arktik Bölge ve Türkiye Üzerindeki Etkilerinin Karşılaştırılması' projesi ile coğrafya alanında Bursa Bölge 3. oldum.
             </p>
           </div>
-  
+
           {/* Resim */}
           <div className="md:w-2/5 flex justify-center">
             <div className="rounded-full overflow-hidden w-80 h-80 relative shadow-lg">
@@ -121,9 +121,9 @@ export default function Hakkimda() {
             </div>
           </div>
         </div>
-  
-          {/* Eğitim */}
-          <div className="mt-10">
+
+        {/* Eğitim */}
+        <div className="mt-10">
           <h3 className="text-2xl font-semibold mb-4">Eğitim</h3>
           <ul className="list-disc pl-6 text-xl space-y-6">
             {education.map((edu, index) => (
@@ -146,7 +146,7 @@ export default function Hakkimda() {
             ))}
           </ul>
         </div>
-  
+
         {/* Yetenekler */}
         <div>
           <h3 className="text-2xl font-semibold mb-6 text-center md:text-left">Yetenekler</h3>
@@ -162,7 +162,7 @@ export default function Hakkimda() {
             ))}
           </div>
         </div>
-        
+
         {/* Sertifikalar */}
         <div>
           <h3 className="text-2xl font-semibold mb-6 text-center md:text-left">Sertifikalar</h3>
@@ -187,5 +187,5 @@ export default function Hakkimda() {
       <FooterComponent />
     </main>
   );
-  
+
 }
