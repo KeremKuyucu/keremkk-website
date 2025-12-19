@@ -5,7 +5,6 @@ import Navbar from "@/app/components/Navbar";
 import FooterComponent from "@/app/components/Footer";
 import { createClient } from "@supabase/supabase-js";
 
-// Supabase istemcisini oluştur (Environment variables Next.js standartlarında olmalı)
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -24,7 +23,7 @@ export default function Home() {
           token = data.session?.access_token;
         }
 
-        await fetch('https://tudwocdtymtasjfwzqxe.supabase.co/functions/v1/collect-analytics', {
+        await fetch('https://brgwnlbgasameiuuoxte.supabase.co/functions/v1/collect-analytics', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
