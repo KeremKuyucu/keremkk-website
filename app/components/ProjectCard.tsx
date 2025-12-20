@@ -241,90 +241,90 @@ const ProjelerSection: React.FC = () => {
         viewLink: "https://kisalink.icu",
       }
     ],
-    KeremKK- Auth: [
+    Auth: [
       {
         imageUrl: "/imgs/keremkkauth.png",
         altText: "KeremKK-Auth",
         title: "KeremKK-Auth - Kullanıcı Girişi",
         features: ["Supabase", "Next.js", "Web", "Açık kaynak"],
-    featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
-    githubLink: "https://github.com/KeremKuyucu/keremkk-auth",
-    viewLink: "https://auth.keremkk.com.tr",
-}
+        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        githubLink: "https://github.com/KeremKuyucu/keremkk-auth",
+        viewLink: "https://auth.keremkk.com.tr",
+      }
     ]
   };
 
-const [activeCategory, setActiveCategory] = useState<string | null>(null); // null olarak ayarlandı
+  const [activeCategory, setActiveCategory] = useState<string | null>(null); // null olarak ayarlandı
 
-const sectionRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
 
-useEffect(() => {
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("visible");
-        }
-      });
-    },
-    { threshold: 0.1 }
-  );
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
 
-  const scrollElements = document.querySelectorAll(".scroll-reveal");
-  scrollElements.forEach((el) => {
-    observer.observe(el);
-  });
-
-  return () => {
+    const scrollElements = document.querySelectorAll(".scroll-reveal");
     scrollElements.forEach((el) => {
-      observer.unobserve(el);
+      observer.observe(el);
     });
-  };
-}, [activeCategory]);
 
-return (
-  <div
-    ref={sectionRef}
-    className="min-h-auto px-4 py-8 md:py-0 md:flex md:flex-col md:justify-center md:items-center"
-  >
-    <div className="mx-auto w-full max-w-6xl p-0 m-0">
-      <h2 className="text-3xl md:text-4xl font-normal mb-8 md:mb-12 text-center md:text-left">Projelerim</h2>
-      <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mb-8 md:mb-12">
-        {Object.keys(projectsByCategory).map((category) => (
-          <button
-            key={category}
-            onClick={() => setActiveCategory(category)}
-            className={`px-4 py-2 text-sm sm:px-6 sm:py-2 rounded-full text-base font-medium transition-colors duration-300
+    return () => {
+      scrollElements.forEach((el) => {
+        observer.unobserve(el);
+      });
+    };
+  }, [activeCategory]);
+
+  return (
+    <div
+      ref={sectionRef}
+      className="min-h-auto px-4 py-8 md:py-0 md:flex md:flex-col md:justify-center md:items-center"
+    >
+      <div className="mx-auto w-full max-w-6xl p-0 m-0">
+        <h2 className="text-3xl md:text-4xl font-normal mb-8 md:mb-12 text-center md:text-left">Projelerim</h2>
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mb-8 md:mb-12">
+          {Object.keys(projectsByCategory).map((category) => (
+            <button
+              key={category}
+              onClick={() => setActiveCategory(category)}
+              className={`px-4 py-2 text-sm sm:px-6 sm:py-2 rounded-full text-base font-medium transition-colors duration-300
                   ${activeCategory === category
-                ? "bg-blue-600 text-white shadow-lg"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-          >
-            {category}
-          </button>
-        ))}
-      </div>
-      {activeCategory && ( // activeCategory null ise bu blok render edilmeyecek
-        <div className="space-y-8 md:space-y-12">
-          {projectsByCategory[activeCategory].map((project, index) => (
-            <div
-              key={index}
-              className="scroll-reveal"
-              style={{ transitionDelay: `${index * 0.15}s` }}
+                  ? "bg-blue-600 text-white shadow-lg"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
             >
-              <ProjectCard {...project} />
-            </div>
+              {category}
+            </button>
           ))}
         </div>
-      )}
-      {!activeCategory && ( // Hiçbir kategori seçili değilse gösterilecek metin
-        <p className="text-center text-gray-500 text-lg mt-8">
-          Lütfen görüntülemek için bir kategori seçin.
-        </p>
-      )}
+        {activeCategory && ( // activeCategory null ise bu blok render edilmeyecek
+          <div className="space-y-8 md:space-y-12">
+            {projectsByCategory[activeCategory].map((project, index) => (
+              <div
+                key={index}
+                className="scroll-reveal"
+                style={{ transitionDelay: `${index * 0.15}s` }}
+              >
+                <ProjectCard {...project} />
+              </div>
+            ))}
+          </div>
+        )}
+        {!activeCategory && ( // Hiçbir kategori seçili değilse gösterilecek metin
+          <p className="text-center text-gray-500 text-lg mt-8">
+            Lütfen görüntülemek için bir kategori seçin.
+          </p>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default ProjelerSection;
