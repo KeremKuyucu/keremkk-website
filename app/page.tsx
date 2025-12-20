@@ -14,26 +14,17 @@ export default function Home() {
   useEffect(() => {
     const trackPageView = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        let token = session?.access_token;
+        const { error } = await supabase.functions.invoke(
+          "collect-analytics",
+          {
+            body: {
+              appId: "personal-portfolio",
+              endpoint: window.location.pathname,
+            },
+          }
+        );
 
-        if (!token) {
-          const { data, error } = await supabase.auth.signInAnonymously();
-          if (error) throw error;
-          token = data.session?.access_token;
-        }
-
-        await fetch('https://brgwnlbgasameiuuoxte.supabase.co/functions/v1/collect-analytics', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            appId: "personal-portfolio",
-            endpoint: window.location.pathname
-          })
-        });
+        if (error) throw error;
       } catch (err) {
         console.error("Analytics Error:", err);
       }
