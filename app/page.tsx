@@ -3,35 +3,11 @@ import { useEffect } from "react";
 import ProjelerSection from "./components/ProjectCard";
 import Navbar from "@/app/components/Navbar";
 import FooterComponent from "@/app/components/Footer";
-import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+
 
 export default function Home() {
   useEffect(() => {
-    const trackPageView = async () => {
-      try {
-        const { error } = await supabase.functions.invoke(
-          "collect-analytics",
-          {
-            body: {
-              appId: "personal-portfolio",
-              endpoint: window.location.pathname,
-            },
-          }
-        );
-
-        if (error) throw error;
-      } catch (err) {
-        console.error("Analytics Error:", err);
-      }
-    };
-
-    trackPageView();
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
