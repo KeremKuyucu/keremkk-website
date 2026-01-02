@@ -141,15 +141,6 @@ const ProjelerSection: React.FC = () => {
         featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
         githubLink: "https://github.com/KeremKuyucu/geogame-cdn",
         viewLink: "https://geogame-cdn.keremkk.com.tr",
-      },
-      {
-        imageUrl: "/imgs/geogamewebsite.png",
-        altText: "GeoGame Website",
-        title: "GeoGame Website",
-        features: ["Frontend", "Next.js", "Web", "Açık kaynak"],
-        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
-        githubLink: "https://github.com/KeremKuyucu/geogame-website",
-        viewLink: "https://geogame.keremkk.com.tr",
       }
     ],
     PikaMed: [
@@ -226,7 +217,7 @@ const ProjelerSection: React.FC = () => {
         title: "Analytics - Web Paneli",
         features: ["REST API", "Next.js", "Web", "Açık kaynak"],
         featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
-        githubLink: "https://github.com/KeremKuyucu/analytics-dashboard",
+        githubLink: "https://github.com/KeremKuyucu/analytics-service-basic",
         viewLink: "https://analytics.keremkk.com.tr",
       }
     ],
