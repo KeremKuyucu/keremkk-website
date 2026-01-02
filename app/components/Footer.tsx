@@ -11,7 +11,7 @@ import { FaSignalMessenger } from "react-icons/fa6";
 
 const socialLinks = [
   {
-    href: "mailto:keremkk.iletisim@gmail.com",
+    href: "mailto:contact@keremkk.com.tr",
     label: "E-posta",
     icon: <FaEnvelope />,
     bgHover: "hover:bg-blue-600",
