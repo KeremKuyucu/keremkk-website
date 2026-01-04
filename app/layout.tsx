@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
+import { Analytics } from "@vercel/analytics/next";
 config.autoAddCss = false;
 
 const productSans = localFont({
@@ -63,7 +64,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="tr">
-      <body className={`${productSans.className} antialiased`}>{children}</body>
+      <body className={`${productSans.className} antialiased`}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
