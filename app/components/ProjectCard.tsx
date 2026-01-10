@@ -1,17 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCheckCircle,
-  faFileLines,
-  faCodeBranch,
-  faFilePen,
-  faLaptop,
-  faGaugeHigh,
-  faArrowUpRightFromSquare,
-} from "@fortawesome/free-solid-svg-icons";
-import { faGithub } from "@fortawesome/free-brands-svg-icons";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { FaGithub, FaExternalLinkAlt, FaCode, FaServer, FaMobile, FaDesktop, FaCheckCircle } from "react-icons/fa";
+import { SiFlutter, SiNextdotjs, SiCplusplus, SiDart, SiSupabase, SiFirebase } from "react-icons/si";
 
 interface Project {
   imageUrl: string;
@@ -19,76 +9,134 @@ interface Project {
   isNew?: boolean;
   isDeveloping?: boolean;
   title: string;
+  description?: string;
   features: string[];
-  featureIcons: IconProp[];
+  techStack?: string[];
   viewLink?: string;
   githubLink?: string;
 }
 
+interface CategoryInfo {
+  name: string;
+  icon: React.ReactNode;
+  gradient: string;
+  description: string;
+}
+
+const categoryInfo: { [key: string]: CategoryInfo } = {
+  GeoGame: {
+    name: "GeoGame",
+    icon: <FaMobile className="text-xl" />,
+    gradient: "from-emerald-500 to-teal-600",
+    description: "Coğrafya öğrenme oyunu - Çoklu platform desteği",
+  },
+  PikaMed: {
+    name: "PikaMed",
+    icon: <FaServer className="text-xl" />,
+    gradient: "from-rose-500 to-pink-600",
+    description: "Yapay zeka destekli sağlık takip sistemi",
+  },
+  DiscordStorage: {
+    name: "DiscordStorage",
+    icon: <FaDesktop className="text-xl" />,
+    gradient: "from-violet-500 to-purple-600",
+    description: "Discord üzerinden dosya depolama çözümü",
+  },
+  Analytics: {
+    name: "Analytics",
+    icon: <FaCode className="text-xl" />,
+    gradient: "from-amber-500 to-orange-600",
+    description: "Web analytics ve izleme servisi",
+  },
+  kısaLink: {
+    name: "kısaLink",
+    icon: <FaCode className="text-xl" />,
+    gradient: "from-cyan-500 to-blue-600",
+    description: "Açık kaynak URL kısaltma servisi",
+  },
+  Auth: {
+    name: "Auth",
+    icon: <FaServer className="text-xl" />,
+    gradient: "from-indigo-500 to-blue-600",
+    description: "Merkezi kimlik doğrulama sistemi",
+  },
+};
+
 const fallbackImage = "/imgs/errorimage.jpg";
 
-const ProjectCard: React.FC<Project> = ({
+const getTechIcon = (tech: string) => {
+  const iconMap: { [key: string]: React.ReactNode } = {
+    "Flutter": <SiFlutter className="text-[#02569B]" />,
+    "Next.js": <SiNextdotjs className="dark:text-white" />,
+    "C++": <SiCplusplus className="text-[#00599C]" />,
+    "Dart": <SiDart className="text-[#0175C2]" />,
+    "Supabase": <SiSupabase className="text-[#3ECF8E]" />,
+    "Firebase": <SiFirebase className="text-[#FFCA28]" />,
+  };
+  return iconMap[tech] || <FaCode className="text-gray-500" />;
+};
+
+const ProjectCard: React.FC<Project & { index: number; categoryGradient: string }> = ({
   imageUrl,
   altText,
   isNew,
   isDeveloping,
   title,
+  description,
   features,
-  featureIcons,
+  techStack,
   viewLink,
   githubLink,
+  index,
+  categoryGradient,
 }) => {
+  const [imageError, setImageError] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
-    <div className="rounded-3xl overflow-hidden flex flex-col md:flex-row mb-8 transform transition-all duration-500 ease-out">
-      <div
-        className="relative w-full md:w-1/2 max-w-[512px] mx-auto"
-        style={{ aspectRatio: "16 / 9" }}
-      >
+    <div
+      className="group relative bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl rounded-3xl overflow-hidden border border-gray-200/50 dark:border-gray-800/50 transition-all duration-500 hover:shadow-2xl hover:shadow-violet-500/10 hover:-translate-y-2"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{ animationDelay: `${index * 0.1}s` }}
+    >
+      {/* Image Container */}
+      <div className="relative aspect-video overflow-hidden">
         <img
-          src={imageUrl}
+          src={imageError ? fallbackImage : imageUrl}
           alt={altText}
-          className="absolute top-0 left-0 w-full h-full object-cover object-center rounded-3xl"
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src = fallbackImage;
-          }}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          onError={() => setImageError(true)}
         />
-      </div>
-      <div className="p-4 md:p-8 flex-1">
-        <div className="flex flex-wrap gap-2 mb-2">
+
+        {/* Gradient Overlay */}
+        <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+
+        {/* Badges */}
+        <div className="absolute top-4 left-4 flex gap-2">
           {isNew && (
-            <div className="bg-yellow-500/85 text-white px-3 py-1 rounded-full text-sm sm:text-base"> {/* Mobil için font boyutu küçültüldü */}
-              Yeni
-            </div>
+            <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-lg animate-pulse">
+              ✨ Yeni
+            </span>
           )}
           {isDeveloping && (
-            <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm sm:text-base"> {/* Mobil için font boyutu küçültüldü */}
-              Geliştiriliyor
-            </div>
+            <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-blue-400 to-cyan-500 text-white shadow-lg">
+              🚧 Geliştiriliyor
+            </span>
           )}
         </div>
-        <h3 className="text-2xl sm:text-3xl font-normal mb-4">{title}</h3> {/* Başlık boyutu mobil için küçültüldü */}
-        <ul className="space-y-3 mb-6 stagger-reveal text-sm sm:text-base"> {/* Özellik listesi font boyutu küçültüldü */}
-          {features.map((feature, index) => (
-            <li className="flex items-center" key={index}>
-              <FontAwesomeIcon icon={featureIcons[index]} className="mr-3 fa-fw" />
-              {feature}
-            </li>
-          ))}
-        </ul>
-        <div className="flex flex-col sm:flex-row gap-4 mt-4"> {/* Butonları mobil dikey, tablet/masaüstü yatay hizala */}
+
+        {/* Quick Actions on Hover */}
+        <div className={`absolute bottom-4 right-4 flex gap-2 transition-all duration-300 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
           {viewLink && (
             <a
               href={viewLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-2 px-4 sm:px-6 rounded-full text-base sm:text-lg text-blue-500 flex items-center justify-center group relative overflow-hidden transition-all duration-300 ease-out pr-8 sm:pr-12 hover:bg-blue-200 dark:hover:bg-blue-900/20"
+              className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-gray-800 hover:bg-white hover:scale-110 transition-all duration-300 shadow-lg"
+              title="Projeyi Görüntüle"
             >
-              <FontAwesomeIcon icon={faFileLines} className="mr-2" />
-              Gözat
-              <FontAwesomeIcon
-                icon={faArrowUpRightFromSquare}
-                className="absolute right-0 opacity-0 transform translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 ease-out mr-3"
-              />
+              <FaExternalLinkAlt className="text-sm" />
             </a>
           )}
           {githubLink && (
@@ -96,14 +144,62 @@ const ProjectCard: React.FC<Project> = ({
               href={githubLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="dark:border-white py-2 px-4 sm:px-6 rounded-full text-base sm:text-lg flex items-center justify-center group relative overflow-hidden transition-all duration-300 ease-out pr-8 sm:pr-12 hover:bg-gray-300 dark:hover:bg-black/35"
+              className="w-10 h-10 rounded-full bg-gray-900/90 backdrop-blur-sm flex items-center justify-center text-white hover:bg-gray-900 hover:scale-110 transition-all duration-300 shadow-lg"
+              title="GitHub"
             >
-              <FontAwesomeIcon icon={faGithub} className="mr-2" />
-              Github
-              <FontAwesomeIcon
-                icon={faArrowUpRightFromSquare}
-                className="absolute right-0 opacity-0 transform translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 ease-out mr-3"
-              />
+              <FaGithub className="text-lg" />
+            </a>
+          )}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-6">
+        <h3 className={`text-xl font-bold mb-2 bg-gradient-to-r ${categoryGradient} bg-clip-text text-transparent`}>
+          {title}
+        </h3>
+
+        {description && (
+          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
+            {description}
+          </p>
+        )}
+
+        {/* Features */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {features.slice(0, 4).map((feature, idx) => (
+            <span
+              key={idx}
+              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+            >
+              <FaCheckCircle className="text-emerald-500 text-[10px]" />
+              {feature}
+            </span>
+          ))}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-3 pt-2 border-t border-gray-200 dark:border-gray-800">
+          {viewLink && (
+            <a
+              href={viewLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r ${categoryGradient} hover:shadow-lg transition-all duration-300 hover:scale-[1.02]`}
+            >
+              <FaExternalLinkAlt className="text-xs" />
+              Görüntüle
+            </a>
+          )}
+          {githubLink && (
+            <a
+              href={githubLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300 hover:scale-[1.02]"
+            >
+              <FaGithub />
+              GitHub
             </a>
           )}
         </div>
@@ -119,8 +215,9 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/geogamecpp.png",
         altText: "GeoGame C++",
         title: "GeoGame - C++ Versiyonu",
+        description: "Windows için yerel C++ coğrafya oyunu",
         features: ["Çevrimdışı", "C++", "Windows", "Açık kaynak"],
-        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        techStack: ["C++"],
         githubLink: "https://github.com/KeremKuyucu/GeoGameCPP",
         viewLink: "https://github.com/KeremKuyucu/GeoGameCPP/releases/latest",
       },
@@ -128,8 +225,9 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/geogame.png",
         altText: "GeoGame",
         title: "GeoGame - Flutter Versiyonu",
+        description: "Çoklu platform coğrafya öğrenme uygulaması",
         features: ["Çevrim içi/çevrimdışı", "Flutter", "Android ve Windows", "Açık kaynak"],
-        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        techStack: ["Flutter", "Dart"],
         githubLink: "https://github.com/KeremKuyucu/GeoGame",
         viewLink: "https://geogame.keremkk.com.tr",
       },
@@ -137,8 +235,9 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/geogamecdn.png",
         altText: "GeoGame CDN",
         title: "GeoGame CDN",
+        description: "İçerik dağıtım ağı ve API servisi",
         features: ["Statik içerik", "Next.js", "Backend", "Açık kaynak"],
-        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        techStack: ["Next.js"],
         githubLink: "https://github.com/KeremKuyucu/geogame-cdn",
         viewLink: "https://geogame-cdn.keremkk.com.tr",
       }
@@ -148,8 +247,9 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/pikamed.png",
         altText: "PikaMed",
         title: "PikaMed - Sağlık Takip Sistemi",
+        description: "Yapay zeka destekli kişisel sağlık asistanı",
         features: ["Yapay Zeka Destekli", "Flutter", "Android", "Açık kaynak"],
-        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        techStack: ["Flutter", "Dart"],
         githubLink: "https://github.com/KeremKuyucu/PikaMed",
         viewLink: "https://pikamed.keremkk.com.tr",
       },
@@ -157,8 +257,9 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/pikamedwebsite.png",
         altText: "PikaMed Website",
         title: "PikaMed Website",
+        description: "Ürün tanıtım ve dokümantasyon sitesi",
         features: ["Frontend", "Next.js", "Web", "Açık kaynak"],
-        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        techStack: ["Next.js"],
         githubLink: "https://github.com/KeremKuyucu/PikaMed-website",
         viewLink: "https://pikamed.keremkk.com.tr",
       },
@@ -166,8 +267,9 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/pikamedapi.png",
         altText: "PikaMed API",
         title: "PikaMed API Server",
+        description: "RESTful API ve veri yönetim servisi",
         features: ["REST API", "Next.js", "Backend", "Açık kaynak"],
-        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        techStack: ["Next.js"],
         githubLink: "https://github.com/KeremKuyucu/pikamed-api",
         viewLink: "https://pikamed-api.keremkk.com.tr",
       },
@@ -175,8 +277,9 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/pikamedpanel.png",
         altText: "PikaMed Panel",
         title: "PikaMed Yönetim Paneli",
+        description: "Admin ve kullanıcı yönetim arayüzü",
         features: ["Yönetici Arayüzü", "Next.js", "Web", "Açık kaynak"],
-        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        techStack: ["Next.js"],
         githubLink: "https://github.com/KeremKuyucu/pikamed-panel",
         viewLink: "https://pikamed-panel.keremkk.com.tr",
       },
@@ -186,8 +289,9 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/discordstoragecpp.png",
         altText: "DiscordStorageCPP",
         title: "DiscordStorage - C++ Versiyonu",
+        description: "Yüksek performanslı yerel depolama çözümü",
         features: ["Discord Bot API", "C++", "Windows", "Açık kaynak"],
-        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        techStack: ["C++"],
         githubLink: "https://github.com/KeremKuyucu/DiscordStorageCPP",
         viewLink: "https://github.com/KeremKuyucu/DiscordStorageCPP/releases/latest",
       },
@@ -195,8 +299,9 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/discordstorage.png",
         altText: "DiscordStorage",
         title: "DiscordStorage - Flutter Versiyonu",
+        description: "Mobil ve masaüstü uyumlu depolama uygulaması",
         features: ["Discord Bot API", "Flutter", "Android ve Windows", "Açık kaynak"],
-        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        techStack: ["Flutter", "Dart"],
         githubLink: "https://github.com/KeremKuyucu/DiscordStorage",
         viewLink: "https://github.com/KeremKuyucu/DiscordStorage/releases/latest",
       },
@@ -204,8 +309,9 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/discordstoragedart.png",
         altText: "DiscordStorageDart",
         title: "DiscordStorage - Dart CLI Versiyonu",
+        description: "Komut satırı tabanlı hızlı erişim aracı",
         features: ["Discord Bot API", "Dart", "Windows", "Açık kaynak"],
-        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        techStack: ["Dart"],
         githubLink: "https://github.com/KeremKuyucu/DiscordStorageDart",
         viewLink: "https://github.com/KeremKuyucu/DiscordStorageDart/releases/latest",
       },
@@ -215,8 +321,9 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/analytics.png",
         altText: "Analytics",
         title: "Analytics - Web Paneli",
+        description: "Gizlilik odaklı web analytics çözümü",
         features: ["REST API", "Next.js", "Web", "Açık kaynak"],
-        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        techStack: ["Next.js"],
         githubLink: "https://github.com/KeremKuyucu/analytics-service-basic",
         viewLink: "https://analytics.keremkk.com.tr",
       }
@@ -225,9 +332,10 @@ const ProjelerSection: React.FC = () => {
       {
         imageUrl: "/imgs/kısalink.png",
         altText: "kısaLink",
-        title: "kısaLink - Açık Kaynak URL Kısaltma Servisi",
+        title: "kısaLink - URL Kısaltma Servisi",
+        description: "Hızlı ve güvenli link kısaltma platformu",
         features: ["Firebase", "Next.js", "Web", "Açık kaynak"],
-        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        techStack: ["Next.js", "Firebase"],
         githubLink: "https://github.com/KeremKuyucu/shortlink",
         viewLink: "https://kisalink.icu",
       }
@@ -237,16 +345,16 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/keremkkauth.png",
         altText: "KeremKK-Auth",
         title: "KeremKK-Auth - Kullanıcı Girişi",
+        description: "Merkezi kimlik doğrulama ve yetkilendirme sistemi",
         features: ["Supabase", "Next.js", "Web", "Açık kaynak"],
-        featureIcons: [faCheckCircle, faFilePen, faLaptop, faGaugeHigh],
+        techStack: ["Next.js", "Supabase"],
         githubLink: "https://github.com/KeremKuyucu/keremkk-auth",
         viewLink: "https://auth.keremkk.com.tr",
       }
     ]
   };
 
-  const [activeCategory, setActiveCategory] = useState<string | null>(null); // null olarak ayarlandı
-
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -262,59 +370,123 @@ const ProjelerSection: React.FC = () => {
     );
 
     const scrollElements = document.querySelectorAll(".scroll-reveal");
-    scrollElements.forEach((el) => {
-      observer.observe(el);
-    });
+    scrollElements.forEach((el) => observer.observe(el));
 
-    return () => {
-      scrollElements.forEach((el) => {
-        observer.unobserve(el);
-      });
-    };
+    return () => scrollElements.forEach((el) => observer.unobserve(el));
   }, [activeCategory]);
 
+  const categories = Object.keys(projectsByCategory);
+
   return (
-    <div
+    <section
       ref={sectionRef}
-      className="min-h-auto px-4 py-8 md:py-0 md:flex md:flex-col md:justify-center md:items-center"
+      className="py-20 px-6"
     >
-      <div className="mx-auto w-full max-w-6xl p-0 m-0">
-        <h2 className="text-3xl md:text-4xl font-normal mb-8 md:mb-12 text-center md:text-left">Projelerim</h2>
-        <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mb-8 md:mb-12">
-          {Object.keys(projectsByCategory).map((category) => (
-            <button
-              key={category}
-              onClick={() => setActiveCategory(category)}
-              className={`px-4 py-2 text-sm sm:px-6 sm:py-2 rounded-full text-base font-medium transition-colors duration-300
-                  ${activeCategory === category
-                  ? "bg-blue-600 text-white shadow-lg"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
-            >
-              {category}
-            </button>
-          ))}
+      <div className="max-w-7xl mx-auto">
+        {/* Section Header */}
+        <div className="text-center mb-16 scroll-reveal">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
+            Tüm Projelerim
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg">
+            Geliştirdiğim projeler kategorilere ayrılmış şekilde.
+            Detayları görüntülemek için bir kategori seçin.
+          </p>
         </div>
-        {activeCategory && ( // activeCategory null ise bu blok render edilmeyecek
-          <div className="space-y-8 md:space-y-12">
+
+        {/* Category Pills */}
+        <div className="flex flex-wrap justify-center gap-3 mb-12 scroll-reveal">
+          {categories.map((category) => {
+            const info = categoryInfo[category] || { gradient: "from-gray-500 to-gray-600" };
+            const isActive = activeCategory === category;
+
+            return (
+              <button
+                key={category}
+                onClick={() => setActiveCategory(isActive ? null : category)}
+                className={`group relative px-6 py-3 rounded-2xl font-semibold text-sm md:text-base transition-all duration-300 overflow-hidden ${isActive
+                  ? `bg-gradient-to-r ${info.gradient} text-white shadow-lg shadow-violet-500/25 scale-105`
+                  : "bg-white/80 dark:bg-gray-900/80 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800"
+                  }`}
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  {info.icon}
+                  {category}
+                  <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-white/20 dark:bg-black/20">
+                    {projectsByCategory[category].length}
+                  </span>
+                </span>
+
+                {/* Hover Effect */}
+                {!isActive && (
+                  <div className={`absolute inset-0 bg-gradient-to-r ${info.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Category Description */}
+        {activeCategory && categoryInfo[activeCategory] && (
+          <div className="text-center mb-12 animate-fadeIn">
+            <div className={`inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-gradient-to-r ${categoryInfo[activeCategory].gradient} text-white shadow-lg`}>
+              {categoryInfo[activeCategory].icon}
+              <span className="font-medium">{categoryInfo[activeCategory].description}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Projects Grid */}
+        {activeCategory && (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
             {projectsByCategory[activeCategory].map((project, index) => (
               <div
                 key={index}
                 className="scroll-reveal"
-                style={{ transitionDelay: `${index * 0.15}s` }}
+                style={{ transitionDelay: `${index * 0.1}s` }}
               >
-                <ProjectCard {...project} />
+                <ProjectCard
+                  {...project}
+                  index={index}
+                  categoryGradient={categoryInfo[activeCategory]?.gradient || "from-gray-500 to-gray-600"}
+                />
               </div>
             ))}
           </div>
         )}
-        {!activeCategory && ( // Hiçbir kategori seçili değilse gösterilecek metin
-          <p className="text-center text-gray-500 text-lg mt-8">
-            Lütfen görüntülemek için bir kategori seçin.
-          </p>
+
+        {/* Empty State */}
+        {!activeCategory && (
+          <div className="text-center py-16 scroll-reveal">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 mb-6">
+              <FaCode className="text-4xl text-violet-500" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              Bir Kategori Seçin
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+              Yukarıdaki kategorilerden birine tıklayarak projelerimi keşfedebilirsiniz.
+            </p>
+
+            {/* Quick Stats */}
+            <div className="flex justify-center gap-8 mt-8">
+              <div className="text-center">
+                <p className="text-3xl font-bold bg-gradient-to-r from-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
+                  {Object.values(projectsByCategory).flat().length}
+                </p>
+                <p className="text-sm text-gray-500">Toplam Proje</p>
+              </div>
+              <div className="text-center">
+                <p className="text-3xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
+                  {categories.length}
+                </p>
+                <p className="text-sm text-gray-500">Kategori</p>
+              </div>
+            </div>
+          </div>
         )}
       </div>
-    </div>
+    </section>
   );
 };
 
