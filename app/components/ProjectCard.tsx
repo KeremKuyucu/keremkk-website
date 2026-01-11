@@ -212,7 +212,7 @@ const ProjelerSection: React.FC = () => {
   const projectsByCategory: { [key: string]: Project[] } = {
     GeoGame: [
       {
-        imageUrl: "/imgs/geogamecpp.png",
+        imageUrl: "/imgs/projects/geogamecpp.png",
         altText: "GeoGame C++",
         title: "GeoGame - C++ Versiyonu",
         description: "Windows için yerel C++ coğrafya oyunu",
@@ -222,7 +222,7 @@ const ProjelerSection: React.FC = () => {
         viewLink: "https://github.com/KeremKuyucu/GeoGameCPP/releases/latest",
       },
       {
-        imageUrl: "/imgs/geogame.png",
+        imageUrl: "/imgs/projects/geogame.png",
         altText: "GeoGame",
         title: "GeoGame - Flutter Versiyonu",
         description: "Çoklu platform coğrafya öğrenme uygulaması",
@@ -232,7 +232,7 @@ const ProjelerSection: React.FC = () => {
         viewLink: "https://geogame.keremkk.com.tr",
       },
       {
-        imageUrl: "/imgs/geogamecdn.png",
+        imageUrl: "/imgs/projects/geogamecdn.png",
         altText: "GeoGame CDN",
         title: "GeoGame CDN",
         description: "İçerik dağıtım ağı ve API servisi",
@@ -244,7 +244,7 @@ const ProjelerSection: React.FC = () => {
     ],
     PikaMed: [
       {
-        imageUrl: "/imgs/pikamed.png",
+        imageUrl: "/imgs/projects/pikamed.png",
         altText: "PikaMed",
         title: "PikaMed - Sağlık Takip Sistemi",
         description: "Yapay zeka destekli kişisel sağlık asistanı",
@@ -254,7 +254,7 @@ const ProjelerSection: React.FC = () => {
         viewLink: "https://pikamed.keremkk.com.tr",
       },
       {
-        imageUrl: "/imgs/pikamedwebsite.png",
+        imageUrl: "/imgs/projects/pikamedwebsite.png",
         altText: "PikaMed Website",
         title: "PikaMed Website",
         description: "Ürün tanıtım ve dokümantasyon sitesi",
@@ -264,7 +264,7 @@ const ProjelerSection: React.FC = () => {
         viewLink: "https://pikamed.keremkk.com.tr",
       },
       {
-        imageUrl: "/imgs/pikamedapi.png",
+        imageUrl: "/imgs/projects/pikamedapi.png",
         altText: "PikaMed API",
         title: "PikaMed API Server",
         description: "RESTful API ve veri yönetim servisi",
@@ -274,7 +274,7 @@ const ProjelerSection: React.FC = () => {
         viewLink: "https://pikamed-api.keremkk.com.tr",
       },
       {
-        imageUrl: "/imgs/pikamedpanel.png",
+        imageUrl: "/imgs/projects/pikamedpanel.png",
         altText: "PikaMed Panel",
         title: "PikaMed Yönetim Paneli",
         description: "Admin ve kullanıcı yönetim arayüzü",
@@ -286,7 +286,7 @@ const ProjelerSection: React.FC = () => {
     ],
     DiscordStorage: [
       {
-        imageUrl: "/imgs/discordstoragecpp.png",
+        imageUrl: "/imgs/projects/discordstoragecpp.png",
         altText: "DiscordStorageCPP",
         title: "DiscordStorage - C++ Versiyonu",
         description: "Yüksek performanslı yerel depolama çözümü",
@@ -296,7 +296,7 @@ const ProjelerSection: React.FC = () => {
         viewLink: "https://github.com/KeremKuyucu/DiscordStorageCPP/releases/latest",
       },
       {
-        imageUrl: "/imgs/discordstorage.png",
+        imageUrl: "/imgs/projects/discordstorage.png",
         altText: "DiscordStorage",
         title: "DiscordStorage - Flutter Versiyonu",
         description: "Mobil ve masaüstü uyumlu depolama uygulaması",
@@ -306,7 +306,7 @@ const ProjelerSection: React.FC = () => {
         viewLink: "https://github.com/KeremKuyucu/DiscordStorage/releases/latest",
       },
       {
-        imageUrl: "/imgs/discordstoragedart.png",
+        imageUrl: "/imgs/projects/discordstoragedart.png",
         altText: "DiscordStorageDart",
         title: "DiscordStorage - Dart CLI Versiyonu",
         description: "Komut satırı tabanlı hızlı erişim aracı",
@@ -318,7 +318,7 @@ const ProjelerSection: React.FC = () => {
     ],
     Analytics: [
       {
-        imageUrl: "/imgs/analytics.png",
+        imageUrl: "/imgs/projects/analytics.png",
         altText: "Analytics",
         title: "Analytics - Web Paneli",
         description: "Gizlilik odaklı web analytics çözümü",
@@ -330,7 +330,7 @@ const ProjelerSection: React.FC = () => {
     ],
     kısaLink: [
       {
-        imageUrl: "/imgs/kısalink.png",
+        imageUrl: "/imgs/projects/kısalink.png",
         altText: "kısaLink",
         title: "kısaLink - URL Kısaltma Servisi",
         description: "Hızlı ve güvenli link kısaltma platformu",
@@ -342,7 +342,7 @@ const ProjelerSection: React.FC = () => {
     ],
     Auth: [
       {
-        imageUrl: "/imgs/keremkkauth.png",
+        imageUrl: "/imgs/projects/keremkkauth.png",
         altText: "KeremKK-Auth",
         title: "KeremKK-Auth - Kullanıcı Girişi",
         description: "Merkezi kimlik doğrulama ve yetkilendirme sistemi",

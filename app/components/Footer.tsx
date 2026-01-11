@@ -8,7 +8,7 @@ import {
 } from "react-icons/fa";
 import { FaSignalMessenger } from "react-icons/fa6";
 
-const socialLinks = [
+export const socialLinks = [
   {
     href: "mailto:contact@keremkk.com.tr",
     label: "E-posta",
