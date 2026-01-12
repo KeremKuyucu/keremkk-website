@@ -1,13 +1,8 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { FaGithub, FaCode, FaRocket, FaTerminal } from "react-icons/fa";
-import { roles } from "@/app/data/skills";
-
-const stats = [
-    { number: "10+", label: "Proje", icon: FaCode },
-    { number: "6+", label: "Teknoloji", icon: FaRocket },
-    { number: "3+", label: "Yıl Deneyim", icon: FaTerminal },
-];
+import { roles, skills } from "@/app/data/skills";
+import { getTotalProjectCount, getYearsOfExperience } from "@/app/data/projects";
 
 const particles = [
     { left: 5, top: 10, delay: 0, duration: 6 },
@@ -39,6 +34,13 @@ const HeroSection: React.FC = () => {
     const [displayText, setDisplayText] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
     const heroRef = useRef<HTMLDivElement>(null);
+
+    // Dynamic stats calculated from actual data
+    const stats = useMemo(() => [
+        { number: `${getTotalProjectCount()}+`, label: "Proje", icon: FaCode },
+        { number: `${skills.length}+`, label: "Teknoloji", icon: FaRocket },
+        { number: `${getYearsOfExperience()}+`, label: "Yıl Deneyim", icon: FaTerminal },
+    ], []);
 
     useEffect(() => {
         setIsLoaded(true);
