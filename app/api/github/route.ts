@@ -3,11 +3,25 @@ import { NextResponse } from 'next/server';
 interface GitHubRepoData {
     archived: boolean;
     pushed_at: string;
+    stargazers_count: number;
+    forks_count: number;
+    language: string | null;
+    private: boolean;
+    open_issues_count: number;
+    watchers_count: number;
+    description: string | null;
 }
 
 interface RepoInfo {
     lastCommit: string;
     isArchived: boolean;
+    stars: number;
+    forks: number;
+    language: string | null;
+    isPrivate: boolean;
+    openIssues: number;
+    watchers: number;
+    description: string | null;
 }
 
 // Cache for GitHub data (1 hour)
@@ -69,17 +83,44 @@ export async function GET(request: Request) {
                 const repoInfo: RepoInfo = {
                     lastCommit: getRelativeTime(data.pushed_at),
                     isArchived: data.archived,
+                    stars: data.stargazers_count,
+                    forks: data.forks_count,
+                    language: data.language,
+                    isPrivate: data.private,
+                    openIssues: data.open_issues_count,
+                    watchers: data.watchers_count,
+                    description: data.description,
                 };
 
                 // Update cache
                 cache.set(repo, { data: repoInfo, timestamp: Date.now() });
                 results[repo] = repoInfo;
             } else {
-                results[repo] = { lastCommit: 'Bilinmiyor', isArchived: false };
+                results[repo] = {
+                    lastCommit: 'Bilinmiyor',
+                    isArchived: false,
+                    stars: 0,
+                    forks: 0,
+                    language: null,
+                    isPrivate: true,
+                    openIssues: 0,
+                    watchers: 0,
+                    description: null
+                };
             }
         } catch (error) {
             console.error(`Error fetching ${repo}:`, error);
-            results[repo] = { lastCommit: 'Bilinmiyor', isArchived: false };
+            results[repo] = {
+                lastCommit: 'Bilinmiyor',
+                isArchived: false,
+                stars: 0,
+                forks: 0,
+                language: null,
+                isPrivate: true,
+                openIssues: 0,
+                watchers: 0,
+                description: null
+            };
         }
     }
 

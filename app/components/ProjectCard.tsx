@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import { FaGithub, FaExternalLinkAlt, FaCode, FaServer, FaMobile, FaDesktop, FaCheckCircle } from "react-icons/fa";
-import { SiFlutter, SiNextdotjs, SiCplusplus, SiDart, SiSupabase, SiFirebase } from "react-icons/si";
+import { FaGithub, FaExternalLinkAlt, FaCode, FaServer, FaMobile, FaDesktop, FaCheckCircle, FaLock, FaStar, FaCodeBranch, FaEye, FaGraduationCap } from "react-icons/fa";
+import { SiFlutter, SiNextdotjs, SiCplusplus, SiDart, SiSupabase, SiFirebase, SiTypescript, SiTailwindcss, SiResend } from "react-icons/si";
 
 interface Project {
   imageUrl: string;
@@ -9,7 +9,12 @@ interface Project {
   isNew?: boolean;
   isDeveloping?: boolean;
   isArchived?: boolean;
+  isPrivate?: boolean;
   lastCommit?: string;
+  stars?: number;
+  forks?: number;
+  language?: string | null;
+  watchers?: number;
   title: string;
   description?: string;
   features: string[];
@@ -62,6 +67,12 @@ const categoryInfo: { [key: string]: CategoryInfo } = {
     gradient: "from-indigo-500 to-blue-600",
     description: "Merkezi kimlik doğrulama sistemi",
   },
+  EglYillik: {
+    name: "EglYillik",
+    icon: <FaGraduationCap className="text-xl" />,
+    gradient: "from-indigo-500 to-blue-600",
+    description: "Eğitim kurumları için dijital mezuniyet albümü",
+  },
 };
 
 const fallbackImage = "/imgs/errorimage.jpg";
@@ -74,6 +85,9 @@ const getTechIcon = (tech: string) => {
     "Dart": <SiDart className="text-[#0175C2]" />,
     "Supabase": <SiSupabase className="text-[#3ECF8E]" />,
     "Firebase": <SiFirebase className="text-[#FFCA28]" />,
+    "TypeScript": <SiTypescript className="text-[#3178C6]" />,
+    "Tailwind CSS": <SiTailwindcss className="text-[#06B6D4]" />,
+    "Resend": <SiResend className="text-white" />,
   };
   return iconMap[tech] || <FaCode className="text-gray-500" />;
 };
@@ -84,7 +98,12 @@ const ProjectCard: React.FC<Project & { index: number; categoryGradient: string 
   isNew,
   isDeveloping,
   isArchived,
+  isPrivate,
   lastCommit,
+  stars,
+  forks,
+  language,
+  watchers,
   title,
   description,
   features,
@@ -118,6 +137,12 @@ const ProjectCard: React.FC<Project & { index: number; categoryGradient: string 
 
         {/* Badges */}
         <div className="absolute top-4 left-4 flex flex-wrap gap-2 max-w-[calc(100%-2rem)]">
+          {isPrivate && (
+            <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-yellow-500 to-amber-600 text-white shadow-lg flex items-center gap-1.5">
+              <FaLock className="text-[10px]" />
+              Private
+            </span>
+          )}
           {isNew && (
             <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-lg animate-pulse">
               ✨ Yeni
@@ -148,7 +173,7 @@ const ProjectCard: React.FC<Project & { index: number; categoryGradient: string 
               <FaExternalLinkAlt className="text-sm" />
             </a>
           )}
-          {githubLink && (
+          {githubLink && !isPrivate && (
             <a
               href={githubLink}
               target="_blank"
@@ -172,6 +197,51 @@ const ProjectCard: React.FC<Project & { index: number; categoryGradient: string 
           <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
             {description}
           </p>
+        )}
+
+        {/* Tech Stack with Icons */}
+        {techStack && techStack.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {techStack.map((tech, idx) => (
+              <span
+                key={idx}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200/50 dark:border-gray-700/50"
+              >
+                {getTechIcon(tech)}
+                {tech}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* GitHub Stats */}
+        {(stars !== undefined || forks !== undefined || language) && (
+          <div className="flex flex-wrap items-center gap-3 mb-4 text-sm">
+            {stars !== undefined && stars > 0 && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
+                <FaStar className="text-xs" />
+                <span className="font-medium">{stars}</span>
+              </div>
+            )}
+            {forks !== undefined && forks > 0 && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                <FaCodeBranch className="text-xs" />
+                <span className="font-medium">{forks}</span>
+              </div>
+            )}
+            {watchers !== undefined && watchers > 0 && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400">
+                <FaEye className="text-xs" />
+                <span className="font-medium">{watchers}</span>
+              </div>
+            )}
+            {language && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+                <FaCode className="text-xs" />
+                <span className="font-medium">{language}</span>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Features */}
@@ -210,7 +280,7 @@ const ProjectCard: React.FC<Project & { index: number; categoryGradient: string 
               Görüntüle
             </a>
           )}
-          {githubLink && (
+          {githubLink && !isPrivate && (
             <a
               href={githubLink}
               target="_blank"
@@ -220,6 +290,12 @@ const ProjectCard: React.FC<Project & { index: number; categoryGradient: string 
               <FaGithub />
               GitHub
             </a>
+          )}
+          {isPrivate && (
+            <div className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-60">
+              <FaLock className="text-xs" />
+              Private Repo
+            </div>
           )}
         </div>
       </div>
@@ -234,8 +310,8 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/projects/geogamecpp.png",
         altText: "GeoGame C++",
         title: "GeoGame - C++ Versiyonu",
-        description: "Windows için yerel C++ coğrafya oyunu",
-        features: ["Çevrimdışı", "C++", "Windows", "Açık kaynak"],
+        description: "Windows API ve düşük seviyeli kaynak yönetimi ile optimize edilmiş yüksek performanslı yerel masaüstü oyunu.",
+        features: ["Düşük gecikmeli UI", "Win32 API Entegrasyonu", "Verimli bellek yönetimi", "Açık kaynak"],
         techStack: ["C++"],
         githubLink: "https://github.com/KeremKuyucu/GeoGameCPP",
       },
@@ -243,9 +319,9 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/projects/geogame.png",
         altText: "GeoGame",
         title: "GeoGame - Flutter Versiyonu",
-        description: "Çoklu platform coğrafya öğrenme uygulaması",
-        features: ["Çevrim içi/çevrimdışı", "Flutter", "Android ve Windows", "Açık kaynak"],
-        techStack: ["Flutter", "Dart"],
+        description: "Platformlar arası tutarlı deneyim sunan, zengin animasyonlu ve genişletilebilir coğrafya öğrenme platformu.",
+        features: ["Cross-platform mimari", "Gelişmiş state yönetimi", "Modern UI/UX", "Açık kaynak"],
+        techStack: ["Flutter", "Dart", "Supabase"],
         githubLink: "https://github.com/KeremKuyucu/GeoGame",
         viewLink: "/geogame",
       },
@@ -253,8 +329,8 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/projects/geogamecdn.png",
         altText: "GeoGame CDN",
         title: "GeoGame CDN",
-        description: "İçerik dağıtım ağı ve API servisi",
-        features: ["Statik içerik", "Next.js", "Backend", "Açık kaynak"],
+        description: "Oyun içi statik varlıkların hızlı dağıtımı ve dinamik içerik yönetimi için özelleştirilmiş API servisi.",
+        features: ["Optimize edilmiş asset servisi", "Next.js API Routes", "Merkezi içerik yönetimi", "Açık kaynak"],
         techStack: ["Next.js"],
         githubLink: "https://github.com/KeremKuyucu/geogame-cdn",
       }
@@ -264,8 +340,8 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/projects/pikamed.png",
         altText: "PikaMed",
         title: "PikaMed - Sağlık Takip Sistemi",
-        description: "Yapay zeka destekli kişisel sağlık asistanı",
-        features: ["Yapay Zeka Destekli", "Flutter", "Android", "Açık kaynak"],
+        description: "Kullanıcı verilerini yapay zeka ile işleyerek kişiselleştirilmiş sağlık öngörüleri sunan mobil çözüm.",
+        features: ["LLM / AI Entegrasyonu", "Biyometrik veri görselleştirme", "Kullanıcı odaklı tasarım", "Açık kaynak"],
         techStack: ["Flutter", "Dart"],
         githubLink: "https://github.com/KeremKuyucu/PikaMed-Mobile",
       },
@@ -273,8 +349,8 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/projects/pikamedwebsite.png",
         altText: "PikaMed Website",
         title: "PikaMed Website",
-        description: "Ürün tanıtım ve dokümantasyon sitesi",
-        features: ["Frontend", "Next.js", "Web", "Açık kaynak"],
+        description: "Proje ekosisteminin tanıtımı ve kullanıcı dokümantasyonu için tasarlanmış yüksek performanslı web arayüzü.",
+        features: ["SEO Optimizasyonu", "Responsive tasarım", "Hızlı sayfa yükleme", "Açık kaynak"],
         techStack: ["Next.js"],
         githubLink: "https://github.com/KeremKuyucu/PikaMed-website",
         viewLink: "/pikamed",
@@ -283,8 +359,8 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/projects/pikamedapi.png",
         altText: "PikaMed API",
         title: "PikaMed API Server",
-        description: "RESTful API ve veri yönetim servisi",
-        features: ["REST API", "Next.js", "Backend", "Açık kaynak"],
+        description: "Tüm PikaMed ekosisteminin veri tutarlılığını ve güvenliğini sağlayan ölçeklenebilir backend mimarisi.",
+        features: ["Güvenli veri modelleme", "RESTful mimari", "Hızlı yanıt süreleri", "Açık kaynak"],
         techStack: ["Next.js"],
         githubLink: "https://github.com/KeremKuyucu/pikamed-apiserver",
       },
@@ -292,8 +368,8 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/projects/pikamedpanel.png",
         altText: "PikaMed Panel",
         title: "PikaMed Yönetim Paneli",
-        description: "Admin ve kullanıcı yönetim arayüzü",
-        features: ["Yönetici Arayüzü", "Next.js", "Web", "Açık kaynak"],
+        description: "Sistem yöneticileri için veri manipülasyonu ve kullanıcı yönetimi sağlayan operasyonel dashboard.",
+        features: ["Rol tabanlı erişim kontrolü", "Veri analitiği arayüzü", "Anlık sistem takibi", "Açık kaynak"],
         techStack: ["Next.js"],
         githubLink: "https://github.com/KeremKuyucu/pikamed-panel",
       },
@@ -303,8 +379,8 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/projects/discordstoragecpp.png",
         altText: "DiscordStorageCPP",
         title: "DiscordStorage - C++ Versiyonu",
-        description: "Yüksek performanslı yerel depolama çözümü",
-        features: ["Discord Bot API", "C++", "Windows", "Açık kaynak"],
+        description: "Discord altyapısını bir dosya sistemi gibi kullanan, performans ve hız odaklı masaüstü uygulaması.",
+        features: ["Multi-part upload mantığı", "Düşük overhead", "Sistem seviyesinde entegrasyon", "Açık kaynak"],
         techStack: ["C++"],
         githubLink: "https://github.com/KeremKuyucu/DiscordStorageCPP",
       },
@@ -312,8 +388,8 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/projects/discordstorage.png",
         altText: "DiscordStorage",
         title: "DiscordStorage - Flutter Versiyonu",
-        description: "Mobil ve masaüstü uyumlu depolama uygulaması",
-        features: ["Discord Bot API", "Flutter", "Android ve Windows", "Açık kaynak"],
+        description: "Dosya yönetimini Discord sunucuları üzerinden kullanıcı dostu bir arayüzle sunan cross-platform uygulama.",
+        features: ["Dosya şifreleme mantığı", "Görsel dosya gezgini", "Mobil ve Masaüstü desteği", "Açık kaynak"],
         techStack: ["Flutter", "Dart"],
         githubLink: "https://github.com/KeremKuyucu/DiscordStorage",
       },
@@ -321,8 +397,8 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/projects/discordstoragedart.png",
         altText: "DiscordStorageDart",
         title: "DiscordStorage - Dart CLI Versiyonu",
-        description: "Komut satırı tabanlı hızlı erişim aracı",
-        features: ["Discord Bot API", "Dart", "Windows", "Açık kaynak"],
+        description: "Geliştiriciler için terminal üzerinden hızlı dosya yükleme ve yönetme imkanı tanıyan komut satırı aracı.",
+        features: ["Hızlı CLI komutları", "Otomasyon dostu", "Hafif çalışma zamanı", "Açık kaynak"],
         techStack: ["Dart"],
         githubLink: "https://github.com/KeremKuyucu/DiscordStorageDart",
       },
@@ -332,9 +408,9 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/projects/analytics.png",
         altText: "Analytics",
         title: "Analytics - Web Paneli",
-        description: "Gizlilik odaklı web analytics çözümü",
-        features: ["REST API", "Next.js", "Web", "Açık kaynak"],
-        techStack: ["Next.js"],
+        description: "Üçüncü taraf takipçiler olmadan web trafiğini izleyen, gizlilik odaklı hafif analiz servisi.",
+        features: ["Zero-JS footprint (minimalist)", "Gizlilik odaklı takip", "Özel veri görselleştirme", "Açık kaynak"],
+        techStack: ["Next.js", "Supabase"],
         githubLink: "https://github.com/KeremKuyucu/analytics-service-basic",
       }
     ],
@@ -343,8 +419,8 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/projects/kısalink.png",
         altText: "kısaLink",
         title: "kısaLink - URL Kısaltma Servisi",
-        description: "Hızlı ve güvenli link kısaltma platformu",
-        features: ["Firebase", "Next.js", "Web", "Açık kaynak"],
+        description: "Yüksek trafik yükünü kaldırabilen, Firebase entegrasyonlu ve istatistik destekli link yönetim platformu.",
+        features: ["Gerçek zamanlı yönlendirme", "Tıklama analitiği", "Serverless mimari", "Açık kaynak"],
         techStack: ["Next.js", "Firebase"],
         githubLink: "https://github.com/KeremKuyucu/shortlink",
       }
@@ -354,17 +430,35 @@ const ProjelerSection: React.FC = () => {
         imageUrl: "/imgs/projects/keremkkauth.png",
         altText: "KeremKK-Auth",
         title: "KeremKK-Auth - Kullanıcı Girişi",
-        description: "Merkezi kimlik doğrulama ve yetkilendirme sistemi",
-        features: ["Supabase", "Next.js", "Web", "Açık kaynak"],
-        techStack: ["Next.js", "Supabase"],
+        description: "Tüm projeler için merkezi bir kimlik doğrulama noktası sağlayan Single Sign-On (SSO) altyapısı.",
+        features: ["Güvenli session yönetimi", "Sosyal login desteği", "Merkezi kullanıcı veritabanı", "Açık kaynak"],
+        techStack: ["Next.js", "Supabase", "Resend"],
         githubLink: "https://github.com/KeremKuyucu/keremkk-auth",
         viewLink: "/accounts",
+      }
+    ],
+    EglYillik: [
+      {
+        imageUrl: "/imgs/projects/egl-yillik.png",
+        altText: "EGL-Yillik",
+        title: "EGL Yıllık - Dijital Mezuniyet Albümü",
+        description: "Eğitim kurumları için tasarlanmış, çok katmanlı yetkilendirme ve yoğun veri etkileşimi içeren dijital anı platformu.",
+        features: [
+          "Gelişmiş RBAC (Owner'dan User'a 5 seviyeli yetki)",
+          "Resend ile otomatize mail iş akışları",
+          "Dinamik sınıf ve ilerleme istatistikleri",
+          "Gerçek zamanlı veri senkronizasyonu",
+          "Tip güvenli (TypeScript) mimari"
+        ],
+        techStack: ["Next.js", "Supabase", "Resend", "Tailwind CSS", "TypeScript"],
+        githubLink: "https://github.com/KeremKuyucu/Egl-yillik",
+        viewLink: "/egl-yillik",
       }
     ]
   };
 
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [githubData, setGithubData] = useState<{ [key: string]: { lastCommit: string; isArchived: boolean } }>({});
+  const [githubData, setGithubData] = useState<{ [key: string]: { lastCommit: string; isArchived: boolean; stars: number; forks: number; language: string | null; isPrivate: boolean; watchers: number; } }>({});
   const [isLoadingGithub, setIsLoadingGithub] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -426,9 +520,9 @@ const ProjelerSection: React.FC = () => {
 
   // Helper to get GitHub data for a project
   const getGithubDataForProject = (githubLink?: string) => {
-    if (!githubLink) return { lastCommit: undefined, isArchived: undefined };
+    if (!githubLink) return { lastCommit: undefined, isArchived: undefined, stars: undefined, forks: undefined, language: undefined, isPrivate: undefined, watchers: undefined };
     const repoName = extractRepoName(githubLink);
-    if (!repoName || !githubData[repoName]) return { lastCommit: undefined, isArchived: undefined };
+    if (!repoName || !githubData[repoName]) return { lastCommit: undefined, isArchived: undefined, stars: undefined, forks: undefined, language: undefined, isPrivate: undefined, watchers: undefined };
     return githubData[repoName];
   };
 
@@ -498,7 +592,7 @@ const ProjelerSection: React.FC = () => {
               const ghData = getGithubDataForProject(project.githubLink);
               return (
                 <div
-                  key={index}
+                  key={`${activeCategory}-${project.title}`}
                   className="scroll-reveal"
                   style={{ transitionDelay: `${index * 0.1}s` }}
                 >
@@ -506,6 +600,11 @@ const ProjelerSection: React.FC = () => {
                     {...project}
                     lastCommit={ghData.lastCommit || project.lastCommit}
                     isArchived={ghData.isArchived ?? project.isArchived}
+                    isPrivate={ghData.isPrivate ?? project.isPrivate}
+                    stars={ghData.stars ?? project.stars}
+                    forks={ghData.forks ?? project.forks}
+                    language={ghData.language ?? project.language}
+                    watchers={ghData.watchers ?? project.watchers}
                     index={index}
                     categoryGradient={categoryInfo[activeCategory]?.gradient || "from-gray-500 to-gray-600"}
                   />

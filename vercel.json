@@ -14,6 +14,11 @@
       "source": "/accounts",
       "destination": "https://accounts.keremkk.com.tr",
       "permanent": true
+    },
+    {
+      "source": "/egl-yillik",
+      "destination": "#",
+      "permanent": true
     }
   ]
 }

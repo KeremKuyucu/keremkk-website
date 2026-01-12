@@ -94,9 +94,6 @@ const FooterComponent: React.FC = () => {
         <h2 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 mb-6">
           Vakit ayırdığınız için teşekkürler.
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-12 text-lg">
-          Projelerim hakkında konuşmak veya sadece merhaba demek için ulaşabilirsiniz.
-        </p>
 
         {/* Social Links Grid */}
         <div className="flex flex-wrap items-center justify-center gap-4 mb-16">
