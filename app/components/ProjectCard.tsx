@@ -8,6 +8,8 @@ interface Project {
   altText: string;
   isNew?: boolean;
   isDeveloping?: boolean;
+  isArchived?: boolean;
+  lastCommit?: string;
   title: string;
   description?: string;
   features: string[];
@@ -81,6 +83,8 @@ const ProjectCard: React.FC<Project & { index: number; categoryGradient: string 
   altText,
   isNew,
   isDeveloping,
+  isArchived,
+  lastCommit,
   title,
   description,
   features,
@@ -113,7 +117,7 @@ const ProjectCard: React.FC<Project & { index: number; categoryGradient: string 
         <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
 
         {/* Badges */}
-        <div className="absolute top-4 left-4 flex gap-2">
+        <div className="absolute top-4 left-4 flex flex-wrap gap-2 max-w-[calc(100%-2rem)]">
           {isNew && (
             <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-lg animate-pulse">
               ✨ Yeni
@@ -122,6 +126,11 @@ const ProjectCard: React.FC<Project & { index: number; categoryGradient: string 
           {isDeveloping && (
             <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-blue-400 to-cyan-500 text-white shadow-lg">
               🚧 Geliştiriliyor
+            </span>
+          )}
+          {isArchived && (
+            <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-gray-500 to-gray-600 text-white shadow-lg">
+              📦 Arşivlendi
             </span>
           )}
         </div>
@@ -167,7 +176,7 @@ const ProjectCard: React.FC<Project & { index: number; categoryGradient: string 
 
         {/* Features */}
         <div className="flex flex-wrap gap-2 mb-4">
-          {features.slice(0, 4).map((feature, idx) => (
+          {features.slice(0, 3).map((feature, idx) => (
             <span
               key={idx}
               className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
@@ -177,6 +186,16 @@ const ProjectCard: React.FC<Project & { index: number; categoryGradient: string 
             </span>
           ))}
         </div>
+
+        {/* Last Commit */}
+        {lastCommit && (
+          <div className="flex items-center gap-2 mb-4 text-xs text-gray-500 dark:text-gray-400">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Son commit: {lastCommit}</span>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="flex gap-3 pt-2 border-t border-gray-200 dark:border-gray-800">
@@ -219,7 +238,6 @@ const ProjelerSection: React.FC = () => {
         features: ["Çevrimdışı", "C++", "Windows", "Açık kaynak"],
         techStack: ["C++"],
         githubLink: "https://github.com/KeremKuyucu/GeoGameCPP",
-        viewLink: "https://github.com/KeremKuyucu/GeoGameCPP/releases/latest",
       },
       {
         imageUrl: "/imgs/projects/geogame.png",
@@ -229,7 +247,7 @@ const ProjelerSection: React.FC = () => {
         features: ["Çevrim içi/çevrimdışı", "Flutter", "Android ve Windows", "Açık kaynak"],
         techStack: ["Flutter", "Dart"],
         githubLink: "https://github.com/KeremKuyucu/GeoGame",
-        viewLink: "https://geogame.keremkk.com.tr",
+        viewLink: "/geogame",
       },
       {
         imageUrl: "/imgs/projects/geogamecdn.png",
@@ -239,7 +257,6 @@ const ProjelerSection: React.FC = () => {
         features: ["Statik içerik", "Next.js", "Backend", "Açık kaynak"],
         techStack: ["Next.js"],
         githubLink: "https://github.com/KeremKuyucu/geogame-cdn",
-        viewLink: "https://geogame-cdn.keremkk.com.tr",
       }
     ],
     PikaMed: [
@@ -250,8 +267,7 @@ const ProjelerSection: React.FC = () => {
         description: "Yapay zeka destekli kişisel sağlık asistanı",
         features: ["Yapay Zeka Destekli", "Flutter", "Android", "Açık kaynak"],
         techStack: ["Flutter", "Dart"],
-        githubLink: "https://github.com/KeremKuyucu/PikaMed",
-        viewLink: "https://pikamed.keremkk.com.tr",
+        githubLink: "https://github.com/KeremKuyucu/PikaMed-Mobile",
       },
       {
         imageUrl: "/imgs/projects/pikamedwebsite.png",
@@ -261,7 +277,7 @@ const ProjelerSection: React.FC = () => {
         features: ["Frontend", "Next.js", "Web", "Açık kaynak"],
         techStack: ["Next.js"],
         githubLink: "https://github.com/KeremKuyucu/PikaMed-website",
-        viewLink: "https://pikamed.keremkk.com.tr",
+        viewLink: "/pikamed",
       },
       {
         imageUrl: "/imgs/projects/pikamedapi.png",
@@ -270,8 +286,7 @@ const ProjelerSection: React.FC = () => {
         description: "RESTful API ve veri yönetim servisi",
         features: ["REST API", "Next.js", "Backend", "Açık kaynak"],
         techStack: ["Next.js"],
-        githubLink: "https://github.com/KeremKuyucu/pikamed-api",
-        viewLink: "https://pikamed-api.keremkk.com.tr",
+        githubLink: "https://github.com/KeremKuyucu/pikamed-apiserver",
       },
       {
         imageUrl: "/imgs/projects/pikamedpanel.png",
@@ -281,7 +296,6 @@ const ProjelerSection: React.FC = () => {
         features: ["Yönetici Arayüzü", "Next.js", "Web", "Açık kaynak"],
         techStack: ["Next.js"],
         githubLink: "https://github.com/KeremKuyucu/pikamed-panel",
-        viewLink: "https://pikamed-panel.keremkk.com.tr",
       },
     ],
     DiscordStorage: [
@@ -293,7 +307,6 @@ const ProjelerSection: React.FC = () => {
         features: ["Discord Bot API", "C++", "Windows", "Açık kaynak"],
         techStack: ["C++"],
         githubLink: "https://github.com/KeremKuyucu/DiscordStorageCPP",
-        viewLink: "https://github.com/KeremKuyucu/DiscordStorageCPP/releases/latest",
       },
       {
         imageUrl: "/imgs/projects/discordstorage.png",
@@ -303,7 +316,6 @@ const ProjelerSection: React.FC = () => {
         features: ["Discord Bot API", "Flutter", "Android ve Windows", "Açık kaynak"],
         techStack: ["Flutter", "Dart"],
         githubLink: "https://github.com/KeremKuyucu/DiscordStorage",
-        viewLink: "https://github.com/KeremKuyucu/DiscordStorage/releases/latest",
       },
       {
         imageUrl: "/imgs/projects/discordstoragedart.png",
@@ -313,7 +325,6 @@ const ProjelerSection: React.FC = () => {
         features: ["Discord Bot API", "Dart", "Windows", "Açık kaynak"],
         techStack: ["Dart"],
         githubLink: "https://github.com/KeremKuyucu/DiscordStorageDart",
-        viewLink: "https://github.com/KeremKuyucu/DiscordStorageDart/releases/latest",
       },
     ],
     Analytics: [
@@ -325,7 +336,6 @@ const ProjelerSection: React.FC = () => {
         features: ["REST API", "Next.js", "Web", "Açık kaynak"],
         techStack: ["Next.js"],
         githubLink: "https://github.com/KeremKuyucu/analytics-service-basic",
-        viewLink: "https://analytics.keremkk.com.tr",
       }
     ],
     kısaLink: [
@@ -337,7 +347,6 @@ const ProjelerSection: React.FC = () => {
         features: ["Firebase", "Next.js", "Web", "Açık kaynak"],
         techStack: ["Next.js", "Firebase"],
         githubLink: "https://github.com/KeremKuyucu/shortlink",
-        viewLink: "https://kisalink.icu",
       }
     ],
     Auth: [
@@ -349,13 +358,51 @@ const ProjelerSection: React.FC = () => {
         features: ["Supabase", "Next.js", "Web", "Açık kaynak"],
         techStack: ["Next.js", "Supabase"],
         githubLink: "https://github.com/KeremKuyucu/keremkk-auth",
-        viewLink: "https://auth.keremkk.com.tr",
+        viewLink: "/accounts",
       }
     ]
   };
 
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [githubData, setGithubData] = useState<{ [key: string]: { lastCommit: string; isArchived: boolean } }>({});
+  const [isLoadingGithub, setIsLoadingGithub] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
+
+  // Extract repo names from GitHub links
+  const extractRepoName = (githubLink: string): string | null => {
+    const match = githubLink.match(/github\.com\/([^\/]+\/[^\/]+)/);
+    return match ? match[1] : null;
+  };
+
+  // Fetch GitHub data when component mounts
+  useEffect(() => {
+    const fetchGithubData = async () => {
+      setIsLoadingGithub(true);
+      const allProjects = Object.values(projectsByCategory).flat();
+      const repoNames = allProjects
+        .map((p) => p.githubLink ? extractRepoName(p.githubLink) : null)
+        .filter((name): name is string => name !== null);
+
+      if (repoNames.length === 0) {
+        setIsLoadingGithub(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/github?repos=${repoNames.join(',')}`);
+        if (response.ok) {
+          const data = await response.json();
+          setGithubData(data);
+        }
+      } catch (error) {
+        console.error('Error fetching GitHub data:', error);
+      } finally {
+        setIsLoadingGithub(false);
+      }
+    };
+
+    fetchGithubData();
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -376,6 +423,14 @@ const ProjelerSection: React.FC = () => {
   }, [activeCategory]);
 
   const categories = Object.keys(projectsByCategory);
+
+  // Helper to get GitHub data for a project
+  const getGithubDataForProject = (githubLink?: string) => {
+    if (!githubLink) return { lastCommit: undefined, isArchived: undefined };
+    const repoName = extractRepoName(githubLink);
+    if (!repoName || !githubData[repoName]) return { lastCommit: undefined, isArchived: undefined };
+    return githubData[repoName];
+  };
 
   return (
     <section
@@ -439,19 +494,24 @@ const ProjelerSection: React.FC = () => {
         {/* Projects Grid */}
         {activeCategory && (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
-            {projectsByCategory[activeCategory].map((project, index) => (
-              <div
-                key={index}
-                className="scroll-reveal"
-                style={{ transitionDelay: `${index * 0.1}s` }}
-              >
-                <ProjectCard
-                  {...project}
-                  index={index}
-                  categoryGradient={categoryInfo[activeCategory]?.gradient || "from-gray-500 to-gray-600"}
-                />
-              </div>
-            ))}
+            {projectsByCategory[activeCategory].map((project, index) => {
+              const ghData = getGithubDataForProject(project.githubLink);
+              return (
+                <div
+                  key={index}
+                  className="scroll-reveal"
+                  style={{ transitionDelay: `${index * 0.1}s` }}
+                >
+                  <ProjectCard
+                    {...project}
+                    lastCommit={ghData.lastCommit || project.lastCommit}
+                    isArchived={ghData.isArchived ?? project.isArchived}
+                    index={index}
+                    categoryGradient={categoryInfo[activeCategory]?.gradient || "from-gray-500 to-gray-600"}
+                  />
+                </div>
+              );
+            })}
           </div>
         )}
 

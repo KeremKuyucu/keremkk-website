@@ -122,15 +122,6 @@ const FooterComponent: React.FC = () => {
             >
               Kaynak Kod
             </a>
-            <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
-            <a
-              href="https://github.com/LewisLosa/manolya"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-              Forked from Manolya
-            </a>
           </div>
         </div>
       </div>
