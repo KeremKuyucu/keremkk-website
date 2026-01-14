@@ -168,7 +168,6 @@ export const projectsByCategory: { [key: string]: Project[] } = {
             ],
             techStack: ["Next.js", "Supabase", "Resend", "Tailwind CSS", "TypeScript"],
             githubLink: "https://github.com/KeremKuyucu/Egl-yillik",
-            viewLink: "/egl-yillik",
         }
     ]
 };
