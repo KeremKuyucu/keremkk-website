@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { supabaseAdmin } from '@/lib/supabase';
+
+// Anonim kullanıcılar için sabit UUID (Supabase auth olmadan form gönderimi için)
+const ANONYMOUS_USER_ID = '00000000-0000-0000-0000-000000000000';
 
 export async function POST(request: NextRequest) {
     try {
@@ -9,39 +13,27 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Tüm alanlar zorunludur' }, { status: 400 });
         }
 
-        const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+        // Supabase'e feedback kaydet
+        // Tablo yapısı: sebep (konu), message, isim (ad), user_id
+        // Not: email alanı tabloda yok, mesajın içine eklenecek
+        const fullMessage = `[E-posta: ${email}]\n\n${message}`;
 
-        if (!webhookUrl) {
-            console.error('DISCORD_WEBHOOK_URL not configured');
-            return NextResponse.json({ error: 'Sunucu hatası' }, { status: 500 });
-        }
+        const { data, error } = await supabaseAdmin
+            .from('feedbacks')
+            .insert({
+                sebep: subject,
+                message: fullMessage,
+                isim: name,
+                user_id: ANONYMOUS_USER_ID,
+                Status: false,
+                App: 'keremkk.com.tr'
+            })
+            .select()
+            .single();
 
-        // Discord embed
-        const embed = {
-            title: '📬 Yeni İletişim Mesajı',
-            color: 0x7c3aed, // Violet
-            fields: [
-                { name: '👤 Ad', value: name, inline: true },
-                { name: '📧 E-posta', value: email, inline: true },
-                { name: '📋 Konu', value: subject, inline: false },
-                { name: '💬 Mesaj', value: message, inline: false },
-            ],
-            timestamp: new Date().toISOString(),
-            footer: {
-                text: 'keremkk.com.tr İletişim Formu',
-            },
-        };
-
-        const response = await fetch(webhookUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                embeds: [embed],
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error('Discord webhook failed');
+        if (error) {
+            console.error('Supabase insert error:', error);
+            return NextResponse.json({ error: 'Mesaj kaydedilemedi' }, { status: 500 });
         }
 
         return NextResponse.json({ success: true, message: 'Mesajınız gönderildi!' });
