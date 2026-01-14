@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
-// Anonim kullanıcılar için sabit UUID (Supabase auth olmadan form gönderimi için)
-const ANONYMOUS_USER_ID = '00000000-0000-0000-0000-000000000000';
-
 export async function POST(request: NextRequest) {
     try {
         const { name, email, subject, message } = await request.json();
@@ -14,8 +11,9 @@ export async function POST(request: NextRequest) {
         }
 
         // Supabase'e feedback kaydet
-        // Tablo yapısı: sebep (konu), message, isim (ad), user_id
+        // Tablo yapısı: sebep (konu), message, isim (ad)
         // Not: email alanı tabloda yok, mesajın içine eklenecek
+        // user_id eklenmedi çünkü anonim kullanıcılar users tablosunda yok
         const fullMessage = `[E-posta: ${email}]\n\n${message}`;
 
         const { data, error } = await supabaseAdmin
@@ -24,7 +22,6 @@ export async function POST(request: NextRequest) {
                 sebep: subject,
                 message: fullMessage,
                 isim: name,
-                user_id: ANONYMOUS_USER_ID,
                 Status: false,
                 App: 'keremkk.com.tr'
             })
