@@ -7,21 +7,21 @@ const featuredProjects = [
         description: "Coğrafya öğrenmeyi eğlenceli hale getiren çoklu platform oyunu",
         tags: ["Flutter", "C++", "Next.js"],
         gradient: "from-emerald-500 to-teal-600",
-        link: "https://geogame.keremkk.com.tr",
+        link: "/geogame",
     },
     {
         title: "PikaMed",
         description: "Yapay zeka destekli sağlık takip sistemi",
         tags: ["Flutter", "Next.js", "AI"],
         gradient: "from-rose-500 to-pink-600",
-        link: "https://pikamed.keremkk.com.tr",
+        link: "/pikamed",
     },
     {
         title: "DiscordStorage",
         description: "Discord üzerinden dosya depolama çözümü",
         tags: ["C++", "Flutter", "Dart"],
         gradient: "from-violet-500 to-purple-600",
-        link: "https://github.com/KeremKuyucu/DiscordStorage",
+        link: "/discordstorage",
     },
 ];
 

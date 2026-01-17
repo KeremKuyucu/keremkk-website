@@ -1,36 +1,70 @@
 // Centralized project data for dynamic stats and consistency
 
+/**
+ * Proje kartı için kullanılan veri yapısı
+ * 
+ * ## Temel Bilgiler
+ * @property {string} imageUrl - Proje kartının kapak görseli URL'i (örn: "/imgs/projects/geogame.png")
+ * @property {string} altText - Görsel yüklenemezse gösterilen alternatif metin
+ * @property {string} title - Proje başlığı, gradient renkli olarak gösterilir
+ * @property {string} [description] - Projenin kısa açıklaması (2 satırla sınırlı)
+ * @property {string[]} features - Projenin özellik listesi, ✅ ikonuyla gösterilir (max 3 tanesi)
+ * @property {string[]} [techStack] - Kullanılan teknolojiler (Flutter, Next.js vb.) ikonlarıyla gösterilir
+ * @property {string} [viewLink] - "Görüntüle" butonunun yönlendireceği URL
+ * @property {string} [githubLink] - GitHub repo linki
+ * 
+ * ## Etiketler (Badges)
+ * @property {boolean} [isNew] - ✨ Yeni etiketi (turuncu, yanıp sönen)
+ * @property {boolean} [isDeveloping] - 🚧 Geliştiriliyor etiketi (mavi)
+ * @property {boolean} [isArchived] - 📦 Arşivlendi etiketi (gri) (otomatik olarak arşivlenir github verisi alınamaz ise)
+ * @property {boolean} [isPrivate] - 🔒 Private etiketi (sarı), GitHub butonu devre dışı kalır
+ * 
+ * ## GitHub İstatistikleri (API'den otomatik çekilir, manuel tanımlanabilir)
+ * @property {number} [stars] - ⭐ Repo yıldız sayısı
+ * @property {number} [forks] - 🔀 Fork sayısı
+ * @property {number} [watchers] - 👁️ İzleyici sayısı
+ * @property {string|null} [language] - 💻 Ana programlama dili
+ * @property {string} [lastCommit] - ⏰ Son commit tarihi
+ */
 export interface Project {
+    /** Proje kartının kapak görseli URL'i */
     imageUrl: string;
+    /** Görsel yüklenemezse gösterilen alternatif metin */
     altText: string;
+    /** ✨ Yeni etiketi göster */
     isNew?: boolean;
+    /** 🚧 Geliştiriliyor etiketi göster */
     isDeveloping?: boolean;
+    /** 📦 Arşivlendi etiketi göster */
     isArchived?: boolean;
+    /** 🔒 Private repo etiketi göster (GitHub butonu devre dışı) */
     isPrivate?: boolean;
+    /** Son commit tarihi (API'den otomatik çekilir) */
     lastCommit?: string;
+    /** ⭐ GitHub yıldız sayısı (API'den otomatik çekilir) */
     stars?: number;
+    /** 🔀 GitHub fork sayısı (API'den otomatik çekilir) */
     forks?: number;
+    /** 💻 Ana programlama dili (API'den otomatik çekilir) */
     language?: string | null;
+    /** 👁️ GitHub izleyici sayısı (API'den otomatik çekilir) */
     watchers?: number;
+    /** Proje başlığı */
     title: string;
+    /** Projenin kısa açıklaması */
     description?: string;
+    /** Projenin özellik listesi (max 3 tanesi gösterilir) */
     features: string[];
+    /** Kullanılan teknolojiler */
     techStack?: string[];
+    /** "Görüntüle" butonunun yönlendireceği URL */
     viewLink?: string;
+    /** GitHub repo linki */
     githubLink?: string;
 }
 
 export const projectsByCategory: { [key: string]: Project[] } = {
     GeoGame: [
-        {
-            imageUrl: "/imgs/projects/geogamecpp.png",
-            altText: "GeoGame C++",
-            title: "GeoGame - C++ Versiyonu",
-            description: "Windows API ve düşük seviyeli kaynak yönetimi ile optimize edilmiş yüksek performanslı yerel masaüstü oyunu.",
-            features: ["Düşük gecikmeli UI", "Win32 API Entegrasyonu", "Verimli bellek yönetimi", "Açık kaynak"],
-            techStack: ["C++"],
-            githubLink: "https://github.com/KeremKuyucu/GeoGameCPP",
-        },
         {
             imageUrl: "/imgs/projects/geogame.png",
             altText: "GeoGame",
@@ -40,6 +74,15 @@ export const projectsByCategory: { [key: string]: Project[] } = {
             techStack: ["Flutter", "Dart", "Supabase"],
             githubLink: "https://github.com/KeremKuyucu/GeoGame",
             viewLink: "/geogame",
+        },
+        {
+            imageUrl: "/imgs/projects/geogamecpp.png",
+            altText: "GeoGame C++",
+            title: "GeoGame - C++ Versiyonu",
+            description: "Windows API ve düşük seviyeli kaynak yönetimi ile optimize edilmiş yüksek performanslı yerel masaüstü oyunu.",
+            features: ["Düşük gecikmeli UI", "Win32 API Entegrasyonu", "Verimli bellek yönetimi", "Açık kaynak"],
+            techStack: ["C++"],
+            githubLink: "https://github.com/KeremKuyucu/GeoGameCPP",
         },
         {
             imageUrl: "/imgs/projects/geogamecdn.png",
@@ -168,6 +211,8 @@ export const projectsByCategory: { [key: string]: Project[] } = {
             ],
             techStack: ["Next.js", "Supabase", "Resend", "Tailwind CSS", "TypeScript"],
             githubLink: "https://github.com/KeremKuyucu/Egl-yillik",
+            isNew: true,
+            isDeveloping: true,
         }
     ]
 };

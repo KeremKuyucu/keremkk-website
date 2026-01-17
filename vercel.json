@@ -11,6 +11,11 @@
       "permanent": true
     },
     {
+      "source": "/discordstorage",
+      "destination": "https://github.com/KeremKuyucu/discordstorage",
+      "permanent": true
+    },
+    {
       "source": "/accounts",
       "destination": "https://accounts.keremkk.com.tr",
       "permanent": true
