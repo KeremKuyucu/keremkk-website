@@ -10,10 +10,6 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Tüm alanlar zorunludur' }, { status: 400 });
         }
 
-        // Supabase'e feedback kaydet
-        // Tablo yapısı: sebep (konu), message, isim (ad)
-        // Not: email alanı tabloda yok, mesajın içine eklenecek
-        // user_id eklenmedi çünkü anonim kullanıcılar users tablosunda yok
         const fullMessage = `[E-posta: ${email}]\n\n${message}`;
 
         const { data, error } = await supabaseAdmin
