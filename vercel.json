@@ -25,7 +25,7 @@
       "destination": "#",
       "permanent": true
     }
-  ]
+  ],
   "rewrites": [
     {
       "source": "/.well-known/discord",
