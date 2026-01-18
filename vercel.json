@@ -26,4 +26,10 @@
       "permanent": true
     }
   ]
+  "rewrites": [
+    {
+      "source": "/.well-known/discord",
+      "destination": "/.well-known/discord"
+    }
+  ]
 }
