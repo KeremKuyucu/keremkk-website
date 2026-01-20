@@ -5,7 +5,6 @@ import FooterComponent from "@/app/components/Footer";
 import HeroSection from "@/app/components/HeroSection";
 import TechStackSection from "@/app/components/TechStackSection";
 import FeaturedProjects from "@/app/components/FeaturedProjects";
-import ContactSection from "@/app/components/ContactSection";
 import ProjelerSection from "./components/ProjectCard";
 
 export default function Home() {
@@ -34,7 +33,6 @@ export default function Home() {
       <TechStackSection />
       <FeaturedProjects />
       <ProjelerSection />
-      <ContactSection />
       <FooterComponent />
     </main>
   );

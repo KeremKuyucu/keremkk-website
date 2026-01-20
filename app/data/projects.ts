@@ -1,4 +1,6 @@
 // Centralized project data for dynamic stats and consistency
+import React from 'react';
+import { FaMobile, FaServer, FaDesktop, FaCode, FaGraduationCap } from 'react-icons/fa';
 
 /**
  * Proje kartı için kullanılan veri yapısı
@@ -16,15 +18,6 @@
  * ## Etiketler (Badges)
  * @property {boolean} [isNew] - ✨ Yeni etiketi (turuncu, yanıp sönen)
  * @property {boolean} [isDeveloping] - 🚧 Geliştiriliyor etiketi (mavi)
- * @property {boolean} [isArchived] - 📦 Arşivlendi etiketi (gri) (otomatik olarak arşivlenir github verisi alınamaz ise)
- * @property {boolean} [isPrivate] - 🔒 Private etiketi (sarı), GitHub butonu devre dışı kalır
- * 
- * ## GitHub İstatistikleri (API'den otomatik çekilir, manuel tanımlanabilir)
- * @property {number} [stars] - ⭐ Repo yıldız sayısı
- * @property {number} [forks] - 🔀 Fork sayısı
- * @property {number} [watchers] - 👁️ İzleyici sayısı
- * @property {string|null} [language] - 💻 Ana programlama dili
- * @property {string} [lastCommit] - ⏰ Son commit tarihi
  */
 export interface Project {
     /** Proje kartının kapak görseli URL'i */
@@ -35,20 +28,6 @@ export interface Project {
     isNew?: boolean;
     /** 🚧 Geliştiriliyor etiketi göster */
     isDeveloping?: boolean;
-    /** 📦 Arşivlendi etiketi göster */
-    isArchived?: boolean;
-    /** 🔒 Private repo etiketi göster (GitHub butonu devre dışı) */
-    isPrivate?: boolean;
-    /** Son commit tarihi (API'den otomatik çekilir) */
-    lastCommit?: string;
-    /** ⭐ GitHub yıldız sayısı (API'den otomatik çekilir) */
-    stars?: number;
-    /** 🔀 GitHub fork sayısı (API'den otomatik çekilir) */
-    forks?: number;
-    /** 💻 Ana programlama dili (API'den otomatik çekilir) */
-    language?: string | null;
-    /** 👁️ GitHub izleyici sayısı (API'den otomatik çekilir) */
-    watchers?: number;
     /** Proje başlığı */
     title: string;
     /** Projenin kısa açıklaması */
@@ -62,6 +41,58 @@ export interface Project {
     /** GitHub repo linki */
     githubLink?: string;
 }
+
+export interface CategoryInfo {
+    name: string;
+    icon: React.ReactNode;
+    gradient: string;
+    description: string;
+}
+
+export const categoryInfo: { [key: string]: CategoryInfo } = {
+    GeoGame: {
+        name: "GeoGame",
+        icon: React.createElement(FaMobile, { className: "text-xl" }),
+        gradient: "from-emerald-500 to-teal-600",
+        description: "Coğrafya öğrenme oyunu - Çoklu platform desteği",
+    },
+    PikaMed: {
+        name: "PikaMed",
+        icon: React.createElement(FaServer, { className: "text-xl" }),
+        gradient: "from-rose-500 to-pink-600",
+        description: "Yapay zeka destekli sağlık takip sistemi",
+    },
+    DiscordStorage: {
+        name: "DiscordStorage",
+        icon: React.createElement(FaDesktop, { className: "text-xl" }),
+        gradient: "from-violet-500 to-purple-600",
+        description: "Discord üzerinden dosya depolama çözümü",
+    },
+    Analytics: {
+        name: "Analytics",
+        icon: React.createElement(FaCode, { className: "text-xl" }),
+        gradient: "from-amber-500 to-orange-600",
+        description: "Web analytics ve izleme servisi",
+    },
+    kısaLink: {
+        name: "kısaLink",
+        icon: React.createElement(FaCode, { className: "text-xl" }),
+        gradient: "from-cyan-500 to-blue-600",
+        description: "Açık kaynak URL kısaltma servisi",
+    },
+    Auth: {
+        name: "Auth",
+        icon: React.createElement(FaServer, { className: "text-xl" }),
+        gradient: "from-indigo-500 to-blue-600",
+        description: "Merkezi kimlik doğrulama sistemi",
+    },
+    EglYillik: {
+        name: "EglYillik",
+        icon: React.createElement(FaGraduationCap, { className: "text-xl" }),
+        gradient: "from-red-500 to-blue-600",
+        description: "Eğitim kurumları için dijital mezuniyet albümü",
+    },
+};
 
 export const projectsByCategory: { [key: string]: Project[] } = {
     GeoGame: [
@@ -190,7 +221,7 @@ export const projectsByCategory: { [key: string]: Project[] } = {
             altText: "KeremKK-Auth",
             title: "KeremKK-Auth - Kullanıcı Girişi",
             description: "Tüm projeler için merkezi bir kimlik doğrulama noktası sağlayan Single Sign-On (SSO) altyapısı.",
-            features: ["Güvenli session yönetimi", "Sosyal login desteği", "Merkezi kullanıcı veritabanı", "Açık kaynak"],
+            features: ["Güvenli session yönetimi", "Merkezi kullanıcı veritabanı"],
             techStack: ["Next.js", "Supabase", "Resend"],
             githubLink: "https://github.com/KeremKuyucu/keremkk-auth",
             viewLink: "/accounts",
@@ -201,13 +232,11 @@ export const projectsByCategory: { [key: string]: Project[] } = {
             imageUrl: "/imgs/projects/egl-yillik.png",
             altText: "EGL-Yillik",
             title: "EGL Yıllık - Dijital Mezuniyet Albümü",
-            description: "Eğitim kurumları için tasarlanmış, çok katmanlı yetkilendirme ve yoğun veri etkileşimi içeren dijital anı platformu.",
+            description: "Mezuniyet heyecanını dijitalleştiren; zaman kilitli Gizli Kasa ve interaktif oylama sistemleriyle zenginleştirilmiş modern yıllık platformu.",
             features: [
-                "Gelişmiş RBAC (Owner'dan User'a 5 seviyeli yetki)",
-                "Resend ile otomatize mail iş akışları",
-                "Dinamik sınıf ve ilerleme istatistikleri",
-                "Gerçek zamanlı veri senkronizasyonu",
-                "Tip güvenli (TypeScript) mimari"
+                "Zaman Ayarlı Gizli Kasa Anı Teknolojisi",
+                "Gelişmiş RBAC (4 Seviyeli Yetkilendirme)",
+                "Resend Entegrasyonlu Bildirim Sistemi"
             ],
             techStack: ["Next.js", "Supabase", "Resend", "Tailwind CSS", "TypeScript"],
             githubLink: "https://github.com/KeremKuyucu/Egl-yillik",

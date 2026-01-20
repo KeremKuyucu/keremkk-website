@@ -72,8 +72,7 @@ export async function GET(request: Request) {
             const response = await fetch(`https://api.github.com/repos/${repo}`, {
                 headers: {
                     'Accept': 'application/vnd.github.v3+json',
-                    // Optional: Add GitHub token for higher rate limits
-                    // 'Authorization': `token ${process.env.GITHUB_TOKEN}`,
+                    ...(process.env.GITHUB_TOKEN && { 'Authorization': `Bearer ${process.env.GITHUB_TOKEN}` }),
                 },
                 next: { revalidate: 3600 } // Cache for 1 hour
             });

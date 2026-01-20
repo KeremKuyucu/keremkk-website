@@ -1,60 +1,10 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import { FaGithub, FaExternalLinkAlt, FaCode, FaServer, FaMobile, FaDesktop, FaCheckCircle, FaLock, FaStar, FaCodeBranch, FaEye, FaGraduationCap } from "react-icons/fa";
+import { FaGithub, FaExternalLinkAlt, FaCode, FaCheckCircle, FaLock, FaStar, FaCodeBranch, FaEye } from "react-icons/fa";
 import { SiFlutter, SiNextdotjs, SiCplusplus, SiDart, SiSupabase, SiFirebase, SiTypescript, SiTailwindcss, SiResend } from "react-icons/si";
-import { projectsByCategory, Project } from "@/app/data/projects";
+import { projectsByCategory, Project, categoryInfo } from "@/app/data/projects";
 
-interface CategoryInfo {
-  name: string;
-  icon: React.ReactNode;
-  gradient: string;
-  description: string;
-}
 
-const categoryInfo: { [key: string]: CategoryInfo } = {
-  GeoGame: {
-    name: "GeoGame",
-    icon: <FaMobile className="text-xl" />,
-    gradient: "from-emerald-500 to-teal-600",
-    description: "Coğrafya öğrenme oyunu - Çoklu platform desteği",
-  },
-  PikaMed: {
-    name: "PikaMed",
-    icon: <FaServer className="text-xl" />,
-    gradient: "from-rose-500 to-pink-600",
-    description: "Yapay zeka destekli sağlık takip sistemi",
-  },
-  DiscordStorage: {
-    name: "DiscordStorage",
-    icon: <FaDesktop className="text-xl" />,
-    gradient: "from-violet-500 to-purple-600",
-    description: "Discord üzerinden dosya depolama çözümü",
-  },
-  Analytics: {
-    name: "Analytics",
-    icon: <FaCode className="text-xl" />,
-    gradient: "from-amber-500 to-orange-600",
-    description: "Web analytics ve izleme servisi",
-  },
-  kısaLink: {
-    name: "kısaLink",
-    icon: <FaCode className="text-xl" />,
-    gradient: "from-cyan-500 to-blue-600",
-    description: "Açık kaynak URL kısaltma servisi",
-  },
-  Auth: {
-    name: "Auth",
-    icon: <FaServer className="text-xl" />,
-    gradient: "from-indigo-500 to-blue-600",
-    description: "Merkezi kimlik doğrulama sistemi",
-  },
-  EglYillik: {
-    name: "EglYillik",
-    icon: <FaGraduationCap className="text-xl" />,
-    gradient: "from-red-500 to-blue-600",
-    description: "Eğitim kurumları için dijital mezuniyet albümü",
-  },
-};
 
 const fallbackImage = "/imgs/errorimage.jpg";
 
@@ -73,7 +23,19 @@ const getTechIcon = (tech: string) => {
   return iconMap[tech] || <FaCode className="text-gray-500" />;
 };
 
-const ProjectCard: React.FC<Project & { index: number; categoryGradient: string }> = ({
+type ProjectCardProps = Project & {
+  index: number;
+  categoryGradient: string;
+  isArchived?: boolean;
+  isPrivate?: boolean;
+  lastCommit?: string;
+  stars?: number;
+  forks?: number;
+  language?: string | null;
+  watchers?: number;
+};
+
+const ProjectCard: React.FC<ProjectCardProps> = ({
   imageUrl,
   altText,
   isNew,
@@ -175,7 +137,7 @@ const ProjectCard: React.FC<Project & { index: number; categoryGradient: string 
         </h3>
 
         {description && (
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
+          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
             {description}
           </p>
         )}
@@ -350,8 +312,12 @@ const ProjelerSection: React.FC = () => {
   const getGithubDataForProject = (githubLink?: string) => {
     if (!githubLink) return { lastCommit: undefined, isArchived: undefined, stars: undefined, forks: undefined, language: undefined, isPrivate: undefined, watchers: undefined };
     const repoName = extractRepoName(githubLink);
-    if (!repoName || !githubData[repoName]) return { lastCommit: undefined, isArchived: undefined, stars: undefined, forks: undefined, language: undefined, isPrivate: undefined, watchers: undefined };
-    return githubData[repoName];
+
+    if (repoName && githubData[repoName]) {
+      return githubData[repoName];
+    }
+
+    return { lastCommit: undefined, isArchived: undefined, stars: undefined, forks: undefined, language: undefined, isPrivate: undefined, watchers: undefined };
   };
 
   return (
@@ -426,13 +392,13 @@ const ProjelerSection: React.FC = () => {
                 >
                   <ProjectCard
                     {...project}
-                    lastCommit={ghData.lastCommit || project.lastCommit}
-                    isArchived={ghData.isArchived ?? project.isArchived}
-                    isPrivate={ghData.isPrivate ?? project.isPrivate}
-                    stars={ghData.stars ?? project.stars}
-                    forks={ghData.forks ?? project.forks}
-                    language={ghData.language ?? project.language}
-                    watchers={ghData.watchers ?? project.watchers}
+                    lastCommit={ghData.lastCommit}
+                    isArchived={ghData.isArchived}
+                    isPrivate={ghData.isPrivate}
+                    stars={ghData.stars}
+                    forks={ghData.forks}
+                    language={ghData.language}
+                    watchers={ghData.watchers}
                     index={index}
                     categoryGradient={categoryInfo[activeCategory]?.gradient || "from-gray-500 to-gray-600"}
                   />
