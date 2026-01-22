@@ -50,6 +50,19 @@ function getRelativeTime(dateString: string): string {
 }
 
 export async function GET(request: Request) {
+    // Site dışından erişimi engelle
+    const origin = request.headers.get('origin');
+    const referer = request.headers.get('referer');
+    const host = request.headers.get('host') || '';
+
+    const isAllowed =
+        (!origin || origin.includes(host)) &&
+        (!referer || referer.includes(host));
+
+    if (!isAllowed) {
+        return NextResponse.json({ error: 'Unauthorized access' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const repos = searchParams.get('repos');
 
