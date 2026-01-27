@@ -31,15 +31,6 @@ export default function SyncPage() {
     const [ttlMinutes, setTtlMinutes] = useState(600);
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
-    // --- 1. SERVER AUTH HELPER ---
-    const hashPassword = async (pwd: string) => {
-        const enc = new TextEncoder();
-        const hash = await window.crypto.subtle.digest("SHA-256", enc.encode(pwd));
-        return Array.from(new Uint8Array(hash))
-            .map(b => b.toString(16).padStart(2, '0'))
-            .join('');
-    };
-
     // --- 2. CLIENT ENCRYPTION HELPERS ---
     const deriveKey = async (password: string) => {
         const enc = new TextEncoder();
@@ -252,13 +243,6 @@ export default function SyncPage() {
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-    // UI HELPER: Hash Display for Setup
-    const [setupHash, setSetupHash] = useState("");
-    useEffect(() => {
-        if (serverPassword && !isAuthenticated) hashPassword(serverPassword).then(setSetupHash);
-    }, [serverPassword, isAuthenticated]);
-
-
     const ttlOptions = [
         { label: "1 Dakika", value: 60 },
         { label: "5 Dakika", value: 300 },
@@ -313,9 +297,7 @@ export default function SyncPage() {
                             placeholder="Erişim Şifresi..."
                             autoFocus
                         />
-                        {/* {serverPassword && (
-                            <p className="text-[10px] text-gray-400 font-mono break-all text-center">Setup Key: {setupHash}</p>
-                        )} */}
+
                         <button
                             type="submit"
                             disabled={isLoading}
