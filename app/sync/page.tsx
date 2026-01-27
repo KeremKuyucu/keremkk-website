@@ -116,12 +116,10 @@ export default function SyncPage() {
         setStatus("");
 
         try {
-            const authHash = await hashPassword(serverPassword);
-
             // 1. Get Session Token
             const resAuth = await fetch(`/api/sync/auth`, {
                 method: "POST",
-                headers: { 'x-sync-password': authHash }
+                headers: { 'x-sync-password': serverPassword }
             });
 
             if (resAuth.ok) {
@@ -135,7 +133,7 @@ export default function SyncPage() {
                 if (resData.ok) {
                     const data = await resData.json();
                     setIsAuthenticated(true);
-                    setAuthToken(token); // Store Session Token, not Password Hash
+                    setAuthToken(token);
                     setMessages(data.messages || []);
                     setServerPassword("");
                 } else {
