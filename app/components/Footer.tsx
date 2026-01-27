@@ -168,9 +168,9 @@ const FooterComponent: React.FC = () => {
         {/* Footer Bottom */}
         <div className="mt-16 pt-8 border-t border-gray-200/50 dark:border-gray-800/50 flex flex-col md:flex-row items-center justify-between gap-6 bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm rounded-3xl p-6">
           <div className="flex flex-col md:flex-row items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400">
-            <span>© {new Date().getFullYear()} Kerem Kuyucu.</span>
+            <span className="bg-gradient-to-r from-red-500 to-blue-500 bg-clip-text text-transparent font-bold">Made by Kerem Kuyucu</span>
             <span className="hidden md:inline">|</span>
-            <span>Tüm hakları saklıdır.</span>
+            <span className="bg-gradient-to-r from-violet-500 to-fuchsia-500 bg-clip-text text-transparent font-bold">With love ❤️</span>
           </div>
 
           <div className="flex items-center gap-6">
