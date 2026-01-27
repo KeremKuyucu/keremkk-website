@@ -1,7 +1,9 @@
 "use client";
+import Link from "next/link";
 import Image from "next/image";
 import profilePic from "../../../public/imgs/1758910751670.jpg";
 import { FaAward, FaCode } from "react-icons/fa";
+import { socialLinks } from "../Footer";
 
 const AboutHero: React.FC = () => {
     return (
@@ -14,20 +16,45 @@ const AboutHero: React.FC = () => {
             <div className="container mx-auto max-w-6xl relative z-10">
                 <div className="flex flex-col md:flex-row items-center gap-12 md:gap-20">
                     {/* Profile Image with Ring */}
-                    <div className="relative group shrink-0 scroll-reveal">
-                        <div className="absolute -inset-1 bg-gradient-to-br from-blue-500 to-violet-600 rounded-full opacity-75 blur transition duration-500 group-hover:opacity-100" />
-                        <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden border-4 border-white dark:border-gray-900 shadow-2xl">
-                            <Image
-                                src={profilePic}
-                                alt="Kerem Kuyucu"
-                                layout="fill"
-                                objectFit="cover"
-                                priority
-                                className="transition-transform duration-500 group-hover:scale-110"
-                            />
+                    <div className="flex flex-col items-center gap-6 relative group shrink-0 scroll-reveal">
+                        <div className="relative">
+                            <div className="absolute -inset-1 bg-gradient-to-br from-blue-500 to-violet-600 rounded-full opacity-75 blur transition duration-500 group-hover:opacity-100" />
+                            <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden border-4 border-white dark:border-gray-900 shadow-2xl">
+                                <Image
+                                    src={profilePic}
+                                    alt="Kerem Kuyucu"
+                                    layout="fill"
+                                    objectFit="cover"
+                                    priority
+                                    className="transition-transform duration-500 group-hover:scale-110"
+                                />
+                            </div>
+                            <div className="absolute bottom-4 right-4 bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg text-2xl animate-bounce">
+                                👋
+                            </div>
                         </div>
-                        <div className="absolute bottom-4 right-4 bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg text-2xl animate-bounce">
-                            👋
+
+                        {/* Social Links under Profile Pic */}
+                        <div className="flex flex-wrap gap-3 justify-center">
+                            {socialLinks.map((link) => (
+                                <a
+                                    key={link.label}
+                                    href={link.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`group/btn relative p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-transparent transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${link.shadow ? `hover:${link.shadow}` : ''}`}
+                                    aria-label={link.label}
+                                >
+                                    <div className={`absolute inset-0 rounded-xl bg-gradient-to-tr ${link.color} opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300`} />
+                                    <div className="relative z-10 text-gray-500 dark:text-gray-400 group-hover/btn:text-white transition-colors duration-300 text-lg">
+                                        {link.icon}
+                                    </div>
+                                    {/* Simple Tooltip */}
+                                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-[10px] rounded opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                                        {link.label}
+                                    </span>
+                                </a>
+                            ))}
                         </div>
                     </div>
 

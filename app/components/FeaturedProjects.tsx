@@ -27,7 +27,7 @@ const featuredProjects = [
 
 const FeaturedProjects: React.FC = () => {
     return (
-        <section className="py-20 px-6 scroll-reveal" id="projeler">
+        <section className="py-20 px-6 scroll-reveal" id="projects">
             <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900 dark:text-white">

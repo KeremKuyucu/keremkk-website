@@ -1,13 +1,13 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FaHome, FaUser, FaCode, FaEnvelope } from "react-icons/fa";
+import { FaHome, FaUser, FaCode, FaFileAlt } from "react-icons/fa";
 
 const navLinks = [
   { href: "/", label: "Ana Sayfa", icon: FaHome },
   { href: "/about", label: "Hakkımda", icon: FaUser },
-  { href: "/#projeler", label: "Projeler", icon: FaCode },
-  { href: "/#iletisim", label: "İletişim", icon: FaEnvelope },
+  { href: "/#projects", label: "Projects", icon: FaCode },
+  { href: "/cv", label: "CV", icon: FaFileAlt },
 ];
 
 const Navbar = () => {
@@ -35,8 +35,8 @@ const Navbar = () => {
                 key={link.href}
                 href={link.href}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${isActive
-                    ? "bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
+                  ? "bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`}
               >
                 <link.icon className="text-sm" />

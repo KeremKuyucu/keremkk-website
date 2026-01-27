@@ -28,6 +28,8 @@ export interface Project {
     isNew?: boolean;
     /** 🚧 Geliştiriliyor etiketi göster */
     isDeveloping?: boolean;
+    /** 🔒 Gizli proje etiketi */
+    isPrivate?: boolean;
     /** Proje başlığı */
     title: string;
     /** Projenin kısa açıklaması */
@@ -242,6 +244,7 @@ export const projectsByCategory: { [key: string]: Project[] } = {
             githubLink: "https://github.com/KeremKuyucu/Egl-yillik",
             isNew: true,
             isDeveloping: true,
+            isPrivate: true,
         }
     ]
 };

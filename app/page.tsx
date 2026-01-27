@@ -27,7 +27,19 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="overflow-x-hidden">
+    <main className="relative overflow-x-hidden min-h-screen">
+      {/* Global Ambient Background Lights */}
+      <div className="fixed inset-0 -z-50 pointer-events-none overflow-hidden">
+        {/* Top Right - Violet Glow */}
+        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-violet-600/10 dark:bg-violet-900/20 blur-[120px] mix-blend-screen" />
+
+        {/* Bottom Left - Cyan/Blue Glow */}
+        <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full bg-cyan-500/10 dark:bg-blue-900/20 blur-[130px] mix-blend-screen" />
+
+        {/* Center - Gentle Warmth */}
+        <div className="absolute top-[40%] left-[30%] w-[400px] h-[400px] rounded-full bg-fuchsia-500/5 dark:bg-fuchsia-900/10 blur-[100px] mix-blend-screen opacity-50" />
+      </div>
+
       <Navbar />
       <HeroSection />
       <TechStackSection />

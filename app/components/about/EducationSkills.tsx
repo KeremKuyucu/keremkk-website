@@ -53,7 +53,7 @@ const EducationSkills: React.FC = () => {
             {/* Skills */}
             <div className="scroll-reveal delay-200">
                 <h3 className="flex items-center gap-2 text-2xl font-bold mb-6 text-gray-900 dark:text-white">
-                    <FaCode className="text-violet-600" /> Yetenekler
+                    <FaCode className="text-violet-600" /> Kullandığım Teknolojiler
                 </h3>
                 <div className="grid grid-cols-2 gap-3">
                     {skills.map((skill) => (
@@ -71,7 +71,7 @@ const EducationSkills: React.FC = () => {
 
                 {/* CV Download */}
                 <a
-                    href="/cv.pdf"
+                    href="/cv"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group mt-6 flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:border-violet-500 dark:hover:border-violet-500 shadow-sm hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-300"

@@ -24,6 +24,11 @@
       "source": "/egl-yillik",
       "destination": "#",
       "permanent": true
+    },
+    {
+      "source": "/cv",
+      "destination": "https://drive.google.com/file/d/1dIjvsQUGXMCnezVphGVeX48fAqUCR_oC/view",
+      "permanent": true
     }
   ]
 }

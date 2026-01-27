@@ -394,7 +394,7 @@ const ProjelerSection: React.FC = () => {
                     {...project}
                     lastCommit={ghData.lastCommit}
                     isArchived={ghData.isArchived}
-                    isPrivate={ghData.isPrivate}
+                    isPrivate={ghData.isPrivate ?? project.isPrivate}
                     stars={ghData.stars}
                     forks={ghData.forks}
                     language={ghData.language}

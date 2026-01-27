@@ -15,6 +15,7 @@
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@iconify/react": "^5.2.1",
     "@vercel/analytics": "^1.6.1",
+    "@vercel/kv": "^3.0.0",
     "fontawesome": "^5.6.3",
     "lucide-react": "^0.501.0",
     "next": "15.3.8",
