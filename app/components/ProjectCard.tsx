@@ -2,8 +2,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FaGithub, FaExternalLinkAlt, FaCode, FaCheckCircle, FaLock, FaStar, FaCodeBranch, FaEye } from "react-icons/fa";
 import { SiFlutter, SiNextdotjs, SiCplusplus, SiDart, SiSupabase, SiFirebase, SiTypescript, SiTailwindcss, SiResend } from "react-icons/si";
-import { projectsByCategory, Project, categoryInfo } from "@/app/data/projects";
-
+import { projectsByCategory, categoryInfo } from "@/app/data/projects";
+import { Project } from "@/app/types";
 
 
 const fallbackImage = "/imgs/errorimage.jpg";

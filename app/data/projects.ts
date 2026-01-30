@@ -2,54 +2,8 @@
 import React from 'react';
 import { FaMobile, FaServer, FaDesktop, FaCode, FaGraduationCap } from 'react-icons/fa';
 
-/**
- * Proje kartı için kullanılan veri yapısı
- * 
- * ## Temel Bilgiler
- * @property {string} imageUrl - Proje kartının kapak görseli URL'i (örn: "/imgs/projects/geogame.png")
- * @property {string} altText - Görsel yüklenemezse gösterilen alternatif metin
- * @property {string} title - Proje başlığı, gradient renkli olarak gösterilir
- * @property {string} [description] - Projenin kısa açıklaması (2 satırla sınırlı)
- * @property {string[]} features - Projenin özellik listesi, ✅ ikonuyla gösterilir (max 3 tanesi)
- * @property {string[]} [techStack] - Kullanılan teknolojiler (Flutter, Next.js vb.) ikonlarıyla gösterilir
- * @property {string} [viewLink] - "Görüntüle" butonunun yönlendireceği URL
- * @property {string} [githubLink] - GitHub repo linki
- * 
- * ## Etiketler (Badges)
- * @property {boolean} [isNew] - ✨ Yeni etiketi (turuncu, yanıp sönen)
- * @property {boolean} [isDeveloping] - 🚧 Geliştiriliyor etiketi (mavi)
- */
-export interface Project {
-    /** Proje kartının kapak görseli URL'i */
-    imageUrl: string;
-    /** Görsel yüklenemezse gösterilen alternatif metin */
-    altText: string;
-    /** ✨ Yeni etiketi göster */
-    isNew?: boolean;
-    /** 🚧 Geliştiriliyor etiketi göster */
-    isDeveloping?: boolean;
-    /** 🔒 Gizli proje etiketi */
-    isPrivate?: boolean;
-    /** Proje başlığı */
-    title: string;
-    /** Projenin kısa açıklaması */
-    description?: string;
-    /** Projenin özellik listesi (max 3 tanesi gösterilir) */
-    features: string[];
-    /** Kullanılan teknolojiler */
-    techStack?: string[];
-    /** "Görüntüle" butonunun yönlendireceği URL */
-    viewLink?: string;
-    /** GitHub repo linki */
-    githubLink?: string;
-}
 
-export interface CategoryInfo {
-    name: string;
-    icon: React.ReactNode;
-    gradient: string;
-    description: string;
-}
+import { Project, CategoryInfo } from '../types';
 
 export const categoryInfo: { [key: string]: CategoryInfo } = {
     GeoGame: {
@@ -106,7 +60,7 @@ export const projectsByCategory: { [key: string]: Project[] } = {
             features: ["Cross-platform mimari", "Gelişmiş state yönetimi", "Modern UI/UX", "Açık kaynak"],
             techStack: ["Flutter", "Dart", "Supabase"],
             githubLink: "https://github.com/KeremKuyucu/GeoGame",
-            viewLink: "/geogame",
+            viewLink: "/r/geogame",
         },
         {
             imageUrl: "/imgs/projects/geogamecpp.png",
@@ -226,7 +180,7 @@ export const projectsByCategory: { [key: string]: Project[] } = {
             features: ["Güvenli session yönetimi", "Merkezi kullanıcı veritabanı"],
             techStack: ["Next.js", "Supabase", "Resend"],
             githubLink: "https://github.com/KeremKuyucu/keremkk-auth",
-            viewLink: "/accounts",
+            viewLink: "/r/accounts",
         }
     ],
     EglYillik: [
@@ -243,11 +197,39 @@ export const projectsByCategory: { [key: string]: Project[] } = {
             techStack: ["Next.js", "Supabase", "Resend", "Tailwind CSS", "TypeScript"],
             githubLink: "https://github.com/KeremKuyucu/Egl-yillik",
             isNew: true,
-            isDeveloping: true,
-            isPrivate: true,
+            isDeveloping: true
         }
     ]
 };
+export const featuredProjects = [
+    {
+        title: "GeoGame",
+        description: "Coğrafya öğrenmeyi eğlenceli hale getiren çoklu platform oyunu",
+        tags: ["Flutter", "C++", "Next.js"],
+        gradient: "from-emerald-500 to-teal-600",
+        link: "/r/geogame",
+    },
+    {
+        title: "PikaMed",
+        description: "Yapay zeka destekli sağlık takip sistemi",
+        tags: ["Flutter", "Next.js", "AI"],
+        gradient: "from-rose-500 to-pink-600",
+        link: "/r/pikamed",
+    },
+    {
+        title: "DiscordStorage",
+        description: "Discord üzerinden dosya depolama çözümü",
+        tags: ["C++", "Flutter", "Dart"],
+        gradient: "from-violet-500 to-purple-600",
+        link: "/r/discordstorage",
+    },
+    {
+        title: "EGL Yıllık",
+        description: "Mezuniyet heyecanını dijitalleştiren; zaman kilitli Gizli Kasa ve interaktif oylama sistemleriyle zenginleştirilmiş modern yıllık platformu.",
+        tags: ["Next.js", "Supabase", "Resend", "Tailwind CSS", "TypeScript"],
+        gradient: "from-violet-500 to-purple-600"
+    },
+];
 
 // Helper functions for dynamic stats
 export const getTotalProjectCount = (): number => {

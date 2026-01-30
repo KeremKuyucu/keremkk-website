@@ -1,12 +1,6 @@
 import { SiFlutter, SiNextdotjs, SiTypescript, SiCplusplus, SiDart, SiSupabase, SiFirebase, SiVercel } from "react-icons/si";
-import { IconType } from "react-icons";
+import { Skill } from '../types';
 
-export interface Skill {
-    name: string;
-    icon: IconType;
-    iconifyIcon: string; // For Iconify usage
-    color: string;
-}
 
 export const skills: Skill[] = [
     { name: "Flutter", icon: SiFlutter, iconifyIcon: "logos:flutter", color: "#02569B" },
