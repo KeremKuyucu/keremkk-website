@@ -7,7 +7,7 @@ const navLinks = [
   { href: "/", label: "Ana Sayfa", icon: FaHome },
   { href: "/about", label: "Hakkımda", icon: FaUser },
   { href: "/#projects", label: "Projects", icon: FaCode },
-  { href: "/r/cv", label: "CV", icon: FaFileAlt },
+  { href: "/cv", label: "CV", icon: FaFileAlt },
 ];
 
 const Navbar = () => {
