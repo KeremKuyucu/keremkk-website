@@ -71,7 +71,7 @@ const EducationSkills: React.FC = () => {
 
                 {/* CV Download */}
                 <a
-                    href="/r/cv"
+                    href="/cv"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group mt-6 flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:border-violet-500 dark:hover:border-violet-500 shadow-sm hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-300"
