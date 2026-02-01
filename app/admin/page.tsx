@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { FaLock, FaStickyNote, FaLink, FaSignOutAlt } from "react-icons/fa";
 import NotesManager from "@/app/components/admin/NotesManager";
-import LinksManager from "@/app/components/admin/LinksManager";
 
 export default function AdminPage() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -137,7 +136,6 @@ export default function AdminPage() {
                 {/* Content Area */}
                 <div className="flex-1">
                     {activeTab === "notes" && <NotesManager authToken={authToken!} />}
-                    {activeTab === "links" && <LinksManager authToken={authToken!} />}
                 </div>
             </div>
         </div>
