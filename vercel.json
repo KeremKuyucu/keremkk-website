@@ -1,0 +1,34 @@
+{
+  "redirects": [
+    {
+      "source": "/geogame",
+      "destination": "https://geogame.keremkk.com.tr",
+      "permanent": true
+    },
+    {
+      "source": "/pikamed",
+      "destination": "https://pikamed.keremkk.com.tr",
+      "permanent": true
+    },
+    {
+      "source": "/discordstorage",
+      "destination": "https://github.com/KeremKuyucu/discordstorage",
+      "permanent": true
+    },
+    {
+      "source": "/accounts",
+      "destination": "https://accounts.keremkk.com.tr",
+      "permanent": true
+    },
+    {
+      "source": "/egl-yillik",
+      "destination": "#",
+      "permanent": true
+    },
+    {
+      "source": "/cv",
+      "destination": "https://drive.google.com/file/d/1dIjvsQUGXMCnezVphGVeX48fAqUCR_oC/view",
+      "permanent": true
+    }
+  ]
+}
