@@ -60,7 +60,7 @@ export const projectsByCategory: { [key: string]: Project[] } = {
             features: ["Cross-platform mimari", "Gelişmiş state yönetimi", "Modern UI/UX", "Açık kaynak"],
             techStack: ["Flutter", "Dart", "Supabase"],
             githubLink: "https://github.com/KeremKuyucu/GeoGame",
-            viewLink: "/r/geogame",
+            viewLink: "/geogame",
         },
         {
             imageUrl: "/imgs/projects/geogamecpp.png",
@@ -180,7 +180,7 @@ export const projectsByCategory: { [key: string]: Project[] } = {
             features: ["Güvenli session yönetimi", "Merkezi kullanıcı veritabanı"],
             techStack: ["Next.js", "Supabase", "Resend"],
             githubLink: "https://github.com/KeremKuyucu/keremkk-auth",
-            viewLink: "/r/accounts",
+            viewLink: "/accounts",
         }
     ],
     EglYillik: [
@@ -207,21 +207,21 @@ export const featuredProjects = [
         description: "Coğrafya öğrenmeyi eğlenceli hale getiren çoklu platform oyunu",
         tags: ["Flutter", "C++", "Next.js"],
         gradient: "from-emerald-500 to-teal-600",
-        link: "/r/geogame",
+        link: "/geogame",
     },
     {
         title: "PikaMed",
         description: "Yapay zeka destekli sağlık takip sistemi",
         tags: ["Flutter", "Next.js", "AI"],
         gradient: "from-rose-500 to-pink-600",
-        link: "/r/pikamed",
+        link: "/pikamed",
     },
     {
         title: "DiscordStorage",
         description: "Discord üzerinden dosya depolama çözümü",
         tags: ["C++", "Flutter", "Dart"],
         gradient: "from-violet-500 to-purple-600",
-        link: "/r/discordstorage",
+        link: "/discordstorage",
     },
     {
         title: "EGL Yıllık",
