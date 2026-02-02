@@ -17,7 +17,7 @@ import { FaSignalMessenger } from "react-icons/fa6";
 
 export const socialLinks = [
   {
-    href: "mailto:contact@keremkk.com.tr",
+    href: "/email",
     label: "E-posta",
     icon: <FaEnvelope />,
     color: "from-blue-500 to-cyan-500",
@@ -25,28 +25,28 @@ export const socialLinks = [
     isMailto: true,
   },
   {
-    href: "https://github.com/KeremKuyucu",
+    href: "/github",
     label: "GitHub",
     icon: <FaGithub />,
     color: "from-gray-700 to-black dark:from-gray-600 dark:to-gray-900",
     shadow: "shadow-gray-500/20",
   },
   {
-    href: "https://discord.com/users/483678328646270996",
+    href: "/discord",
     label: "Discord",
     icon: <FaDiscord />,
     color: "from-indigo-500 to-violet-500",
     shadow: "shadow-indigo-500/20",
   },
   {
-    href: "https://www.linkedin.com/in/kerem-kuyucu/",
+    href: "/linkedin",
     label: "LinkedIn",
     icon: <FaLinkedin />,
     color: "from-blue-600 to-indigo-600",
     shadow: "shadow-blue-600/20",
   },
   {
-    href: "https://signal.me/#eu/ARcpLe2E-_qPXnH6-I26hgbYj_Qco2bpvsoBu7Be67wvl5fAzPxLWIMrJulQBptb",
+    href: "/signal",
     label: "Signal",
     icon: <FaSignalMessenger />,
     color: "from-sky-500 to-blue-500",

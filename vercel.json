@@ -29,6 +29,31 @@
       "source": "/cv",
       "destination": "https://drive.google.com/file/d/1dIjvsQUGXMCnezVphGVeX48fAqUCR_oC/view",
       "permanent": true
+    },
+    {
+      "source": "/github",
+      "destination": "https://github.com/KeremKuyucu",
+      "permanent": true
+    },
+    {
+      "source": "/linkedin",
+      "destination": "https://www.linkedin.com/in/kerem-kuyucu/",
+      "permanent": true
+    },
+    {
+      "source": "/signal",
+      "destination": "https://signal.me/#eu/ARcpLe2E-_qPXnH6-I26hgbYj_Qco2bpvsoBu7Be67wvl5fAzPxLWIMrJulQBptb",
+      "permanent": true
+    },
+    {
+      "source": "/discord",
+      "destination": "https://discord.com/users/483678328646270996",
+      "permanent": true
+    },
+    {
+      "source": "/email",
+      "destination": "mailto:contact@keremkk.com.tr",
+      "permanent": true
     }
   ]
 }
