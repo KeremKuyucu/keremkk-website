@@ -117,12 +117,6 @@ export default function AdminPage() {
                         >
                             <FaStickyNote /> Notlar
                         </button>
-                        <button
-                            onClick={() => setActiveTab("links")}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === "links" ? "bg-white dark:bg-zinc-700 shadow-sm text-gray-900 dark:text-white" : "text-gray-500 hover:text-gray-900 dark:hover:text-gray-300"}`}
-                        >
-                            <FaLink /> Linkler
-                        </button>
                     </div>
 
                     <button

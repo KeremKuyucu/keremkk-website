@@ -5,7 +5,7 @@ import FooterComponent from "@/app/components/Footer";
 import HeroSection from "@/app/components/HeroSection";
 import TechStackSection from "@/app/components/TechStackSection";
 import FeaturedProjects from "@/app/components/FeaturedProjects";
-import ProjelerSection from "./components/ProjectCard";
+import ProjelerSection from "@/app/components/ProjectCard";
 
 export default function Home() {
   useEffect(() => {
