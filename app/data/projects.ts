@@ -205,14 +205,14 @@ export const featuredProjects = [
     {
         title: "GeoGame",
         description: "Coğrafya öğrenmeyi eğlenceli hale getiren çoklu platform oyunu",
-        tags: ["Flutter", "C++", "Next.js"],
+        tags: ["Flutter", "Dart", "Supabase"],
         gradient: "from-emerald-500 to-teal-600",
         link: "/geogame",
     },
     {
         title: "PikaMed",
         description: "Yapay zeka destekli sağlık takip sistemi",
-        tags: ["Flutter", "Next.js", "AI"],
+        tags: ["Flutter", "Next.js", "AI", "NoSQL", "Firebase Auth"],
         gradient: "from-rose-500 to-pink-600",
         link: "/pikamed",
     },

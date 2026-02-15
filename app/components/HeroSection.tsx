@@ -1,8 +1,9 @@
 "use client";
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { FaGithub, FaCode, FaRocket, FaTerminal } from "react-icons/fa";
 import { roles, skills } from "@/app/data/skills";
 import { getTotalProjectCount, getYearsOfExperience } from "@/app/data/projects";
+import Lightning from "@/app/components/Lightning";
 
 const particles = [
     { left: 5, top: 10, delay: 0, duration: 6 },
@@ -28,12 +29,10 @@ const particles = [
 ];
 
 const HeroSection: React.FC = () => {
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [isLoaded, setIsLoaded] = useState(false);
     const [currentRole, setCurrentRole] = useState(0);
     const [displayText, setDisplayText] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
-    const heroRef = useRef<HTMLDivElement>(null);
 
     // Dynamic stats calculated from actual data
     const stats = useMemo(() => [
@@ -44,19 +43,6 @@ const HeroSection: React.FC = () => {
 
     useEffect(() => {
         setIsLoaded(true);
-
-        const handleMouseMove = (e: MouseEvent) => {
-            if (heroRef.current) {
-                const rect = heroRef.current.getBoundingClientRect();
-                setMousePosition({
-                    x: ((e.clientX - rect.left) / rect.width - 0.5) * 30,
-                    y: ((e.clientY - rect.top) / rect.height - 0.5) * 30,
-                });
-            }
-        };
-
-        window.addEventListener("mousemove", handleMouseMove);
-        return () => window.removeEventListener("mousemove", handleMouseMove);
     }, []);
 
     // Typing animation
@@ -84,40 +70,15 @@ const HeroSection: React.FC = () => {
 
     return (
         <header
-            ref={heroRef}
-            className="relative min-h-screen w-full overflow-hidden flex items-center justify-center"
+            className="relative min-h-screen w-full overflow-hidden flex items-center justify-center bg-gradient-to-b from-black/80 via-black/50 to-transparent"
         >
-            {/* Animated Background Gradient Orbs */}
-            <div
-                className="absolute w-[500px] h-[500px] rounded-full opacity-30 blur-[100px] transition-transform duration-1000 ease-out"
-                style={{
-                    background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)",
-                    left: "10%",
-                    top: "20%",
-                    transform: `translate(${mousePosition.x * 0.5}px, ${mousePosition.y * 0.5}px)`,
-                }}
-            />
-            <div
-                className="absolute w-[400px] h-[400px] rounded-full opacity-25 blur-[80px] transition-transform duration-1000 ease-out"
-                style={{
-                    background: "linear-gradient(135deg, #06b6d4 0%, #0ea5e9 50%, #3b82f6 100%)",
-                    right: "10%",
-                    bottom: "30%",
-                    transform: `translate(${-mousePosition.x * 0.3}px, ${-mousePosition.y * 0.3}px)`,
-                }}
-            />
-            <div
-                className="absolute w-[300px] h-[300px] rounded-full opacity-20 blur-[60px] transition-transform duration-1000 ease-out"
-                style={{
-                    background: "linear-gradient(135deg, #f43f5e 0%, #ec4899 100%)",
-                    right: "30%",
-                    top: "10%",
-                    transform: `translate(${mousePosition.x * 0.2}px, ${-mousePosition.y * 0.4}px)`,
-                }}
-            />
+            {/* Lightning Background */}
+            <div className="absolute inset-0 z-0 [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]">
+                <Lightning hue={270} speed={0.5} intensity={1.5} />
+            </div>
 
             {/* Floating Particles */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none z-10 [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]">
                 {particles.map((particle, i) => (
                     <div
                         key={i}
@@ -134,7 +95,7 @@ const HeroSection: React.FC = () => {
 
             {/* Grid Pattern Overlay */}
             <div
-                className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+                className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] z-10"
                 style={{
                     backgroundImage: `linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)`,
                     backgroundSize: "50px 50px",
@@ -142,7 +103,7 @@ const HeroSection: React.FC = () => {
             />
 
             {/* Main Hero Content */}
-            <div className={`relative z-10 text-center px-6 max-w-5xl mx-auto transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <div className={`relative z-20 text-center px-6 max-w-5xl mx-auto transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
                 {/* Greeting Badge */}
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/20 backdrop-blur-sm mb-8">
                     <span className="relative flex h-2 w-2">
