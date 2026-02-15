@@ -1,7 +1,31 @@
 "use client";
 import { useState } from "react";
-import { FaLock, FaStickyNote, FaLink, FaSignOutAlt } from "react-icons/fa";
+import { FaLock, FaStickyNote, FaSignOutAlt } from "react-icons/fa";
 import NotesManager from "@/app/components/admin/NotesManager";
+
+// --- Admin Modules Configuration ---
+interface AdminModule {
+    id: string;
+    label: string;
+    icon: React.ElementType;
+    component: React.ElementType<{ authToken: string }>;
+}
+
+const MODULES: AdminModule[] = [
+    {
+        id: "notes",
+        label: "Notlar",
+        icon: FaStickyNote,
+        component: NotesManager
+    },
+    // Yeni modüller buraya eklenebilir. Örnek:
+    // {
+    //     id: "links",
+    //     label: "Linkler",
+    //     icon: FaLink,
+    //     component: LinksManager
+    // }
+];
 
 export default function AdminPage() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -9,7 +33,9 @@ export default function AdminPage() {
     const [authToken, setAuthToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
-    const [activeTab, setActiveTab] = useState<"notes" | "links">("notes");
+
+    // Varsayılan olarak ilk modülü seç
+    const [activeTab, setActiveTab] = useState<string>(MODULES[0].id);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -42,7 +68,7 @@ export default function AdminPage() {
     const handleLogout = () => {
         setAuthToken(null);
         setIsAuthenticated(false);
-        setActiveTab("notes");
+        setActiveTab(MODULES[0].id);
     };
 
     // --- Render Login ---
@@ -90,6 +116,8 @@ export default function AdminPage() {
         );
     }
 
+    const ActiveComponent = MODULES.find(m => m.id === activeTab)?.component || MODULES[0].component;
+
     // --- Render Dashboard ---
     return (
         <div className="min-h-screen bg-[#fafafa] dark:bg-black font-sans text-gray-900 dark:text-gray-100 flex flex-col">
@@ -110,13 +138,19 @@ export default function AdminPage() {
                         </div>
                     </div>
 
-                    <div className="flex items-center bg-gray-100 dark:bg-zinc-800 rounded-xl p-1">
-                        <button
-                            onClick={() => setActiveTab("notes")}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === "notes" ? "bg-white dark:bg-zinc-700 shadow-sm text-gray-900 dark:text-white" : "text-gray-500 hover:text-gray-900 dark:hover:text-gray-300"}`}
-                        >
-                            <FaStickyNote /> Notlar
-                        </button>
+                    <div className="flex flex-wrap items-center gap-2 bg-gray-100 dark:bg-zinc-800 rounded-xl p-1 overflow-x-auto max-w-full">
+                        {MODULES.map((module) => (
+                            <button
+                                key={module.id}
+                                onClick={() => setActiveTab(module.id)}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${activeTab === module.id
+                                    ? "bg-white dark:bg-zinc-700 shadow-sm text-gray-900 dark:text-white"
+                                    : "text-gray-500 hover:text-gray-900 dark:hover:text-gray-300"
+                                    }`}
+                            >
+                                <module.icon /> {module.label}
+                            </button>
+                        ))}
                     </div>
 
                     <button
@@ -129,7 +163,7 @@ export default function AdminPage() {
 
                 {/* Content Area */}
                 <div className="flex-1">
-                    {activeTab === "notes" && <NotesManager authToken={authToken!} />}
+                    <ActiveComponent authToken={authToken!} />
                 </div>
             </div>
         </div>
