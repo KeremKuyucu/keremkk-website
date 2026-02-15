@@ -10,7 +10,7 @@ type ProjectConfig = {
     key: string;
 };
 
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
     try {
         // 1. Try to get projects from environment variable (JSON array)
         const envProjects = process.env.SUPABASE_MONITOR_PROJECTS;
