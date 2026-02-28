@@ -54,7 +54,10 @@ const ContactPageClient: React.FC = () => {
             const res = await fetch("/api/contact", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({
+                    ...formData,
+                    userAgent: navigator.userAgent,
+                }),
             });
 
             if (res.ok) {

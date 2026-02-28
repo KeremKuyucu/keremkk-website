@@ -19,7 +19,7 @@ export default function NotesManager({ authToken }: { authToken: string }) {
     // --- Fetch Notes ---
     const fetchNotes = async () => {
         try {
-            const res = await fetch("/api/notes", { headers: { "x-sync-token": authToken } });
+            const res = await fetch("/api/admin/notes", { headers: { "x-auth-token": authToken } });
             if (res.ok) {
                 const data = await res.json();
                 const rawNotes = data.notes || [];
@@ -54,11 +54,11 @@ export default function NotesManager({ authToken }: { authToken: string }) {
                 ? JSON.stringify({ encryptedContent: content })
                 : JSON.stringify({ id: activeNote.id, encryptedContent: content });
 
-            const res = await fetch("/api/notes", {
+            const res = await fetch("/api/admin/notes", {
                 method,
                 headers: {
                     "Content-Type": "application/json",
-                    "x-sync-token": authToken
+                    "x-auth-token": authToken
                 },
                 body
             });
@@ -81,11 +81,11 @@ export default function NotesManager({ authToken }: { authToken: string }) {
         e.stopPropagation();
         if (!confirm("Bu not silinsin mi?")) return;
 
-        const res = await fetch("/api/notes", {
+        const res = await fetch("/api/admin/notes", {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
-                "x-sync-token": authToken
+                "x-auth-token": authToken
             },
             body: JSON.stringify({ id })
         });

@@ -28,7 +28,9 @@ const ProjectsPageClient: React.FC = () => {
         />
       </div>
 
-      <FooterComponent />
+      <div className="relative z-20 bg-[var(--background)] flex flex-col">
+        <FooterComponent />
+      </div>
     </main>
   );
 };

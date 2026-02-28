@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { redis, getClientIP } from "@/lib/server-utils";
+import { redis } from "@/lib/server-utils";
 
 interface ContactMessage {
     name: string;
@@ -7,6 +7,7 @@ interface ContactMessage {
     subject: string;
     message: string;
     ip: string;
+    userAgent: string;
     timestamp: number;
 }
 
@@ -15,7 +16,9 @@ const RATE_LIMIT_WINDOW = 60 * 60; // 1 hour in seconds
 
 export async function POST(request: NextRequest) {
     try {
-        const ip = getClientIP(request);
+        const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim()
+            || request.headers.get("x-real-ip")
+            || "unknown";
 
         // Rate limiting
         const rateLimitKey = `contact:ratelimit:${ip}`;
@@ -30,7 +33,7 @@ export async function POST(request: NextRequest) {
 
         // Parse body
         const body = await request.json();
-        const { name, email, subject, message } = body;
+        const { name, email, subject, message, userAgent } = body;
 
         // Validation
         if (!name?.trim() || !email?.trim() || !subject?.trim() || !message?.trim()) {
@@ -62,6 +65,7 @@ export async function POST(request: NextRequest) {
             subject: subject.trim(),
             message: message.trim(),
             ip,
+            userAgent: userAgent || "unknown",
             timestamp: Date.now(),
         };
 
@@ -76,6 +80,36 @@ export async function POST(request: NextRequest) {
             await redis.set(rateLimitKey, 1, { ex: RATE_LIMIT_WINDOW });
         } else {
             await redis.incr(rateLimitKey);
+        }
+
+        // Send Discord Webhook notification
+        const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+        if (webhookUrl) {
+            try {
+                const embed = {
+                    title: "📨 Yeni İletişim Mesajı!",
+                    color: 0x8b5cf6, // Violet-500
+                    fields: [
+                        { name: "👤 İsim", value: name.trim(), inline: true },
+                        { name: "📧 E-posta", value: email.trim(), inline: true },
+                        { name: "📝 Konu", value: subject.trim(), inline: false },
+                        { name: "💬 Mesaj", value: message.trim().length > 1024 ? message.trim().substring(0, 1021) + "..." : message.trim(), inline: false },
+                    ],
+                    footer: { text: `IP: ${ip} | ${new Date().toLocaleString('tr-TR')}` }
+                };
+
+                await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: "Hey <@483678328646270996>, websitenden yeni bir mesaj geldi!",
+                        embeds: [embed]
+                    })
+                });
+            } catch (discordErr) {
+                console.error("Discord webhook error:", discordErr);
+                // We don't fail the request if webhook fails
+            }
         }
 
         return NextResponse.json({ success: true, message: "Mesajınız başarıyla gönderildi!" });

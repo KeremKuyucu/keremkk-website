@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { FaLock, FaStickyNote, FaSignOutAlt } from "react-icons/fa";
 import NotesManager from "@/app/components/admin/NotesManager";
+import MessagesManager from "@/app/components/admin/MessagesManager";
+import { FaEnvelope } from "react-icons/fa";
 
 // --- Admin Modules Configuration ---
 interface AdminModule {
@@ -18,13 +20,12 @@ const MODULES: AdminModule[] = [
         icon: FaStickyNote,
         component: NotesManager
     },
-    // Yeni modüller buraya eklenebilir. Örnek:
-    // {
-    //     id: "links",
-    //     label: "Linkler",
-    //     icon: FaLink,
-    //     component: LinksManager
-    // }
+    {
+        id: "messages",
+        label: "Mesajlar",
+        icon: FaEnvelope,
+        component: MessagesManager
+    }
 ];
 
 export default function AdminPage() {

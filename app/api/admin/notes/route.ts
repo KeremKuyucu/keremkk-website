@@ -3,7 +3,7 @@ import { validateSession, redis } from "@/lib/server-utils";
 
 // GET: Notları getir
 export async function GET(request: Request) {
-    const token = request.headers.get("x-sync-token");
+    const token = request.headers.get("x-auth-token");
     // Notes uses lax validation (no IP check)
     if (!(await validateSession(token))) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
 
 // POST: Yeni not ekle
 export async function POST(request: Request) {
-    const token = request.headers.get("x-sync-token");
+    const token = request.headers.get("x-auth-token");
     if (!(await validateSession(token))) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
 
 // PUT: Not güncelle
 export async function PUT(request: Request) {
-    const token = request.headers.get("x-sync-token");
+    const token = request.headers.get("x-auth-token");
     if (!(await validateSession(token))) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -90,7 +90,7 @@ export async function PUT(request: Request) {
 
 // DELETE: Not sil
 export async function DELETE(request: Request) {
-    const token = request.headers.get("x-sync-token");
+    const token = request.headers.get("x-auth-token");
     if (!(await validateSession(token))) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

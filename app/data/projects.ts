@@ -142,7 +142,7 @@ export const projectsByCategory: { [key: string]: Project[] } = {
             description: "Discord altyapısını bir dosya sistemi gibi kullanan, performans ve hız odaklı masaüstü uygulaması.",
             longDescription: "Discord API üzerinden dosya depolama ve yönetimi sağlayan C++ masaüstü uygulamasıdır. İnteraktif menü ve güçlü CLI olmak üzere iki kullanım modu sunar. LibCurl, DPP ve nlohmann/json kütüphaneleri ile geliştirilmiştir. Her dosya için ayrı kanal oluşturma, otomatik güncelleme bildirimi, config.json ile kolay yapılandırma ve otomatik loglama özellikleri içerir. C++ ekosistemindeki bağımlılık yönetimi karmaşıklığı nedeniyle arşivlenmiş, geliştirme Dart ve Flutter sürümlerine taşınmıştır.",
             features: ["Multi-part upload mantığı", "Düşük overhead", "Sistem seviyesinde entegrasyon", "Açık kaynak"],
-            techStack: ["C++"],
+            techStack: ["C++", "Win32 API"],
             githubLink: "https://github.com/KeremKuyucu/DiscordStorageCPP",
         },
         {
