@@ -3,7 +3,6 @@ import { useEffect, useState, useMemo } from "react";
 import { FaGithub, FaCode, FaRocket, FaTerminal } from "react-icons/fa";
 import { roles, skills } from "@/app/data/skills";
 import { getTotalProjectCount, getYearsOfExperience } from "@/app/data/projects";
-import Lightning from "@/app/components/Lightning";
 
 const particles = [
     { left: 5, top: 10, delay: 0, duration: 6 },

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { redis } from "@/app/lib/server-utils";
+import { redis } from "@/lib/server-utils";
 
 const SESSION_TTL = 3600; // 1 saat
 

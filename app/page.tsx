@@ -6,7 +6,6 @@ import HeroSection from "@/app/components/HeroSection";
 import TechStackSection from "@/app/components/TechStackSection";
 import FeaturedProjects from "@/app/components/FeaturedProjects";
 import ProjelerSection from "@/app/components/ProjectCard";
-import Hyperspeed from "@/app/components/Hyperspeed";
 
 export default function Home() {
   useEffect(() => {
@@ -30,7 +29,6 @@ export default function Home() {
   return (
     <main className="relative overflow-x-hidden min-h-screen">
       {/* Global Ambient Background Lights */}
-      <Hyperspeed />
 
       <Navbar />
       <HeroSection />

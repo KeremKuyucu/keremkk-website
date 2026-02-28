@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { validateSession, redis } from "@/app/lib/server-utils";
+import { validateSession, redis } from "@/lib/server-utils";
 
 // GET: Notları getir
 export async function GET(request: Request) {
