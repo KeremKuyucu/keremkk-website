@@ -54,6 +54,11 @@
       "source": "/email",
       "destination": "mailto:contact@keremkk.com.tr",
       "permanent": true
+    },
+    {
+      "source": "/source-code",
+      "destination": "https://github.com/KeremKuyucu/keremkk-website",
+      "permanent": true
     }
   ]
 }

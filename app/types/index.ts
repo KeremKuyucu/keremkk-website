@@ -41,13 +41,17 @@ export interface Project {
     viewLink?: string;
     /** GitHub repo linki */
     githubLink?: string;
+    /** Detaylı proje açıklaması */
+    longDescription?: string;
 }
 
 export interface CategoryInfo {
     name: string;
+    slug?: string;
     icon: React.ReactNode;
     gradient: string;
     description: string;
+    longDescription?: string;
 }
 
 export interface Skill {

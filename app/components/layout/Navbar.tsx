@@ -1,12 +1,13 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FaHome, FaUser, FaCode, FaFileAlt } from "react-icons/fa";
+import { FaHome, FaUser, FaCode, FaEnvelope } from "react-icons/fa";
 
 const navLinks = [
   { href: "/", label: "Ana Sayfa", icon: FaHome },
   { href: "/about", label: "Hakkımda", icon: FaUser },
-  { href: "/#projects", label: "Projects", icon: FaCode },
+  { href: "/projects", label: "Projeler", icon: FaCode },
+  { href: "/contact", label: "İletişim", icon: FaEnvelope },
 ];
 
 const Navbar = () => {

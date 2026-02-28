@@ -1479,7 +1479,7 @@ const Hyperspeed: FC<HyperspeedProps> = ({ effectOptions = DEFAULT_EFFECT_OPTION
         };
     }, [effectOptions]);
 
-    return <div id="lights" className="w-full h-full min-h-screen fixed inset-0 -z-50 bg-black" ref={hyperspeed}></div>;
+    return <div id="lights" className="absolute inset-0 w-full h-full -z-10 bg-black pointer-events-none" ref={hyperspeed}></div>;
 };
 
 export default Hyperspeed;

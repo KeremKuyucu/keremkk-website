@@ -16,7 +16,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     /* Richer dark background instead of pitch black */
-    --background: #0B0E14; 
+    --background: #0B0E14;
     --foreground: #F8FAFC;
   }
 }

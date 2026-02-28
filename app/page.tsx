@@ -1,11 +1,9 @@
 "use client";
 import { useEffect } from "react";
-import Navbar from "@/app/components/Navbar";
-import FooterComponent from "@/app/components/Footer";
-import HeroSection from "@/app/components/HeroSection";
-import TechStackSection from "@/app/components/TechStackSection";
-import FeaturedProjects from "@/app/components/FeaturedProjects";
-import ProjelerSection from "@/app/components/ProjectCard";
+import Navbar from "@/app/components/layout/Navbar";
+import FooterComponent from "@/app/components/layout/Footer";
+import HeroSection from "@/app/components/home/HeroSection";
+import TechStackSection from "@/app/components/home/TechStackSection";
 
 export default function Home() {
   useEffect(() => {
@@ -28,13 +26,9 @@ export default function Home() {
 
   return (
     <main className="relative overflow-x-hidden min-h-screen">
-      {/* Global Ambient Background Lights */}
-
       <Navbar />
       <HeroSection />
       <TechStackSection />
-      <FeaturedProjects />
-      <ProjelerSection />
       <FooterComponent />
     </main>
   );

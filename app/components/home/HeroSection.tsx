@@ -3,6 +3,7 @@ import { useEffect, useState, useMemo } from "react";
 import { FaGithub, FaCode, FaRocket, FaTerminal } from "react-icons/fa";
 import { roles, skills } from "@/app/data/skills";
 import { getTotalProjectCount, getYearsOfExperience } from "@/app/data/projects";
+import Lightning from "@/app/components/home/Lightning";
 
 const particles = [
     { left: 5, top: 10, delay: 0, duration: 6 },
@@ -133,7 +134,7 @@ const HeroSection: React.FC = () => {
                 {/* CTA Buttons */}
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
                     <a
-                        href="#projects"
+                        href="/projects"
                         className="group relative px-8 py-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-2xl font-semibold text-lg overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-violet-500/25"
                     >
                         <span className="relative z-10 flex items-center gap-2">

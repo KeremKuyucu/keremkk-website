@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
-import Navbar from "@/app/components/Navbar";
-import FooterComponent from "@/app/components/Footer";
+import Navbar from "@/app/components/layout/Navbar";
+import FooterComponent from "@/app/components/layout/Footer";
 import AboutHero from "@/app/components/about/AboutHero";
 import EducationSkills from "@/app/components/about/EducationSkills";
 import CertificatesSection from "@/app/components/about/CertificatesSection";

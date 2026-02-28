@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import { FaGithub, FaExternalLinkAlt, FaCode, FaCheckCircle, FaLock, FaStar, FaCodeBranch, FaEye } from "react-icons/fa";
+import Link from "next/link";
+import { FaGithub, FaExternalLinkAlt, FaCode, FaCheckCircle, FaLock, FaStar, FaCodeBranch, FaEye, FaArrowRight } from "react-icons/fa";
 import { SiFlutter, SiNextdotjs, SiCplusplus, SiDart, SiSupabase, SiFirebase, SiTypescript, SiTailwindcss, SiResend } from "react-icons/si";
 import { projectsByCategory, categoryInfo } from "@/app/data/projects";
 import { Project } from "@/app/types";
@@ -26,6 +27,7 @@ const getTechIcon = (tech: string) => {
 type ProjectCardProps = Project & {
   index: number;
   categoryGradient: string;
+  categorySlug?: string;
   isArchived?: boolean;
   isPrivate?: boolean;
   lastCommit?: string;
@@ -55,6 +57,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   githubLink,
   index,
   categoryGradient,
+  categorySlug,
 }) => {
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -103,31 +106,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           )}
         </div>
 
-        {/* Quick Actions on Hover */}
-        <div className={`absolute bottom-4 right-4 flex gap-2 transition-all duration-300 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-          {viewLink && (
-            <a
-              href={viewLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-gray-800 hover:bg-white hover:scale-110 transition-all duration-300 shadow-lg"
-              title="Projeyi Görüntüle"
-            >
-              <FaExternalLinkAlt className="text-sm" />
-            </a>
-          )}
-          {githubLink && !isPrivate && (
-            <a
-              href={githubLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-10 h-10 rounded-full bg-gray-900/90 backdrop-blur-sm flex items-center justify-center text-white hover:bg-gray-900 hover:scale-110 transition-all duration-300 shadow-lg"
-              title="GitHub"
-            >
-              <FaGithub className="text-lg" />
-            </a>
-          )}
-        </div>
       </div>
 
       {/* Content */}
@@ -212,16 +190,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
         {/* Action Buttons */}
         <div className="flex gap-3 pt-2 border-t border-gray-200 dark:border-gray-800">
-          {viewLink && (
-            <a
-              href={viewLink}
-              target="_blank"
-              rel="noopener noreferrer"
+          {categorySlug && (
+            <Link
+              href={`/projects/${categorySlug}`}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r ${categoryGradient} hover:shadow-lg transition-all duration-300 hover:scale-[1.02]`}
             >
-              <FaExternalLinkAlt className="text-xs" />
-              Görüntüle
-            </a>
+              <FaArrowRight className="text-xs" />
+              Tüm Detaylar
+            </Link>
           )}
           {githubLink && !isPrivate && (
             <a
@@ -232,6 +208,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             >
               <FaGithub />
               GitHub
+            </a>
+          )}
+          {viewLink && (
+            <a
+              href={viewLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 hover:scale-[1.02]"
+            >
+              <FaExternalLinkAlt className="text-xs" />
+              Önizleme
             </a>
           )}
           {isPrivate && (
@@ -327,15 +314,19 @@ const ProjelerSection: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
-        <div className="text-center mb-16 scroll-reveal">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
-            Tüm Projelerim
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg">
-            Geliştirdiğim projeler kategorilere ayrılmış şekilde.
-            Detayları görüntülemek için bir kategori seçin.
-          </p>
-        </div>
+        <section className="relative pt-32 pb-8 px-6">
+          <div className="container mx-auto max-w-6xl relative z-10 text-center">
+            <h1 className="text-4xl md:text-6xl font-bold mb-4 text-white">
+              Tüm{" "}
+              <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent">
+                Projelerim
+              </span>
+            </h1>
+            <p className="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
+              Geliştirdiğim projeler kategorilere ayrılmış şekilde. Detayları görüntülemek için bir kategori seçin.
+            </p>
+          </div>
+        </section>
 
         {/* Category Pills */}
         <div className="flex flex-wrap justify-center gap-3 mb-12 scroll-reveal">
@@ -401,6 +392,7 @@ const ProjelerSection: React.FC = () => {
                     watchers={ghData.watchers}
                     index={index}
                     categoryGradient={categoryInfo[activeCategory]?.gradient || "from-gray-500 to-gray-600"}
+                    categorySlug={categoryInfo[activeCategory]?.slug}
                   />
                 </div>
               );

@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import profilePic from "../../../public/imgs/1758910751670.jpg";
 import { FaAward, FaCode } from "react-icons/fa";
-import { socialLinks } from "../Footer";
+import { socialLinks } from "../layout/Footer";
 
 const AboutHero: React.FC = () => {
     return (
@@ -91,7 +91,7 @@ const AboutHero: React.FC = () => {
                                     <FaCode className="text-2xl text-violet-600" />
                                     <div className="text-left">
                                         <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Deneyim</p>
-                                        <p className="text-sm font-bold text-violet-700 dark:text-violet-300">3+ Yıl Kodlama</p>
+                                        <p className="text-sm font-bold text-violet-700 dark:text-violet-300">2+ Yıl Kodlama</p>
                                     </div>
                                 </div>
                             </div>
