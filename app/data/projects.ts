@@ -68,7 +68,7 @@ export const projectsByCategory: { [key: string]: Project[] } = {
             features: ["Cross-platform mimari", "Gelişmiş state yönetimi", "Modern UI/UX", "Açık kaynak"],
             techStack: ["Flutter", "Dart", "Supabase"],
             githubLink: "https://github.com/KeremKuyucu/GeoGame",
-            viewLink: "/geogame",
+            viewLink: "https://geogame.keremkk.com.tr",
         },
         {
             imageUrl: "/imgs/projects/geogamecpp.png",
@@ -111,7 +111,7 @@ export const projectsByCategory: { [key: string]: Project[] } = {
             features: ["SEO Optimizasyonu", "Responsive tasarım", "Hızlı sayfa yükleme", "Açık kaynak"],
             techStack: ["Next.js"],
             githubLink: "https://github.com/KeremKuyucu/PikaMed-website",
-            viewLink: "/pikamed",
+            viewLink: "https://pikamed.keremkk.com.tr",
         },
         {
             imageUrl: "/imgs/projects/pikamedapi.png",
@@ -200,7 +200,7 @@ export const projectsByCategory: { [key: string]: Project[] } = {
             features: ["Güvenli session yönetimi", "Merkezi kullanıcı veritabanı"],
             techStack: ["Next.js", "Supabase", "Resend"],
             githubLink: "https://github.com/KeremKuyucu/keremkk-auth",
-            viewLink: "/accounts",
+            viewLink: "https://accounts.keremkk.com.tr",
         }
     ],
     EglYillik: [
@@ -212,8 +212,8 @@ export const projectsByCategory: { [key: string]: Project[] } = {
             longDescription: "EGL 2026 mezunları için geliştirilen dijital yıllık platformudur. Kişiselleştirilmiş dashboard ile günlük selamlamalar, istatistikler ve geri sayım sayaçları sunar. Profil sistemi, badge'ler ve aktivite durumları içerir. Arkadaşlara anı yazma özelliği ve mezuniyet gününe kadar kilitli kalan 'Gizli Kasa' mekanizması barındırır. Sınıf içi oylama sistemiyle en komik, en çalışkan gibi kategorilerde oy kullanılabilir. 4 seviyeli RBAC (User, Admin, Super Admin, Owner) ile güvenlik, Supabase Auth ve Row Level Security ile veri koruması, bakım modu ve Resend entegrasyonlu bildirim sistemi sunar.",
             features: [
                 "Zaman Ayarlı Gizli Kasa Anı Teknolojisi",
-                "Gelişmiş RBAC (4 Seviyeli Yetkilendirme)",
-                "Resend Entegrasyonlu Bildirim Sistemi"
+                "Gelişmiş Rol sistemli yetkilendirme kontrolü",
+                "Resend Entegrasyonlu Bildirim Sistemi",
             ],
             techStack: ["Next.js", "Supabase", "Resend", "Tailwind CSS", "TypeScript"],
             githubLink: "https://github.com/KeremKuyucu/Egl-yillik",

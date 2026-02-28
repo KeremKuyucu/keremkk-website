@@ -11,9 +11,11 @@ const ProjectsPageClient: React.FC = () => {
             <Navbar />
 
             {/* Hyperspeed background */}
-            <div className="relative overflow-hidden">
-                <Hyperspeed />
-                <div className="relative z-10">
+            <div className="relative min-h-screen">
+                <div className="fixed top-0 left-0 w-full h-full -z-10 bg-black">
+                    <Hyperspeed />
+                </div>
+                <div className="relative z-10 w-full min-h-screen bg-transparent">
                     <ProjectsSection />
                 </div>
                 {/* Smooth fade to footer */}
