@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import profilePic from "../../../public/imgs/1758910751670.jpg";
+import profilePic from "../../../public/imgs/logo.png";
 import { FaAward, FaCode } from "react-icons/fa";
 import { socialLinks } from "../layout/Footer";
 
