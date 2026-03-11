@@ -42,7 +42,7 @@ const getTechIcon = (tech: string) => {
     return iconMap[tech] || <FaCode className="text-gray-500" />;
 };
 
-const fallbackImage = "/imgs/errorimage.jpg";
+const fallbackImage = "/imgs/errorimage.webp";
 
 interface ProjectDetailClientProps {
     categoryKey: string;

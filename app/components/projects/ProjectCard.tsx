@@ -7,7 +7,7 @@ import { projectsByCategory, categoryInfo } from "@/app/data/projects";
 import { Project } from "@/app/types";
 
 
-const fallbackImage = "/imgs/errorimage.jpg";
+const fallbackImage = "/imgs/errorimage.webp";
 
 const getTechIcon = (tech: string) => {
   const iconMap: { [key: string]: React.ReactNode } = {
