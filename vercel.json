@@ -2,7 +2,7 @@
   "redirects": [
     {
       "source": "/cv",
-      "destination": "https://drive.google.com/file/d/1dIjvsQUGXMCnezVphGVeX48fAqUCR_oC/view",
+      "destination": "#",
       "permanent": true
     },
     {
