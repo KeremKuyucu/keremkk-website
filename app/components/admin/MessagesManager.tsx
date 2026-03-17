@@ -8,7 +8,6 @@ interface ContactMessage {
     email: string;
     subject: string;
     message: string;
-    ip: string;
     timestamp: number;
 }
 
@@ -127,7 +126,6 @@ export default function MessagesManager({ authToken }: { authToken: string }) {
                             </div>
 
                             <div className="mt-8 pt-4 border-t border-gray-100 dark:border-zinc-800 text-xs text-gray-400">
-                                <p>IP: {selectedMessage.ip}</p>
                                 <p>ID: {selectedMessage.id}</p>
                             </div>
                         </div>

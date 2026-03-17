@@ -1,20 +1,33 @@
 import { NextResponse } from "next/server";
-import { validateSession, redis } from "@/lib/server-utils";
+import { validateSession } from "@/lib/server-utils";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 // GET: Notları getir
 export async function GET(request: Request) {
     const token = request.headers.get("x-auth-token");
-    // Notes uses lax validation (no IP check)
     if (!(await validateSession(token))) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     try {
-        // Notları bir liste olarak tutuyoruz
-        // Key: user:notes
-        const notes = await redis.get<any[]>("user:notes") || [];
-        return NextResponse.json({ notes });
+        const supabase = createAdminClient();
+        const { data: notes, error } = await supabase
+            .from('notes')
+            .select('*')
+            .order('updated_at', { ascending: false })
+            .limit(50);
+
+        if (error) throw error;
+
+        // Map updated_at to updatedAt for front-end compatibility
+        const mappedNotes = (notes || []).map(note => ({
+            ...note,
+            updatedAt: note.updated_at ? new Date(note.updated_at).getTime() : Date.now()
+        }));
+
+        return NextResponse.json({ notes: mappedNotes });
     } catch (error) {
+        console.error("Notes GET error:", error);
         return NextResponse.json({ error: "Internal Error" }, { status: 500 });
     }
 }
@@ -33,22 +46,27 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Content required" }, { status: 400 });
         }
 
-        const noteIdentifier = crypto.randomUUID();
-        const newNote = {
-            id: noteIdentifier,
-            content: encryptedContent, // Şifreli blob
-            updatedAt: Date.now()
+        const supabase = createAdminClient();
+        const { data: newNote, error } = await supabase
+            .from('notes')
+            .insert({
+                content: encryptedContent,
+                updated_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        // Map updated_at to updatedAt for front-end compatibility
+        const mappedNote = {
+            ...newNote,
+            updatedAt: newNote.updated_at ? new Date(newNote.updated_at).getTime() : Date.now()
         };
 
-        // Mevcut notları al, yenisini başa ekle
-        const notes = await redis.get<any[]>("user:notes") || [];
-        // Max 50 not saklayalım (basit tutmak için)
-        const updatedNotes = [newNote, ...notes].slice(0, 50);
-
-        await redis.set("user:notes", updatedNotes);
-
-        return NextResponse.json({ success: true, note: newNote });
+        return NextResponse.json({ success: true, note: mappedNote });
     } catch (error) {
+        console.error("Notes POST error:", error);
         return NextResponse.json({ error: "Internal Error" }, { status: 500 });
     }
 }
@@ -63,27 +81,37 @@ export async function PUT(request: Request) {
     try {
         const { id, encryptedContent } = await request.json();
 
-        const notes = await redis.get<any[]>("user:notes") || [];
-        const index = notes.findIndex((n: any) => n.id === id);
-
-        if (index === -1) {
-            return NextResponse.json({ error: "Note not found" }, { status: 404 });
+        if (!id || !encryptedContent) {
+            return NextResponse.json({ error: "ID and content required" }, { status: 400 });
         }
 
-        notes[index] = {
-            ...notes[index],
-            content: encryptedContent,
-            updatedAt: Date.now()
+        const supabase = createAdminClient();
+        const { data: updatedNote, error } = await supabase
+            .from('notes')
+            .update({
+                content: encryptedContent,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') {
+                return NextResponse.json({ error: "Note not found" }, { status: 404 });
+            }
+            throw error;
+        }
+
+        // Map updated_at to updatedAt for front-end compatibility
+        const mappedNote = {
+            ...updatedNote,
+            updatedAt: updatedNote.updated_at ? new Date(updatedNote.updated_at).getTime() : Date.now()
         };
 
-        // Güncelleneni en başa taşı
-        const updatedNote = notes.splice(index, 1)[0];
-        notes.unshift(updatedNote);
-
-        await redis.set("user:notes", notes);
-
-        return NextResponse.json({ success: true, note: updatedNote });
+        return NextResponse.json({ success: true, note: mappedNote });
     } catch (error) {
+        console.error("Notes PUT error:", error);
         return NextResponse.json({ error: "Internal Error" }, { status: 500 });
     }
 }
@@ -98,13 +126,21 @@ export async function DELETE(request: Request) {
     try {
         const { id } = await request.json();
 
-        const notes = await redis.get<any[]>("user:notes") || [];
-        const filteredNotes = notes.filter((n: any) => n.id !== id);
+        if (!id) {
+            return NextResponse.json({ error: "ID required" }, { status: 400 });
+        }
 
-        await redis.set("user:notes", filteredNotes);
+        const supabase = createAdminClient();
+        const { error } = await supabase
+            .from('notes')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
 
         return NextResponse.json({ success: true });
     } catch (error) {
+        console.error("Notes DELETE error:", error);
         return NextResponse.json({ error: "Internal Error" }, { status: 500 });
     }
 }

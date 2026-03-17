@@ -1,35 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { redis } from "@/lib/server-utils";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 interface ContactMessage {
     name: string;
     email: string;
     subject: string;
     message: string;
-    ip: string;
     userAgent: string;
     timestamp: number;
 }
 
-const RATE_LIMIT_MAX = 3; // Max messages per window
-const RATE_LIMIT_WINDOW = 60 * 60; // 1 hour in seconds
-
 export async function POST(request: NextRequest) {
     try {
-        const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim()
-            || request.headers.get("x-real-ip")
-            || "unknown";
-
-        // Rate limiting
-        const rateLimitKey = `contact:ratelimit:${ip}`;
-        const currentCount = await redis.get<number>(rateLimitKey);
-
-        if (currentCount !== null && currentCount >= RATE_LIMIT_MAX) {
-            return NextResponse.json(
-                { error: "Çok fazla mesaj gönderdiniz. Lütfen bir süre sonra tekrar deneyin." },
-                { status: 429 }
-            );
-        }
+        const supabase = createAdminClient();
 
         // Parse body
         const body = await request.json();
@@ -58,28 +41,19 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Save to Redis
-        const contactMessage: ContactMessage = {
+        // Save to Supabase
+        const { error: insertError } = await supabase.from('contact_messages').insert({
             name: name.trim(),
             email: email.trim(),
             subject: subject.trim(),
             message: message.trim(),
-            ip,
-            userAgent: userAgent || "unknown",
-            timestamp: Date.now(),
-        };
+            user_agent: userAgent || "unknown",
+            timestamp: Date.now()
+        });
 
-        const messageId = `contact:msg:${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-        await redis.set(messageId, JSON.stringify(contactMessage), { ex: 60 * 60 * 24 * 30 }); // 30 days TTL
-
-        // Push to a list for easy retrieval
-        await redis.lpush("contact:messages", messageId);
-
-        // Update rate limit
-        if (currentCount === null) {
-            await redis.set(rateLimitKey, 1, { ex: RATE_LIMIT_WINDOW });
-        } else {
-            await redis.incr(rateLimitKey);
+        if (insertError) {
+            console.error("Supabase insert error:", insertError);
+            throw insertError;
         }
 
         // Send Discord Webhook notification
@@ -95,7 +69,7 @@ export async function POST(request: NextRequest) {
                         { name: "📝 Konu", value: subject.trim(), inline: false },
                         { name: "💬 Mesaj", value: message.trim().length > 1024 ? message.trim().substring(0, 1021) + "..." : message.trim(), inline: false },
                     ],
-                    footer: { text: `IP: ${ip} | ${new Date().toLocaleString('tr-TR')}` }
+                    footer: { text: `${new Date().toLocaleString('tr-TR')}` }
                 };
 
                 await fetch(webhookUrl, {
