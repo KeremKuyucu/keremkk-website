@@ -22,6 +22,7 @@
     "lucide-react": "^0.501.0",
     "next": "15.3.8",
     "ogl": "^1.0.11",
+    "otpauth": "^9.5.0",
     "postprocessing": "^6.38.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

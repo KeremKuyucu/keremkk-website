@@ -24,9 +24,8 @@ interface RepoInfo {
     description: string | null;
 }
 
-// Cache for GitHub data (1 hour)
-const cache = new Map<string, { data: RepoInfo; timestamp: number }>();
-const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
+// Not: next: { revalidate: 3600 } ile Next.js Data Cache kullanılıyor,
+// serverless'ta in-memory Map çalışmadığı için kaldırıldı.
 
 function getRelativeTime(dateString: string): string {
     const date = new Date(dateString);
@@ -74,20 +73,13 @@ export async function GET(request: Request) {
     const results: { [key: string]: RepoInfo } = {};
 
     for (const repo of repoList) {
-        // Check cache
-        const cached = cache.get(repo);
-        if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-            results[repo] = cached.data;
-            continue;
-        }
-
         try {
             const response = await fetch(`https://api.github.com/repos/${repo}`, {
                 headers: {
                     'Accept': 'application/vnd.github.v3+json',
                     ...(process.env.GITHUB_TOKEN && { 'Authorization': `Bearer ${process.env.GITHUB_TOKEN}` }),
                 },
-                next: { revalidate: 3600 } // Cache for 1 hour
+                next: { revalidate: 3600 } // Cache for 1 hour via Next.js Data Cache
             });
 
             if (response.ok) {
@@ -104,8 +96,6 @@ export async function GET(request: Request) {
                     description: data.description,
                 };
 
-                // Update cache
-                cache.set(repo, { data: repoInfo, timestamp: Date.now() });
                 results[repo] = repoInfo;
             } else {
                 results[repo] = {
