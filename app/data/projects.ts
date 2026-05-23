@@ -217,8 +217,8 @@ export const projectsByCategory: { [key: string]: Project[] } = {
             ],
             techStack: ["Next.js", "Supabase", "Resend", "Tailwind CSS", "TypeScript"],
             githubLink: "https://github.com/KeremKuyucu/Egl-yillik",
-            isNew: true,
-            isDeveloping: true
+            isNew: false,
+            isDeveloping: false
         }
     ]
 };
