@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
-import { FaLock, FaStickyNote, FaSignOutAlt } from "react-icons/fa";
+import { FaLock, FaStickyNote, FaSignOutAlt, FaChartBar } from "react-icons/fa";
 import NotesManager from "@/app/components/admin/NotesManager";
 import MessagesManager from "@/app/components/admin/MessagesManager";
+import AnalyticsManager from "@/app/components/admin/AnalyticsManager";
 import { FaEnvelope } from "react-icons/fa";
 
 // --- Admin Modules Configuration ---
@@ -25,6 +26,12 @@ const MODULES: AdminModule[] = [
         label: "Mesajlar",
         icon: FaEnvelope,
         component: MessagesManager
+    },
+    {
+        id: "analytics",
+        label: "Analiz",
+        icon: FaChartBar,
+        component: AnalyticsManager
     }
 ];
 
