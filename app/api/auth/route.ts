@@ -29,7 +29,7 @@ export async function POST(request: Request) {
         // --- Session ---
         const token = crypto.randomUUID();
         const expiresAt = new Date(Date.now() + SESSION_TTL * 1000).toISOString();
-        
+
         const { error: sessionError } = await supabase.from('sessions').insert({
             token,
             user_agent: request.headers.get("user-agent") ?? "",
