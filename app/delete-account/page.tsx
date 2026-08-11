@@ -50,6 +50,12 @@ export default function DeleteAccountPage() {
                   help@keremkk.com.tr
                 </a>
               </div>
+              <div className="mt-4 flex items-start gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+                <span className="text-amber-500 text-xl leading-none mt-0.5">⚠️</span>
+                <p className="text-sm text-amber-800 dark:text-amber-300">
+                  <strong>Important:</strong> Please send your deletion request from the e-mail address associated with your account. This helps us verify your identity and process your request faster.
+                </p>
+              </div>
             </div>
 
             <div>
