@@ -19,5 +19,5 @@ export const roles = [
     "Mobile App Developer",
     "Flutter Developer",
     "Next.js Developer",
-    "Lise Öğrencisi",
+    "Mühendislik Öğrencisi",
 ];

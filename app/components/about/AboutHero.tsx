@@ -71,7 +71,7 @@ const AboutHero: React.FC = () => {
 
                         <div className="space-y-4 text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
                             <p>
-                                Bilecik <strong className="text-gray-900 dark:text-white">Ertuğrulgazi Lisesi</strong> 12. sınıf öğrencisiyim.
+                                <strong className="text-gray-900 dark:text-white">Bilecik Şeyh Edebali Üniversitesi</strong> Elektrik-Elektronik Mühendisliği öğrencisiyim.
                                 Teknolojiye olan tutkum beni sürekli yeni şeyler öğrenmeye ve üretmeye itiyor.
                             </p>
                             <p>

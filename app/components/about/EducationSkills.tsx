@@ -5,13 +5,22 @@ import { skills } from "@/app/data/skills";
 
 const education = [
     {
+        school: "Bilecik Şeyh Edebali Üniversitesi",
+        period: "2026-Günümüz",
+        current: true,
+        department: "Elektrik-Elektronik Mühendisliği",
+        city: "Bilecik",
+        country: "Türkiye",
+        description: "Lisans eğitimime Elektrik-Elektronik Mühendisliği bölümünde devam ediyorum.",
+    },
+    {
         school: "Ertuğrulgazi Lisesi",
         period: "2022-2026",
-        current: true,
+        current: false,
         department: "Sayısal",
         city: "Bilecik",
         country: "Türkiye",
-        description: "Lise eğitimime sayısal alanda devam ediyorum.",
+        description: "Lise eğitimimi sayısal alanda başarıyla tamamladım.",
     },
     {
         school: "Deneyap Teknoloji Atölyeleri",

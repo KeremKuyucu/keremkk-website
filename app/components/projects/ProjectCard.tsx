@@ -1,8 +1,8 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { FaGithub, FaExternalLinkAlt, FaCode, FaCheckCircle, FaLock, FaStar, FaCodeBranch, FaEye, FaArrowRight } from "react-icons/fa";
-import { SiFlutter, SiNextdotjs, SiCplusplus, SiDart, SiSupabase, SiFirebase, SiTypescript, SiTailwindcss, SiResend } from "react-icons/si";
+import { FaGithub, FaExternalLinkAlt, FaCode, FaCheckCircle, FaLock, FaStar, FaCodeBranch, FaEye, FaArrowRight, FaWindows } from "react-icons/fa";
+import { SiFlutter, SiNextdotjs, SiCplusplus, SiDart, SiSupabase, SiFirebase, SiTypescript, SiTailwindcss, SiResend, SiAutohotkey } from "react-icons/si";
 import { projectsByCategory, categoryInfo } from "@/app/data/projects";
 import { Project } from "@/app/types";
 
@@ -20,6 +20,8 @@ const getTechIcon = (tech: string) => {
     "TypeScript": <SiTypescript className="text-[#3178C6]" />,
     "Tailwind CSS": <SiTailwindcss className="text-[#06B6D4]" />,
     "Resend": <SiResend className="text-white" />,
+    "AutoHotkey": <SiAutohotkey className="text-[#339933]" />,
+    "Windows": <FaWindows className="text-[#0078D4]" />,
   };
   return iconMap[tech] || <FaCode className="text-gray-500" />;
 };

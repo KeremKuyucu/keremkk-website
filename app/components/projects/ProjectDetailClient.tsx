@@ -13,6 +13,7 @@ import {
     FaStar,
     FaCodeBranch,
     FaEye,
+    FaWindows,
 } from "react-icons/fa";
 import {
     SiFlutter,
@@ -24,6 +25,7 @@ import {
     SiTypescript,
     SiTailwindcss,
     SiResend,
+    SiAutohotkey,
 } from "react-icons/si";
 import { Project, CategoryInfo } from "@/app/types";
 
@@ -38,6 +40,8 @@ const getTechIcon = (tech: string) => {
         TypeScript: <SiTypescript className="text-[#3178C6]" />,
         "Tailwind CSS": <SiTailwindcss className="text-[#06B6D4]" />,
         Resend: <SiResend className="text-white" />,
+        AutoHotkey: <SiAutohotkey className="text-[#339933]" />,
+        Windows: <FaWindows className="text-[#0078D4]" />,
     };
     return iconMap[tech] || <FaCode className="text-gray-500" />;
 };

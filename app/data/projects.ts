@@ -1,6 +1,6 @@
 // Centralized project data for dynamic stats and consistency
 import React from 'react';
-import { FaMobile, FaServer, FaDesktop, FaCode, FaGraduationCap } from 'react-icons/fa';
+import { FaMobile, FaServer, FaDesktop, FaCode, FaGraduationCap, FaGamepad, FaKeyboard } from 'react-icons/fa';
 
 
 import { Project, CategoryInfo } from '../types';
@@ -12,6 +12,20 @@ export const categoryInfo: { [key: string]: CategoryInfo } = {
         icon: React.createElement(FaMobile, { className: "text-xl" }),
         gradient: "from-emerald-500 to-teal-600",
         description: "Coğrafya öğrenme oyunu - Çoklu platform desteği",
+    },
+    OkeyDefteri: {
+        name: "Okey Defteri",
+        slug: "okey-defteri",
+        icon: React.createElement(FaGamepad, { className: "text-xl" }),
+        gradient: "from-emerald-600 to-teal-700",
+        description: "Okey 101 canlı skor ve istatistik takip uygulaması",
+    },
+    CopilotButton: {
+        name: "Copilot Button",
+        slug: "copilot-button",
+        icon: React.createElement(FaKeyboard, { className: "text-xl" }),
+        gradient: "from-cyan-500 to-blue-600",
+        description: "Windows Copilot tuşu için medya ve mikrofon kontrolörü",
     },
     PikaMed: {
         name: "PikaMed",
@@ -89,6 +103,34 @@ export const projectsByCategory: { [key: string]: Project[] } = {
             features: ["Optimize edilmiş asset servisi", "Next.js API Routes", "Merkezi içerik yönetimi", "Açık kaynak"],
             techStack: ["Next.js"],
             githubLink: "https://github.com/KeremKuyucu/geogame-cdn",
+        }
+    ],
+    OkeyDefteri: [
+        {
+            imageUrl: "/imgs/projects/okeydefteri.jpg",
+            altText: "Okey Defteri",
+            title: "Okey Defteri - Mobil Skor Takipçisi",
+            description: "Okey 101 oyunları için geliştirilmiş, canlı skor takibi, el sonu taş hesaplayıcı ve dinamik lakap motoru içeren Flutter uygulaması.",
+            longDescription: "Okey 101 karşılaşmaları için geliştirilmiş modern ve akıllı bir skor takip mobil uygulamasıdır. 4 oyunculu masa düzeni, tek tıkla ceza/puan girişi, otomatik tur yönetimi, el sonu kalan taşları toplayan hesap makinesi ve çiftli puanlama desteği sunar. Oyunun gidişatına göre her tur oyunculara bağlama uygun unvanlar atayan dinamik lakap motoru, detaylı oyuncu/takım istatistikleri, SharedPreferences tabanlı yerel otomatik kayıt, JSON formatında veri yedekleme ve GitHub Releases üzerinden otomatik güncelleme denetleyicisi içerir.",
+            features: ["Canlı Masa ve Skor Takibi", "Taş Hesap Makinesi & İstatistikler", "Dinamik Lakap Motoru", "Açık kaynak"],
+            techStack: ["Flutter", "Dart"],
+            githubLink: "https://github.com/KeremKuyucu/okey-defteri-flutter",
+            isNew: true,
+            isDeveloping: false
+        }
+    ],
+    CopilotButton: [
+        {
+            imageUrl: "/imgs/projects/copilotbutton.jpg",
+            altText: "Copilot Button Controller",
+            title: "Copilot Button - Windows Kontrolörü",
+            description: "Windows 11 Copilot tuşunu oyun korumalı mikrofon susturma, medya kontrolü ve özelleştirilebilir OSD eylemlerine dönüştüren AutoHotkey aracı.",
+            longDescription: "Windows 11 klavyelerindeki donanımsal Copilot tuşunu (Win + Shift + F23) güçlü bir mikrofon ve medya kontrolcüsüne dönüştüren AutoHotkey v2 aracıdır. Anti-modifier leak hook mimarisi sayesinde oyunlarda ve tam ekran uygulamalarda Shift veya Win tuşlarının kilitlenmesini kesin olarak engeller. 1-4 tıklama ve basılı tutma hareketleriyle anında mikrofon susturma, Spotify / YouTube Music kontrolü, ekranda beliren şık OSD bildirimleri, koyu tema destekli ayarlar arayüzü ve GitHub üzerinden tek tıkla otomatik güncelleme sunar.",
+            features: ["Anti-Modifier Tuş Koruması", "Mikrofon & Medya OSD Kontrolü", "Özelleştirilebilir Tıklama Eylemleri", "Açık kaynak"],
+            techStack: ["AutoHotkey", "Windows"],
+            githubLink: "https://github.com/KeremKuyucu/copilot-button",
+            isNew: true,
+            isDeveloping: false
         }
     ],
     PikaMed: [
