@@ -10,7 +10,7 @@ export default function GeoGameTermsOfService() {
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-black transition-colors duration-300">
       <Navbar />
-      
+
       <section className="pt-32 pb-20 px-6 max-w-4xl mx-auto">
         <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100 dark:border-gray-800">
           <h1 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900 dark:text-white">
@@ -41,7 +41,7 @@ export default function GeoGameTermsOfService() {
                 <li>Doğru, güncel ve eksiksiz bilgiler sağlamakla yükümlüsünüz.</li>
                 <li>Hesap bilgilerinizin (özellikle şifrenizin) gizliliğini korumak sizin sorumluluğunuzdadır.</li>
                 <li>Hesabınız üzerinden gerçekleştirilen tüm işlemlerden siz sorumlusunuz.</li>
-                <li>Hesabınıza yetkisiz erişim tespit etmeniz durumunda derhal <a href="mailto:help@keremkk.com.tr" className="text-blue-600 dark:text-blue-400 hover:underline">iletisim@keremkk.com.tr</a> adresine bildirmelisiniz.</li>
+                <li>Hesabınıza yetkisiz erişim tespit etmeniz durumunda derhal <a href="mailto:help@keremkk.com.tr" className="text-blue-600 dark:text-blue-400 hover:underline">help@keremkk.com.tr</a> adresine bildirmelisiniz.</li>
               </ul>
             </div>
 
@@ -103,7 +103,7 @@ export default function GeoGameTermsOfService() {
             <div>
               <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">8. Hesap Silme</h2>
               <p>
-                Hesabınızı ve tüm ilişkili verilerinizi kalıcı olarak silmek istemeniz durumunda, <a href="mailto:help@keremkk.com.tr" className="text-blue-600 dark:text-blue-400 hover:underline">iletisim@keremkk.com.tr</a> adresine başvurabilirsiniz. Hesap silme talepleriniz en geç 30 gün içinde işleme alınacaktır. Silinen hesaplar ve veriler geri alınamaz.
+                Hesabınızı ve tüm ilişkili verilerinizi kalıcı olarak silmek istemeniz durumunda, <a href="mailto:help@keremkk.com.tr" className="text-blue-600 dark:text-blue-400 hover:underline">help@keremkk.com.tr</a> adresine başvurabilirsiniz. Hesap silme talepleriniz en geç 30 gün içinde işleme alınacaktır. Silinen hesaplar ve veriler geri alınamaz.
               </p>
             </div>
 
@@ -149,7 +149,7 @@ export default function GeoGameTermsOfService() {
             <div>
               <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">14. Bize Ulaşın</h2>
               <p>
-                Bu Kullanım Koşulları ile ilgili herhangi bir sorunuz veya öneriniz varsa, benimle iletişime geçmekten çekinmeyin. Bana <a href="mailto:help@keremkk.com.tr" className="text-blue-600 dark:text-blue-400 hover:underline">iletisim@keremkk.com.tr</a> adresinden ulaşabilirsiniz.
+                Bu Kullanım Koşulları ile ilgili herhangi bir sorunuz veya öneriniz varsa, benimle iletişime geçmekten çekinmeyin. Bana <a href="mailto:help@keremkk.com.tr" className="text-blue-600 dark:text-blue-400 hover:underline">help@keremkk.com.tr</a> adresinden ulaşabilirsiniz.
               </p>
             </div>
           </div>

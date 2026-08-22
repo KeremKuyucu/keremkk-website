@@ -75,7 +75,7 @@ export default function OkeyDefteriPrivacyPolicy() {
             <div>
               <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Bize Ulaşın</h2>
               <p>
-                Gizlilik Politikam ile ilgili herhangi bir sorunuz veya öneriniz varsa, benimle iletişime geçmekten çekinmeyin. Bana <a href="mailto:help@keremkk.com.tr" className="text-blue-600 dark:text-blue-400 hover:underline">iletisim@keremkk.com.tr</a> adresinden ulaşabilirsiniz.
+                Gizlilik Politikam ile ilgili herhangi bir sorunuz veya öneriniz varsa, benimle iletişime geçmekten çekinmeyin. Bana <a href="mailto:help@keremkk.com.tr" className="text-blue-600 dark:text-blue-400 hover:underline">help@keremkk.com.tr</a> adresinden ulaşabilirsiniz.
               </p>
             </div>
           </div>
