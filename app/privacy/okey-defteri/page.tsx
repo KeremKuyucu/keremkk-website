@@ -2,8 +2,8 @@ import Navbar from "@/app/components/layout/Navbar";
 import FooterComponent from "@/app/components/layout/Footer";
 
 export const metadata = {
-  title: "Okey Defteri - Gizlilik Politikası",
-  description: "Okey Defteri mobil uygulaması için gizlilik politikası",
+  title: "Okey Defteri - Privacy Policy",
+  description: "Privacy policy for the Okey Defteri mobile application",
 };
 
 export default function OkeyDefteriPrivacyPolicy() {
@@ -14,44 +14,44 @@ export default function OkeyDefteriPrivacyPolicy() {
       <section className="pt-32 pb-20 px-6 max-w-4xl mx-auto">
         <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100 dark:border-gray-800">
           <h1 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900 dark:text-white">
-            Okey Defteri - Gizlilik Politikası
+            Okey Defteri - Privacy Policy
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mb-8">
-            Son Güncelleme Tarihi: 16 Temmuz 2026
+            Last Updated: July 16, 2026
           </p>
 
           <div className="space-y-8 text-gray-700 dark:text-gray-300 leading-relaxed">
             <p>
-              Kerem Kuyucu, Okey Defteri uygulamasını Ücretsiz (Reklam Destekli) bir uygulama olarak geliştirmiştir. Bu HİZMET Kerem Kuyucu tarafından hiçbir ücret talep edilmeden sağlanmaktadır ve olduğu gibi kullanılması amaçlanmıştır.
+              Kerem Kuyucu built the Okey Defteri app as an Ad-Supported Free app. This SERVICE is provided by Kerem Kuyucu at no cost and is intended for use as is.
             </p>
             <p>
-              Bu sayfa, HİZMET&apos;imi kullanmaya karar veren herkesi, Kişisel Bilgilerin toplanması, kullanılması ve ifşa edilmesiyle ilgili politikalarım hakkında bilgilendirmek için kullanılmaktadır.
+              This page is used to inform visitors regarding my policies with the collection, use, and disclosure of Personal Information if anyone decided to use my SERVICE.
             </p>
             <p>
-              HİZMET&apos;imi kullanmayı seçerseniz, bu politikayla ilişkili olarak bilgilerin toplanmasını ve kullanılmasını kabul etmiş olursunuz.
+              If you choose to use my SERVICE, then you agree to the collection and use of information in relation to this policy.
             </p>
 
             <div>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Bilgi Toplama ve Kullanım</h2>
+              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Information Collection and Use</h2>
               <p>
-                Uygulamamız daha iyi bir deneyim sunmak amacıyla, bazı kişisel olmayan verileri toplayabilir. Topladığımız veriler arasında istatistiksel amaçlı olarak cihazınızda oluşturulan tekil tanımlayıcılar (UUID) bulunabilir. Bu verilerle kişisel kimliğinize (adınız, e-posta adresiniz vb.) ulaşılması kesinlikle mümkün değildir.
+                To provide a better experience, our application may collect certain non-personal data. The collected data may include unique identifiers (UUIDs) generated on your device for statistical purposes. It is strictly not possible to identify your personal identity (such as your name, email address, etc.) from this data.
               </p>
             </div>
 
             <div>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Üçüncü Taraf Hizmet Sağlayıcıları</h2>
+              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Third-Party Service Providers</h2>
               <p className="mb-3">
-                Uygulamamız, hizmetlerimizi sağlamak veya reklam göstermek için üçüncü taraf hizmetlerini kullanmaktadır. Bu hizmetler, cihazınızın Reklam Kimliği&apos;ne veya teknik verilere (Crash günlükleri gibi) erişebilir.
+                Our application uses third-party services to deliver features and display advertisements. These services may access your device&apos;s Advertising ID or technical data (such as crash logs).
               </p>
-              <p className="mb-2">Uygulama tarafından kullanılan üçüncü taraf hizmet sağlayıcılarının gizlilik politikalarına aşağıdaki bağlantılardan ulaşabilirsiniz:</p>
+              <p className="mb-2">You can access the privacy policies of the third-party service providers used by the application via the links below:</p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>
                   <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
-                    Google Play Hizmetleri
+                    Google Play Services
                   </a>
                 </li>
                 <li>
-                  <a href="https://support.google.com/admob/answer/6128543?hl=tr" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
+                  <a href="https://support.google.com/admob/answer/6128543" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
                     AdMob
                   </a>
                 </li>
@@ -59,23 +59,23 @@ export default function OkeyDefteriPrivacyPolicy() {
             </div>
 
             <div>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Günlük Verileri (Log Data)</h2>
+              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Log Data</h2>
               <p>
-                Uygulamayı kullanırken bir hata veya çökme oluşması durumunda, (üçüncü taraf ürünler aracılığıyla) cihazınızdaki Günlük Verileri (Log Data) toplanabilir. Bu Günlük Verileri; cihazınızın İnternet Protokolü (&quot;IP&quot;) adresi, cihaz adı, işletim sistemi sürümü, hizmetimizi kullanırken uygulamanın yapılandırması, hizmeti kullanımınızın saati, tarihi ve diğer istatistikler gibi bilgileri içerebilir.
+                In the event of an error or crash while using the application, Log Data may be collected on your device (via third-party services). This Log Data may include information such as your device&apos;s Internet Protocol (&quot;IP&quot;) address, device name, operating system version, the configuration of the app when utilizing our service, the time and date of your use of the service, and other statistics.
               </p>
             </div>
 
             <div>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Değişiklikler</h2>
+              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Changes to This Privacy Policy</h2>
               <p>
-                Gizlilik Politikamızı zaman zaman güncelleyebiliriz. Bu nedenle, herhangi bir değişiklik olup olmadığını görmek için bu sayfayı periyodik olarak gözden geçirmeniz tavsiye edilir. Değişiklikler bu sayfada yayımlandıktan hemen sonra yürürlüğe girer.
+                I may update our Privacy Policy from time to time. Thus, you are advised to review this page periodically for any changes. Changes are effective immediately after they are posted on this page.
               </p>
             </div>
 
             <div>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Bize Ulaşın</h2>
+              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Contact Us</h2>
               <p>
-                Gizlilik Politikam ile ilgili herhangi bir sorunuz veya öneriniz varsa, benimle iletişime geçmekten çekinmeyin. Bana <a href="mailto:help@keremkk.com.tr" className="text-blue-600 dark:text-blue-400 hover:underline">help@keremkk.com.tr</a> adresinden ulaşabilirsiniz.
+                If you have any questions or suggestions regarding my Privacy Policy, do not hesitate to contact me at <a href="mailto:help@keremkk.com.tr" className="text-blue-600 dark:text-blue-400 hover:underline">help@keremkk.com.tr</a>.
               </p>
             </div>
           </div>
