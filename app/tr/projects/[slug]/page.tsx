@@ -13,8 +13,8 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { slug } = await params;
-    const category = getCategoryBySlug(slug, "en");
-    if (!category) return { title: "Project Not Found" };
+    const category = getCategoryBySlug(slug, "tr");
+    if (!category) return { title: "Proje Bulunamadı" };
 
     return {
         title: `${category.info.name} - Kerem Kuyucu`,
@@ -22,17 +22,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         openGraph: {
             title: `${category.info.name} - Kerem Kuyucu`,
             description: category.info.description,
-            url: `https://keremkk.com.tr/projects/${slug}`,
+            url: `https://keremkk.com.tr/tr/projects/${slug}`,
             siteName: "Kerem Kuyucu",
-            locale: "en_US",
+            locale: "tr_TR",
             type: "website",
         },
     };
 }
 
-export default async function ProjectDetailPage({ params }: PageProps) {
+export default async function TurkishProjectDetailPage({ params }: PageProps) {
     const { slug } = await params;
-    const category = getCategoryBySlug(slug, "en");
+    const category = getCategoryBySlug(slug, "tr");
 
     if (!category) {
         notFound();
@@ -43,7 +43,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
             categoryKey={category.key}
             categoryInfo={category.info}
             projects={category.projects}
-            lang="en"
+            lang="tr"
         />
     );
 }

@@ -1,74 +1,20 @@
 "use client";
+import React from "react";
 import { FaCertificate } from "react-icons/fa";
+import { translations, Language } from "@/app/data/translations";
 
-const certificates = [
-    {
-        title: "Mobil Uygulama",
-        issuedBy: "Deneyap",
-        link: "https://drdogrulama.sanayi.gov.tr/tr/verify/46284815765408/",
-        image: "https://drdepo.sanayi.gov.tr/verified-bucket/cert/46284815765408.png",
-    },
-    {
-        title: "Havacılık ve Uzay",
-        issuedBy: "Deneyap",
-        link: "https://drdogrulama.sanayi.gov.tr/tr/verify/94718028006695/",
-        image: "https://drdepo.sanayi.gov.tr/verified-bucket/cert/94718028006695.png",
-    },
-    {
-        title: "Nanoteknoloji",
-        issuedBy: "Deneyap",
-        link: "https://drdogrulama.sanayi.gov.tr/tr/verify/73128913915133/",
-        image: "https://drdepo.sanayi.gov.tr/verified-bucket/cert/73128913915133.png",
-    },
-    {
-        title: "Siber Güvenlik",
-        issuedBy: "Deneyap",
-        link: "https://drdogrulama.sanayi.gov.tr/tr/verify/90969521776686/",
-        image: "https://drdepo.sanayi.gov.tr/verified-bucket/cert/90969521776686.png",
-    },
-    {
-        title: "Yazılım Teknolojileri",
-        issuedBy: "Deneyap",
-        link: "https://drdogrulama.sanayi.gov.tr/tr/verify/55126453824614/",
-        image: "https://drdepo.sanayi.gov.tr/verified-bucket/cert/55126453824614.png",
-    },
-    {
-        title: "İleri Robotik",
-        issuedBy: "Deneyap",
-        link: "https://drdogrulama.sanayi.gov.tr/tr/verify/61116175771908/",
-        image: "https://drdepo.sanayi.gov.tr/verified-bucket/cert/61116175771908.png",
-    },
-    {
-        title: "Elektronik Programlama",
-        issuedBy: "Deneyap",
-        link: "https://drdogrulama.sanayi.gov.tr/tr/verify/75809686615656/",
-        image: "https://drdepo.sanayi.gov.tr/verified-bucket/cert/75809686615656.png",
-    },
-    {
-        title: "Robotik ve Kodlama",
-        issuedBy: "Deneyap",
-        link: "https://drdogrulama.sanayi.gov.tr/tr/verify/52013621048830/",
-        image: "https://drdepo.sanayi.gov.tr/verified-bucket/cert/52013621048830.png",
-    },
-    {
-        title: "Tasarım ve Üretim",
-        issuedBy: "Deneyap",
-        link: "https://drdogrulama.sanayi.gov.tr/tr/verify/27701996921054/",
-        image: "https://drdepo.sanayi.gov.tr/verified-bucket/cert/27701996921054.png",
-    },
-    {
-        title: "Yapay Zeka",
-        issuedBy: "Deneyap",
-        link: "https://drdogrulama.sanayi.gov.tr/tr/verify/29435665655018/",
-        image: "https://drdepo.sanayi.gov.tr/verified-bucket/cert/29435665655018.png",
-    },
-];
+interface CertificatesSectionProps {
+    lang?: Language;
+}
 
-const CertificatesSection: React.FC = () => {
+const CertificatesSection: React.FC<CertificatesSectionProps> = ({ lang = "en" }) => {
+    const t = translations[lang].about;
+    const certificates = t.certificatesList;
+
     return (
         <div className="lg:col-span-8">
             <h3 className="flex items-center gap-2 text-2xl font-bold mb-8 scroll-reveal text-gray-900 dark:text-white">
-                <FaCertificate className="text-orange-500" /> Sertifikalar
+                <FaCertificate className="text-orange-500" /> {t.certificatesTitle}
             </h3>
 
             <div className="grid sm:grid-cols-2 gap-6">
@@ -96,7 +42,7 @@ const CertificatesSection: React.FC = () => {
                             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{cert.issuedBy}</p>
 
                             <div className="mt-auto flex items-center text-sm font-semibold text-orange-500 opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                                Sertifikayı Doğrula <span className="ml-1">→</span>
+                                {t.verifyCertificate} <span className="ml-1">→</span>
                             </div>
                         </div>
                     </a>

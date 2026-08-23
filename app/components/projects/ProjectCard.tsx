@@ -3,9 +3,9 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { FaGithub, FaExternalLinkAlt, FaCode, FaCheckCircle, FaLock, FaStar, FaCodeBranch, FaEye, FaArrowRight, FaWindows } from "react-icons/fa";
 import { SiFlutter, SiNextdotjs, SiCplusplus, SiDart, SiSupabase, SiFirebase, SiTypescript, SiTailwindcss, SiResend, SiAutohotkey } from "react-icons/si";
-import { projectsByCategory, categoryInfo } from "@/app/data/projects";
+import { getProjectsByCategory, getCategoryInfo } from "@/app/data/projects";
 import { Project } from "@/app/types";
-
+import { translations, Language } from "@/app/data/translations";
 
 const fallbackImage = "/imgs/errorimage.webp";
 
@@ -37,9 +37,10 @@ type ProjectCardProps = Project & {
   forks?: number;
   language?: string | null;
   watchers?: number;
+  lang?: Language;
 };
 
-const ProjectCard: React.FC<ProjectCardProps> = ({
+export const ProjectCard: React.FC<ProjectCardProps> = ({
   imageUrl,
   altText,
   isNew,
@@ -60,9 +61,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   index,
   categoryGradient,
   categorySlug,
+  lang = "en",
 }) => {
   const [imageError, setImageError] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
+  const [, setIsHovered] = useState(false);
+  const t = translations[lang].projects;
+
+  const detailHref = lang === "tr" ? `/tr/projects/${categorySlug}` : `/projects/${categorySlug}`;
 
   return (
     <div
@@ -81,33 +86,32 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         />
 
         {/* Gradient Overlay */}
-        <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
         {/* Badges */}
         <div className="absolute top-4 left-4 flex flex-wrap gap-2 max-w-[calc(100%-2rem)]">
           {isPrivate && (
             <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-yellow-500 to-amber-600 text-white shadow-lg flex items-center gap-1.5">
               <FaLock className="text-[10px]" />
-              Private
+              {t.badges.private}
             </span>
           )}
           {isNew && (
             <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-lg animate-pulse">
-              ✨ Yeni
+              {t.badges.new}
             </span>
           )}
           {isDeveloping && (
             <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-blue-400 to-cyan-500 text-white shadow-lg">
-              🚧 Geliştiriliyor
+              {t.badges.developing}
             </span>
           )}
           {isArchived && (
             <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-gray-500 to-gray-600 text-white shadow-lg">
-              📦 Arşivlendi
+              {t.badges.archived}
             </span>
           )}
         </div>
-
       </div>
 
       {/* Content */}
@@ -186,7 +190,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>Son commit: {lastCommit}</span>
+            <span>{t.lastCommit} {lastCommit}</span>
           </div>
         )}
 
@@ -194,11 +198,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         <div className="flex gap-3 pt-2 border-t border-gray-200 dark:border-gray-800">
           {categorySlug && (
             <Link
-              href={`/projects/${categorySlug}`}
+              href={detailHref}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r ${categoryGradient} hover:shadow-lg transition-all duration-300 hover:scale-[1.02]`}
             >
               <FaArrowRight className="text-xs" />
-              Tüm Detaylar
+              {t.allDetails}
             </Link>
           )}
           {githubLink && !isPrivate && (
@@ -209,7 +213,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300 hover:scale-[1.02]"
             >
               <FaGithub />
-              GitHub
+              {t.github}
             </a>
           )}
           {viewLink && (
@@ -220,13 +224,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 hover:scale-[1.02]"
             >
               <FaExternalLinkAlt className="text-xs" />
-              Önizleme
+              {t.preview}
             </a>
           )}
           {isPrivate && (
             <div className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-60">
               <FaLock className="text-xs" />
-              Private Repo
+              {t.privateRepo}
             </div>
           )}
         </div>
@@ -235,11 +239,19 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   );
 };
 
-const ProjelerSection: React.FC = () => {
+interface ProjelerSectionProps {
+  lang?: Language;
+}
+
+const ProjelerSection: React.FC<ProjelerSectionProps> = ({ lang = "en" }) => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [githubData, setGithubData] = useState<{ [key: string]: { lastCommit: string; isArchived: boolean; stars: number; forks: number; language: string | null; isPrivate: boolean; watchers: number; } }>({});
-  const [isLoadingGithub, setIsLoadingGithub] = useState(false);
+  const [, setIsLoadingGithub] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
+
+  const t = translations[lang].projects;
+  const projectsByCategory = getProjectsByCategory(lang);
+  const categoryInfo = getCategoryInfo(lang);
 
   // Extract repo names from GitHub links
   const extractRepoName = (githubLink: string): string | null => {
@@ -275,7 +287,7 @@ const ProjelerSection: React.FC = () => {
     };
 
     fetchGithubData();
-  }, []);
+  }, [projectsByCategory]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -319,13 +331,13 @@ const ProjelerSection: React.FC = () => {
         <section className="relative pt-32 pb-8 px-6">
           <div className="container mx-auto max-w-6xl relative z-10 text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-4 text-white">
-              Tüm{" "}
+              {t.titlePrefix}{" "}
               <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent">
-                Projelerim
+                {t.titleHighlight}
               </span>
             </h1>
             <p className="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
-              Geliştirdiğim projeler kategorilere ayrılmış şekilde. Detayları görüntülemek için bir kategori seçin.
+              {t.subtitle}
             </p>
           </div>
         </section>
@@ -395,6 +407,7 @@ const ProjelerSection: React.FC = () => {
                     index={index}
                     categoryGradient={categoryInfo[activeCategory]?.gradient || "from-gray-500 to-gray-600"}
                     categorySlug={categoryInfo[activeCategory]?.slug}
+                    lang={lang}
                   />
                 </div>
               );
@@ -409,10 +422,10 @@ const ProjelerSection: React.FC = () => {
               <FaCode className="text-4xl text-violet-500" />
             </div>
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              Bir Kategori Seçin
+              {t.selectCategory}
             </h3>
             <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-              Yukarıdaki kategorilerden birine tıklayarak projelerimi keşfedebilirsiniz.
+              {t.selectCategoryHint}
             </p>
 
             {/* Quick Stats */}
@@ -421,13 +434,13 @@ const ProjelerSection: React.FC = () => {
                 <p className="text-3xl font-bold bg-gradient-to-r from-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
                   {Object.values(projectsByCategory).flat().length}
                 </p>
-                <p className="text-sm text-gray-500">Toplam Proje</p>
+                <p className="text-sm text-gray-500">{t.totalProjects}</p>
               </div>
               <div className="text-center">
                 <p className="text-3xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
                   {categories.length}
                 </p>
-                <p className="text-sm text-gray-500">Kategori</p>
+                <p className="text-sm text-gray-500">{t.categoriesCount}</p>
               </div>
             </div>
           </div>

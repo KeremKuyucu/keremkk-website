@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   FaEnvelope,
   FaGithub,
@@ -17,11 +18,12 @@ import {
   FaPaperPlane,
 } from "react-icons/fa";
 import { FaSignalMessenger } from "react-icons/fa6";
+import { translations, Language } from "@/app/data/translations";
 
 export const socialLinks = [
   {
     href: "mailto:contact@keremkk.com.tr",
-    label: "E-posta",
+    label: "Email",
     icon: <FaEnvelope />,
     color: "from-blue-500 to-cyan-500",
     shadow: "shadow-blue-500/20",
@@ -55,13 +57,6 @@ export const socialLinks = [
     color: "from-sky-500 to-blue-500",
     shadow: "shadow-sky-500/20",
   },
-];
-
-const navLinks = [
-  { href: "/", label: "Ana Sayfa", icon: FaHome },
-  { href: "/about", label: "Hakkımda", icon: FaUser },
-  { href: "/projects", label: "Projeler", icon: FaProjectDiagram },
-  { href: "/contact", label: "İletişim", icon: FaPaperPlane },
 ];
 
 const SocialButton = ({
@@ -102,6 +97,19 @@ const SocialButton = ({
 );
 
 const FooterComponent: React.FC = () => {
+  const pathname = usePathname() || "/";
+  const isTr = pathname === "/tr" || pathname.startsWith("/tr/");
+  const lang: Language = isTr ? "tr" : "en";
+  const t = translations[lang];
+  const basePath = isTr ? "/tr" : "";
+
+  const navLinks = [
+    { href: isTr ? "/tr" : "/", label: t.nav.home, icon: FaHome },
+    { href: `${basePath}/about`, label: t.nav.about, icon: FaUser },
+    { href: `${basePath}/projects`, label: t.nav.projects, icon: FaProjectDiagram },
+    { href: `${basePath}/contact`, label: t.nav.contact, icon: FaPaperPlane },
+  ];
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -126,25 +134,24 @@ const FooterComponent: React.FC = () => {
           {/* Brand Column */}
           <div className="md:col-span-1">
             <Link
-              href="/"
+              href={isTr ? "/tr" : "/"}
               className="inline-block text-3xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent mb-4 hover:opacity-80 transition-opacity"
             >
               KK
             </Link>
             <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-xs">
-              Hobi projeleri üreterek kendimi geliştiriyorum. Modern teknolojiler
-              ile yaratıcı çözümler tasarlıyorum.
+              {t.footer.brandBio}
             </p>
             <div className="flex items-center gap-2 mt-4 text-xs text-gray-400 dark:text-gray-500">
               <FaRocket className="text-violet-500" />
-              <span>Yeni projeler geliştiriyorum</span>
+              <span>{t.footer.status}</span>
             </div>
           </div>
 
           {/* Quick Links */}
           <div className="md:col-span-1">
             <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4">
-              Hızlı Linkler
+              {t.footer.quickLinks}
             </h3>
             <nav className="flex flex-col gap-2.5">
               {navLinks.map((link) => (
@@ -163,7 +170,7 @@ const FooterComponent: React.FC = () => {
           {/* Social & Contact */}
           <div className="md:col-span-1">
             <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4">
-              Bağlantılar
+              {t.footer.connections}
             </h3>
             <div className="flex flex-wrap gap-2.5 mb-6">
               {socialLinks.map((link) => (
@@ -171,7 +178,7 @@ const FooterComponent: React.FC = () => {
               ))}
             </div>
             <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed">
-              Proje fikirleri veya iş birliği teklifleri için iletişime geçebilirsiniz.
+              {t.footer.contactNote}
             </p>
           </div>
         </div>
@@ -184,7 +191,7 @@ const FooterComponent: React.FC = () => {
             <span className="font-medium text-gray-600 dark:text-gray-400">Kerem Kuyucu</span>
             <span className="text-gray-300 dark:text-gray-700">·</span>
             <span className="inline-flex items-center gap-1">
-              Made with <FaHeart className="text-red-500 text-[10px] animate-pulse" />
+              {t.footer.madeWith} <FaHeart className="text-red-500 text-[10px] animate-pulse" />
             </span>
           </div>
 
@@ -196,13 +203,13 @@ const FooterComponent: React.FC = () => {
               className="group flex items-center gap-1.5 text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
             >
               <FaCode className="group-hover:rotate-12 transition-transform duration-300" />
-              <span>Kaynak Kod</span>
+              <span>{t.footer.sourceCode}</span>
             </a>
 
             <button
               onClick={scrollToTop}
               className="group p-2 rounded-xl bg-gray-100 dark:bg-gray-900 border border-gray-200/50 dark:border-gray-800/50 text-gray-500 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 hover:border-violet-500/30 hover:bg-violet-50 dark:hover:bg-violet-950/30 transition-all duration-300"
-              aria-label="Yukarı çık"
+              aria-label={t.footer.scrollToTop}
             >
               <FaArrowUp className="text-xs group-hover:-translate-y-0.5 transition-transform duration-300" />
             </button>

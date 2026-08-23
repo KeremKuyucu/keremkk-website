@@ -3,8 +3,13 @@ import React from "react";
 import Navbar from "@/app/components/layout/Navbar";
 import FooterComponent from "@/app/components/layout/Footer";
 import ProjectsSection from "@/app/components/projects/ProjectCard";
+import { Language } from "@/app/data/translations";
 
-const ProjectsPageClient: React.FC = () => {
+interface ProjectsPageClientProps {
+  lang?: Language;
+}
+
+const ProjectsPageClient: React.FC<ProjectsPageClientProps> = ({ lang = "en" }) => {
   return (
     <main className="min-h-screen overflow-x-hidden relative">
       <Navbar />
@@ -12,7 +17,7 @@ const ProjectsPageClient: React.FC = () => {
       {/* Hyperspeed background */}
       <div className="relative min-h-screen">
         <div className="relative z-10 w-full min-h-screen bg-transparent">
-          <ProjectsSection />
+          <ProjectsSection lang={lang} />
         </div>
         {/* Smooth fade to footer */}
         <div

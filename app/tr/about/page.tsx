@@ -6,7 +6,7 @@ import AboutHero from "@/app/components/about/AboutHero";
 import EducationSkills from "@/app/components/about/EducationSkills";
 import CertificatesSection from "@/app/components/about/CertificatesSection";
 
-export default function AboutPage() {
+export default function TurkishAboutPage() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -25,13 +25,13 @@ export default function AboutPage() {
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-black transition-colors duration-300 overflow-x-hidden">
       <Navbar />
-      <AboutHero lang="en" />
+      <AboutHero lang="tr" />
 
       {/* Main Content Grid */}
       <section className="py-20 px-6 max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-12 gap-12">
-          <EducationSkills lang="en" />
-          <CertificatesSection lang="en" />
+          <EducationSkills lang="tr" />
+          <CertificatesSection lang="tr" />
         </div>
       </section>
 

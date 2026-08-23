@@ -5,7 +5,7 @@ import FooterComponent from "@/app/components/layout/Footer";
 import HeroSection from "@/app/components/home/HeroSection";
 import TechStackSection from "@/app/components/home/TechStackSection";
 
-export default function Home() {
+export default function TurkishHome() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -27,8 +27,8 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-black transition-colors duration-300 overflow-x-hidden">
       <Navbar />
-      <HeroSection lang="en" />
-      <TechStackSection lang="en" />
+      <HeroSection lang="tr" />
+      <TechStackSection lang="tr" />
       <FooterComponent />
     </main>
   );

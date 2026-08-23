@@ -30,11 +30,12 @@ const productSans = localFont({
     },
   ],
 });
+
 export const metadata: Metadata = {
-  title: "Kerem Kuyucu",
+  title: "Kerem Kuyucu - Full-Stack & Mobile Developer",
   authors: [{ name: "Kerem Kuyucu", url: "https://keremkk.com.tr" }],
-  description: "Merhaba, Ben Kerem. Kendi başıma hobi projeleri üreterek kendimi geliştiriyorum.",
-  keywords: ["Kerem Kuyucu", "Yazılım Geliştirici", "Programlama", "Projeler", "Teknoloji"],
+  description: "Hello, I'm Kerem. Continuously improving by building hobby projects with modern technologies.",
+  keywords: ["Kerem Kuyucu", "Software Developer", "Full-Stack Developer", "Mobile Developer", "Flutter", "Next.js", "Projects"],
   robots: {
     index: true,
     follow: true,
@@ -47,15 +48,14 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Kerem Kuyucu",
-    description: "Merhaba, Ben Kerem. Kendi başıma hobi projeleri üreterek kendimi geliştiriyorum.",
+    title: "Kerem Kuyucu - Full-Stack & Mobile Developer",
+    description: "Hello, I'm Kerem. Continuously improving by building hobby projects with modern technologies.",
     url: "https://keremkk.com.tr",
     siteName: "Kerem Kuyucu",
-    locale: "tr_TR",
+    locale: "en_US",
     type: "website",
   }
 };
-
 
 export default function RootLayout({
   children,
@@ -63,7 +63,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr">
+    <html lang="en">
       <body className={`${productSans.className} antialiased`}>
         {children}
         <Analytics />

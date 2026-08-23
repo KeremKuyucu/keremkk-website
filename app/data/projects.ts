@@ -1,11 +1,76 @@
-// Centralized project data for dynamic stats and consistency
+// Centralized project data for dynamic stats and consistency with bilingual support
 import React from 'react';
 import { FaMobile, FaServer, FaDesktop, FaCode, FaGraduationCap, FaGamepad, FaKeyboard } from 'react-icons/fa';
-
-
 import { Project, CategoryInfo } from '../types';
+import { Language } from './translations';
 
-export const categoryInfo: { [key: string]: CategoryInfo } = {
+export const categoryInfoEN: { [key: string]: CategoryInfo } = {
+    GeoGame: {
+        name: "GeoGame",
+        slug: "geogame",
+        icon: React.createElement(FaMobile, { className: "text-xl" }),
+        gradient: "from-emerald-500 to-teal-600",
+        description: "Geography learning platform with cross-platform support",
+    },
+    OkeyDefteri: {
+        name: "Okey Defteri",
+        slug: "okey-defteri",
+        icon: React.createElement(FaGamepad, { className: "text-xl" }),
+        gradient: "from-emerald-600 to-teal-700",
+        description: "Okey 101 live score & game statistics tracker",
+    },
+    CopilotButton: {
+        name: "Copilot Button",
+        slug: "copilot-button",
+        icon: React.createElement(FaKeyboard, { className: "text-xl" }),
+        gradient: "from-cyan-500 to-blue-600",
+        description: "Media & microphone controller for Windows Copilot key",
+    },
+    PikaMed: {
+        name: "PikaMed",
+        slug: "pikamed",
+        icon: React.createElement(FaServer, { className: "text-xl" }),
+        gradient: "from-rose-500 to-pink-600",
+        description: "AI-assisted healthcare & patient monitoring system",
+    },
+    DiscordStorage: {
+        name: "DiscordStorage",
+        slug: "discordstorage",
+        icon: React.createElement(FaDesktop, { className: "text-xl" }),
+        gradient: "from-violet-500 to-purple-600",
+        description: "File storage and archiving solution over Discord",
+    },
+    Analytics: {
+        name: "Analytics",
+        slug: "analytics",
+        icon: React.createElement(FaCode, { className: "text-xl" }),
+        gradient: "from-amber-500 to-orange-600",
+        description: "Privacy-friendly web analytics & monitoring service",
+    },
+    kısaLink: {
+        name: "kısaLink",
+        slug: "kisalink",
+        icon: React.createElement(FaCode, { className: "text-xl" }),
+        gradient: "from-cyan-500 to-blue-600",
+        description: "Open-source high performance URL shortener",
+    },
+    Auth: {
+        name: "Auth",
+        slug: "auth",
+        icon: React.createElement(FaServer, { className: "text-xl" }),
+        gradient: "from-indigo-500 to-blue-600",
+        description: "Centralized Single Sign-On (SSO) authentication system",
+    },
+    EglYillik: {
+        name: "EglYillik",
+        slug: "eglyillik",
+        icon: React.createElement(FaGraduationCap, { className: "text-xl" }),
+        gradient: "from-red-500 to-blue-600",
+        description: "Interactive digital graduation yearbook platform",
+    },
+};
+
+export const categoryInfoTR: { [key: string]: CategoryInfo } = {
     GeoGame: {
         name: "GeoGame",
         slug: "geogame",
@@ -71,7 +136,201 @@ export const categoryInfo: { [key: string]: CategoryInfo } = {
     },
 };
 
-export const projectsByCategory: { [key: string]: Project[] } = {
+export const projectsByCategoryEN: { [key: string]: Project[] } = {
+    GeoGame: [
+        {
+            imageUrl: "/imgs/projects/geogame.png",
+            altText: "GeoGame",
+            title: "GeoGame - Flutter Version",
+            description: "Cross-platform geography educational game offering rich animations, stateful gameplay, and leaderboard integration.",
+            longDescription: "GeoGame is a cross-platform educational game that tests and improves geography knowledge through interactive game modes including capitals, flags, distance estimation, and continent-based levels. Available on Android, Windows, and Web with English and Turkish support. Utilizes Supabase for leaderboards and user profile management as part of an open-source ecosystem.",
+            features: ["Cross-platform architecture", "Advanced state management", "Modern UI/UX", "Open source"],
+            techStack: ["Flutter", "Dart", "Supabase"],
+            githubLink: "https://github.com/KeremKuyucu/GeoGame",
+            viewLink: "https://geogame.keremkk.com.tr",
+        },
+        {
+            imageUrl: "/imgs/projects/geogamecpp.png",
+            altText: "GeoGame C++",
+            title: "GeoGame - C++ Version",
+            description: "High-performance native desktop game optimized with Windows API and low-level resource management.",
+            longDescription: "The original native desktop implementation of GeoGame built in C++ with the SFML library. Automatically syncs dataset files on startup to ensure up-to-date geography content. Features capital cities, flag identification, and continent quizzes. Archived in favor of the Flutter release.",
+            features: ["Low-latency UI", "Win32 API integration", "Efficient memory management", "Open source"],
+            techStack: ["C++", "SFML"],
+            githubLink: "https://github.com/KeremKuyucu/GeoGameCPP",
+        },
+        {
+            imageUrl: "/imgs/projects/geogamecdn.png",
+            altText: "GeoGame CDN",
+            title: "GeoGame CDN",
+            description: "Dedicated API and static asset delivery service for the GeoGame ecosystem.",
+            longDescription: "Centralized content delivery and data service for GeoGame. Powers country datasets, flags, and geographic metrics. Runs serverless on Next.js API Routes and Vercel edge infrastructure.",
+            features: ["Optimized asset delivery", "Next.js API Routes", "Centralized content", "Open source"],
+            techStack: ["Next.js"],
+            githubLink: "https://github.com/KeremKuyucu/geogame-cdn",
+        }
+    ],
+    OkeyDefteri: [
+        {
+            imageUrl: "/imgs/projects/okeydefteri.jpg",
+            altText: "Okey Defteri",
+            title: "Okey Defteri - Mobile Score Tracker",
+            description: "Live score tracker, tile calculator, and dynamic nickname engine for Okey 101 games.",
+            longDescription: "A modern smart score tracking mobile application designed for Okey 101 matches. Features 4-player table management, single-tap penalty/score entries, end-round tile counting calculator, and paired gameplay support. Includes a dynamic nickname engine that assigns situational titles to players each round, player/team statistics, local SharedPreferences persistence, JSON backups, and automatic update checks via GitHub Releases.",
+            features: ["Live Table & Score Tracking", "Tile Calculator & Stats", "Dynamic Nickname Engine", "Open source"],
+            techStack: ["Flutter", "Dart"],
+            githubLink: "https://github.com/KeremKuyucu/okey-defteri-flutter",
+            isNew: true,
+            isDeveloping: false
+        }
+    ],
+    CopilotButton: [
+        {
+            imageUrl: "/imgs/projects/copilotbutton.jpg",
+            altText: "Copilot Button Controller",
+            title: "Copilot Button - Windows Controller",
+            description: "AutoHotkey tool converting the Windows 11 Copilot key into a game-safe mic mute, media controller, and OSD overlay.",
+            longDescription: "Transforms the hardware Copilot key (Win + Shift + F23) on Windows 11 into a versatile microphone and media controller. Features an anti-modifier leak hook that prevents Shift/Win key locks in full-screen games. Supports 1-4 clicks and long-press gestures for mic muting, Spotify / YouTube Music playback, sleek on-screen OSD overlays, dark-themed GUI, and one-click GitHub updates.",
+            features: ["Anti-Modifier Key Shield", "Mic & Media OSD Control", "Customizable Gestures", "Open source"],
+            techStack: ["AutoHotkey", "Windows"],
+            githubLink: "https://github.com/KeremKuyucu/copilot-button",
+            isNew: true,
+            isDeveloping: false
+        }
+    ],
+    PikaMed: [
+        {
+            imageUrl: "/imgs/projects/pikamed.png",
+            altText: "PikaMed",
+            title: "PikaMed - Health Tracking System",
+            description: "AI-driven mobile health application delivering personalized patient insights and tracking.",
+            longDescription: "A comprehensive healthcare and patient tracking application built as a Deneyap graduation project. Powered by Firebase Authentication, real-time push alerts, and Gemini AI for intelligent diagnostic insights. Features biometric charts, medication tracking, and doctor-patient communications.",
+            features: ["LLM / AI Integration", "Biometric visualization", "User-centric design", "Open source"],
+            techStack: ["Flutter", "Dart"],
+            githubLink: "https://github.com/KeremKuyucu/PikaMed-Mobile",
+        },
+        {
+            imageUrl: "/imgs/projects/pikamedwebsite.png",
+            altText: "PikaMed Website",
+            title: "PikaMed Website",
+            description: "High-performance web landing page showcasing the PikaMed ecosystem and user documentation.",
+            longDescription: "Promotional and documentation website for the PikaMed mobile health ecosystem. Designed as an SEO-optimized, responsive landing page using Next.js with fast load times and clean component architecture.",
+            features: ["SEO Optimization", "Responsive design", "Fast page loads", "Open source"],
+            techStack: ["Next.js"],
+            githubLink: "https://github.com/KeremKuyucu/PikaMed-website",
+            viewLink: "https://pikamed.keremkk.com.tr",
+        },
+        {
+            imageUrl: "/imgs/projects/pikamedapi.png",
+            altText: "PikaMed API",
+            title: "PikaMed API Server",
+            description: "Scalable backend architecture ensuring data integrity and secure communications across PikaMed.",
+            longDescription: "Central backend API connecting mobile clients, admin dashboard, and web services. Features RESTful endpoints for patient data, medical reports, and AI predictions.",
+            features: ["Secure data modeling", "RESTful architecture", "Fast response times", "Open source"],
+            techStack: ["Next.js"],
+            githubLink: "https://github.com/KeremKuyucu/pikamed-apiserver",
+        },
+        {
+            imageUrl: "/imgs/projects/pikamedpanel.png",
+            altText: "PikaMed Panel",
+            title: "PikaMed Admin Dashboard",
+            description: "Operational administration dashboard providing user management and medical analytics.",
+            longDescription: "Administrative panel for PikaMed administrators and doctors. Features Google Auth RBAC, doctor directory management, rich Mailjet notification dispatch, patient records inspection, and dark mode.",
+            features: ["Role-based access control", "Analytics interface", "Real-time monitoring", "Open source"],
+            techStack: ["Next.js"],
+            githubLink: "https://github.com/KeremKuyucu/pikamed-panel",
+        },
+    ],
+    DiscordStorage: [
+        {
+            imageUrl: "/imgs/projects/discordstoragecpp.png",
+            altText: "DiscordStorageCPP",
+            title: "DiscordStorage - C++ Version",
+            description: "Performance-focused desktop client using Discord infrastructure as a distributed file repository.",
+            longDescription: "A native C++ desktop tool providing file storage and retrieval via Discord API. Offers both an interactive CLI and automation modes. Built with LibCurl, DPP, and nlohmann/json.",
+            features: ["Multi-part chunk upload", "Low overhead", "System-level integration", "Open source"],
+            techStack: ["C++", "Win32 API"],
+            githubLink: "https://github.com/KeremKuyucu/DiscordStorageCPP",
+        },
+        {
+            imageUrl: "/imgs/projects/discordstorage.png",
+            altText: "DiscordStorage",
+            title: "DiscordStorage - Flutter Version",
+            description: "Cross-platform graphical client for seamless file archiving through Discord server channels.",
+            longDescription: "Experimental cross-platform storage client using Discord channels as backend storage. Automatically splits large files into multi-part chunks, validates checksums with SHA-256, and supports both Android and Windows desktop.",
+            features: ["File chunking & encryption", "Visual file browser", "Mobile & Desktop", "Open source"],
+            techStack: ["Flutter", "Dart"],
+            githubLink: "https://github.com/KeremKuyucu/DiscordStorage",
+        },
+        {
+            imageUrl: "/imgs/projects/discordstoragedart.png",
+            altText: "DiscordStorageDart",
+            title: "DiscordStorage - Dart CLI",
+            description: "Lightweight command-line tool for fast file uploads and downloads via terminal.",
+            longDescription: "Portable CLI tool written in Dart to replace C++ dependencies. Provides fast upload, download, and listing commands suitable for shell scripts and automated backups.",
+            features: ["Fast CLI commands", "Automation friendly", "Lightweight runtime", "Open source"],
+            techStack: ["Dart"],
+            githubLink: "https://github.com/KeremKuyucu/DiscordStorageDart",
+        },
+    ],
+    Analytics: [
+        {
+            imageUrl: "/imgs/projects/analytics.png",
+            altText: "Analytics",
+            title: "Analytics - Web Dashboard",
+            description: "Privacy-oriented lightweight analytics service tracking web traffic without third-party trackers.",
+            longDescription: "Lightweight, privacy-first web traffic tracking service. Counts unique visits using anonymized UIDs without intrusive third-party scripts. Features a Next.js visualization dashboard with Supabase storage.",
+            features: ["Minimalist JS footprint", "Privacy-first tracking", "Custom dashboard", "Open source"],
+            techStack: ["Next.js", "Supabase"],
+            githubLink: "https://github.com/KeremKuyucu/analytics-service-basic",
+        }
+    ],
+    kısaLink: [
+        {
+            imageUrl: "/imgs/projects/kısalink.png",
+            altText: "kısaLink",
+            title: "kısaLink - URL Shortener",
+            description: "High-throughput serverless URL shortening and link analytics platform with Firebase integration.",
+            longDescription: "Fast, custom URL management and redirection platform. Uses Firebase Realtime Database for instant routing and real-time click tracking on serverless infrastructure.",
+            features: ["Real-time redirects", "Click analytics", "Serverless architecture", "Open source"],
+            techStack: ["Next.js", "Firebase"],
+            githubLink: "https://github.com/KeremKuyucu/shortlink",
+        }
+    ],
+    Auth: [
+        {
+            imageUrl: "/imgs/projects/keremkkauth.png",
+            altText: "KeremKK-Auth",
+            title: "KeremKK-Auth - SSO Service",
+            description: "Single Sign-On (SSO) authentication gateway connecting all ecosystem applications.",
+            longDescription: "Centralized identity provider for all keremkk.com.tr applications. Built upon Supabase Auth and Resend for email verifications, password resets, and seamless single sign-on across GeoGame, Analytics, and tools.",
+            features: ["Secure session management", "Centralized user DB"],
+            techStack: ["Next.js", "Supabase", "Resend"],
+            githubLink: "https://github.com/KeremKuyucu/keremkk-auth",
+            viewLink: "https://accounts.keremkk.com.tr",
+        }
+    ],
+    EglYillik: [
+        {
+            imageUrl: "/imgs/projects/egl-yillik.png",
+            altText: "EGL-Yillik",
+            title: "EGL Yıllık - Digital Yearbook",
+            description: "Modern graduation platform featuring time-locked secret vaults and peer voting systems.",
+            longDescription: "Digital yearbook web application designed for EGL graduates. Features personalized dashboards, memory walls, peer voting, and time-locked secret vaults unlocked on graduation day. Protected by 4-tier RBAC and Supabase Row Level Security.",
+            features: [
+                "Time-Locked Secret Vault Technology",
+                "Advanced RBAC permission control",
+                "Resend-Integrated Notification System",
+            ],
+            techStack: ["Next.js", "Supabase", "Resend", "Tailwind CSS", "TypeScript"],
+            githubLink: "https://github.com/KeremKuyucu/Egl-yillik",
+            isNew: false,
+            isDeveloping: false
+        }
+    ]
+};
+
+export const projectsByCategoryTR: { [key: string]: Project[] } = {
     GeoGame: [
         {
             imageUrl: "/imgs/projects/geogame.png",
@@ -265,32 +524,49 @@ export const projectsByCategory: { [key: string]: Project[] } = {
     ]
 };
 
-// Helper functions for dynamic stats
+// Accessors by language
+export const getCategoryInfo = (lang: Language = "en"): { [key: string]: CategoryInfo } => {
+    return lang === "tr" ? categoryInfoTR : categoryInfoEN;
+};
+
+export const getProjectsByCategory = (lang: Language = "en"): { [key: string]: Project[] } => {
+    return lang === "tr" ? projectsByCategoryTR : projectsByCategoryEN;
+};
+
+// Legacy exports (defaults to English)
+export const categoryInfo = categoryInfoEN;
+export const projectsByCategory = projectsByCategoryEN;
+
+// Dynamic stats helpers
 export const getTotalProjectCount = (): number => {
-    return Object.values(projectsByCategory).flat().length;
+    return Object.values(projectsByCategoryEN).flat().length;
 };
 
 export const getCategoryCount = (): number => {
-    return Object.keys(projectsByCategory).length;
+    return Object.keys(projectsByCategoryEN).length;
 };
 
-// Experience start date (for calculating years of experience)
 export const EXPERIENCE_START_DATE = new Date('2024-02-14');
 
 export const getYearsOfExperience = (): number => {
     const now = new Date();
     const years = now.getFullYear() - EXPERIENCE_START_DATE.getFullYear();
-    return years;
+    return Math.max(years, 2);
 };
 
-// Helper functions for dynamic routing
-export const getCategoryBySlug = (slug: string): { key: string; info: CategoryInfo; projects: Project[] } | null => {
-    const entry = Object.entries(categoryInfo).find(([, info]) => info.slug === slug);
+// Dynamic routing helpers
+export const getCategoryBySlug = (
+    slug: string,
+    lang: Language = "en"
+): { key: string; info: CategoryInfo; projects: Project[] } | null => {
+    const categories = getCategoryInfo(lang);
+    const projectsMap = getProjectsByCategory(lang);
+    const entry = Object.entries(categories).find(([, info]) => info.slug === slug);
     if (!entry) return null;
     const [key, info] = entry;
-    return { key, info, projects: projectsByCategory[key] || [] };
+    return { key, info, projects: projectsMap[key] || [] };
 };
 
 export const getAllCategorySlugs = (): string[] => {
-    return Object.values(categoryInfo).map((info) => info.slug).filter(Boolean) as string[];
+    return Object.values(categoryInfoEN).map((info) => info.slug).filter(Boolean) as string[];
 };

@@ -2,18 +2,18 @@ import { Metadata } from "next";
 import ProjectsPageClient from "@/app/components/projects/ProjectsPageClient";
 
 export const metadata: Metadata = {
-    title: "Projeler - Kerem Kuyucu",
-    description: "Geliştirdiğim tüm projeler. Mobil uygulamalar, web servisleri, masaüstü uygulamaları ve daha fazlası.",
+    title: "Projects - Kerem Kuyucu",
+    description: "Explore all my projects including mobile applications, web services, desktop tools, and open-source software.",
     openGraph: {
-        title: "Projeler - Kerem Kuyucu",
-        description: "Geliştirdiğim tüm projeler. Mobil uygulamalar, web servisleri, masaüstü uygulamaları ve daha fazlası.",
-        url: "https://keremkk.com.tr/projeler",
+        title: "Projects - Kerem Kuyucu",
+        description: "Explore all my projects including mobile applications, web services, desktop tools, and open-source software.",
+        url: "https://keremkk.com.tr/projects",
         siteName: "Kerem Kuyucu",
-        locale: "tr_TR",
+        locale: "en_US",
         type: "website",
     },
 };
 
-export default function ProjelerPage() {
-    return <ProjectsPageClient />;
+export default function ProjectsPage() {
+    return <ProjectsPageClient lang="en" />;
 }

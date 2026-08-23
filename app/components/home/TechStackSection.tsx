@@ -1,16 +1,24 @@
 "use client";
+import React from "react";
 import { skills } from "@/app/data/skills";
+import { translations, Language } from "@/app/data/translations";
 
-const TechStackSection: React.FC = () => {
+interface TechStackSectionProps {
+    lang?: Language;
+}
+
+const TechStackSection: React.FC<TechStackSectionProps> = ({ lang = "en" }) => {
+    const t = translations[lang].home;
+
     return (
         <section className="py-20 px-6 scroll-reveal">
             <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900 dark:text-white">
-                        Kullandığım Teknolojiler
+                        {t.techStackTitle}
                     </h2>
                     <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                        Projelerimde kullandığım modern teknolojiler ve araçlar
+                        {t.techStackSubtitle}
                     </p>
                 </div>
 

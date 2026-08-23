@@ -1,44 +1,24 @@
 "use client";
+import React from "react";
 import { Icon } from "@iconify/react";
 import { FaGraduationCap, FaCode } from "react-icons/fa";
 import { skills } from "@/app/data/skills";
+import { translations, Language } from "@/app/data/translations";
 
-const education = [
-    {
-        school: "Bilecik Şeyh Edebali Üniversitesi",
-        period: "2026-Günümüz",
-        current: true,
-        department: "Elektrik-Elektronik Mühendisliği",
-        city: "Bilecik",
-        country: "Türkiye",
-        description: "Lisans eğitimime Elektrik-Elektronik Mühendisliği bölümünde devam ediyorum.",
-    },
-    {
-        school: "Ertuğrulgazi Lisesi",
-        period: "2022-2026",
-        current: false,
-        department: "Sayısal",
-        city: "Bilecik",
-        country: "Türkiye",
-        description: "Lise eğitimimi sayısal alanda başarıyla tamamladım.",
-    },
-    {
-        school: "Deneyap Teknoloji Atölyeleri",
-        period: "2022-2025",
-        current: false,
-        city: "Bilecik",
-        country: "Türkiye",
-        description: "Robotik kodlama, elektronik programlama ve yapay zeka vb alanlarında 3 yıl süren kapsamlı eğitim.",
-    },
-];
+interface EducationSkillsProps {
+    lang?: Language;
+}
 
-const EducationSkills: React.FC = () => {
+const EducationSkills: React.FC<EducationSkillsProps> = ({ lang = "en" }) => {
+    const t = translations[lang].about;
+    const education = t.educationList;
+
     return (
         <div className="lg:col-span-4 space-y-12">
             {/* Education Timeline */}
             <div className="scroll-reveal">
                 <h3 className="flex items-center gap-2 text-2xl font-bold mb-8 text-gray-900 dark:text-white">
-                    <FaGraduationCap className="text-blue-600" /> Eğitim
+                    <FaGraduationCap className="text-blue-600" /> {t.educationTitle}
                 </h3>
                 <div className="relative border-l-2 border-gray-200 dark:border-gray-800 ml-3 space-y-8 pl-8">
                     {education.map((edu, index) => (
@@ -49,7 +29,7 @@ const EducationSkills: React.FC = () => {
                                     {edu.period}
                                 </span>
                                 <h4 className="text-lg font-bold text-gray-900 dark:text-white">{edu.school}</h4>
-                                <p className="text-blue-600 dark:text-blue-400 text-sm font-medium mb-2">{edu.department || "Öğrenci"}</p>
+                                <p className="text-blue-600 dark:text-blue-400 text-sm font-medium mb-2">{edu.department || t.currentStudent}</p>
                                 <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
                                     {edu.description}
                                 </p>
@@ -62,7 +42,7 @@ const EducationSkills: React.FC = () => {
             {/* Skills */}
             <div className="scroll-reveal delay-200">
                 <h3 className="flex items-center gap-2 text-2xl font-bold mb-6 text-gray-900 dark:text-white">
-                    <FaCode className="text-violet-600" /> Kullandığım Teknolojiler
+                    <FaCode className="text-violet-600" /> {t.skillsTitle}
                 </h3>
                 <div className="grid grid-cols-2 gap-3">
                     {skills.map((skill) => (
@@ -91,8 +71,8 @@ const EducationSkills: React.FC = () => {
                         </svg>
                     </div>
                     <div className="flex-1">
-                        <p className="font-semibold text-gray-900 dark:text-white">Özgeçmişim</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">PDF olarak indir</p>
+                        <p className="font-semibold text-gray-900 dark:text-white">{t.cvTitle}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{t.cvSubtitle}</p>
                     </div>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 group-hover:text-violet-500 group-hover:translate-x-1 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />

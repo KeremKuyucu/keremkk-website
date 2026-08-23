@@ -5,8 +5,13 @@ import Navbar from "@/app/components/layout/Navbar";
 import FooterComponent from "@/app/components/layout/Footer";
 import { FaPaperPlane, FaEnvelope, FaUser, FaTag, FaComment, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import { socialLinks } from "@/app/components/layout/Footer";
+import { translations, Language } from "@/app/data/translations";
 
-const ContactPageClient: React.FC = () => {
+interface ContactPageClientProps {
+    lang?: Language;
+}
+
+const ContactPageClient: React.FC<ContactPageClientProps> = ({ lang = "en" }) => {
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -15,6 +20,7 @@ const ContactPageClient: React.FC = () => {
     });
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
     const [errorMessage, setErrorMessage] = useState("");
+    const t = translations[lang].contact;
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -39,14 +45,14 @@ const ContactPageClient: React.FC = () => {
         // Client-side validation
         if (!formData.name.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
             setStatus("error");
-            setErrorMessage("Lütfen tüm alanları doldurun.");
+            setErrorMessage(t.fillAllFields);
             return;
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(formData.email)) {
             setStatus("error");
-            setErrorMessage("Lütfen geçerli bir e-posta adresi girin.");
+            setErrorMessage(t.invalidEmail);
             return;
         }
 
@@ -66,11 +72,11 @@ const ContactPageClient: React.FC = () => {
             } else {
                 const data = await res.json();
                 setStatus("error");
-                setErrorMessage(data.error || "Mesaj gönderilemedi. Lütfen tekrar deneyin.");
+                setErrorMessage(data.error || t.sendError);
             }
         } catch {
             setStatus("error");
-            setErrorMessage("Bağlantı hatası. Lütfen tekrar deneyin.");
+            setErrorMessage(t.connectionError);
         }
     };
 
@@ -91,21 +97,19 @@ const ContactPageClient: React.FC = () => {
 
             {/* Hero */}
             <section className="relative pt-32 pb-16 px-6 overflow-hidden">
-
                 <div className="container mx-auto max-w-4xl relative z-10 text-center scroll-reveal">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/20 backdrop-blur-sm mb-6">
                         <FaEnvelope className="text-violet-500" />
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-300">İletişime Geçin</span>
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-300">{t.badge}</span>
                     </div>
                     <h1 className="text-4xl md:text-6xl font-bold mb-4 text-gray-900 dark:text-white">
-                        Bir Fikriniz mi Var?{" "}
+                        {t.titlePrefix}{" "}
                         <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent">
-                            Konuşalım.
+                            {t.titleHighlight}
                         </span>
                     </h1>
                     <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
-                        Proje fikirleri, iş birliği teklifleri veya sadece merhaba demek için mesaj gönderin.
-                        En kısa sürede dönüş yapacağım.
+                        {t.subtitle}
                     </p>
                 </div>
             </section>
@@ -126,22 +130,22 @@ const ContactPageClient: React.FC = () => {
                                             <FaCheckCircle className="text-4xl text-emerald-500" />
                                         </div>
                                         <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                                            Mesajınız Gönderildi!
+                                            {t.successTitle}
                                         </h3>
                                         <p className="text-gray-600 dark:text-gray-400 mb-6">
-                                            En kısa sürede size dönüş yapacağım. Teşekkürler!
+                                            {t.successSubtitle}
                                         </p>
                                         <button
                                             onClick={() => setStatus("idle")}
                                             className="px-6 py-3 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-semibold hover:scale-[1.02] transition-all duration-300"
                                         >
-                                            Yeni Mesaj Gönder
+                                            {t.sendNewMessage}
                                         </button>
                                     </div>
                                 ) : (
                                     <form onSubmit={handleSubmit} className="space-y-6">
                                         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                                            Mesaj Gönderin
+                                            {t.formTitle}
                                         </h2>
 
                                         {/* Name */}
@@ -152,7 +156,7 @@ const ContactPageClient: React.FC = () => {
                                                 name="name"
                                                 value={formData.name}
                                                 onChange={handleChange}
-                                                placeholder="Adınız"
+                                                placeholder={t.namePlaceholder}
                                                 className="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300"
                                                 required
                                             />
@@ -166,7 +170,7 @@ const ContactPageClient: React.FC = () => {
                                                 name="email"
                                                 value={formData.email}
                                                 onChange={handleChange}
-                                                placeholder="E-posta adresiniz"
+                                                placeholder={t.emailPlaceholder}
                                                 className="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300"
                                                 required
                                             />
@@ -180,7 +184,7 @@ const ContactPageClient: React.FC = () => {
                                                 name="subject"
                                                 value={formData.subject}
                                                 onChange={handleChange}
-                                                placeholder="Konu"
+                                                placeholder={t.subjectPlaceholder}
                                                 className="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300"
                                                 required
                                             />
@@ -193,7 +197,7 @@ const ContactPageClient: React.FC = () => {
                                                 name="message"
                                                 value={formData.message}
                                                 onChange={handleChange}
-                                                placeholder="Mesajınız..."
+                                                placeholder={t.messagePlaceholder}
                                                 rows={5}
                                                 className="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300 resize-none"
                                                 required
@@ -217,12 +221,12 @@ const ContactPageClient: React.FC = () => {
                                             {status === "loading" ? (
                                                 <>
                                                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                    Gönderiliyor...
+                                                    {t.submittingButton}
                                                 </>
                                             ) : (
                                                 <>
                                                     <FaPaperPlane />
-                                                    Mesajı Gönder
+                                                    {t.submitButton}
                                                 </>
                                             )}
                                         </button>
@@ -237,10 +241,10 @@ const ContactPageClient: React.FC = () => {
                                 {/* Quick Contact Card */}
                                 <div className="bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl rounded-3xl border border-gray-200/50 dark:border-gray-800/50 p-8">
                                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                                        Diğer Kanallar
+                                        {t.otherChannels}
                                     </h3>
                                     <p className="text-gray-600 dark:text-gray-400 text-sm mb-6 leading-relaxed">
-                                        Aşağıdaki platformlardan da bana ulaşabilirsiniz.
+                                        {t.otherChannelsSubtitle}
                                     </p>
 
                                     <div className="space-y-3">
@@ -266,8 +270,6 @@ const ContactPageClient: React.FC = () => {
                                         ))}
                                     </div>
                                 </div>
-
-
                             </div>
                         </div>
                     </div>

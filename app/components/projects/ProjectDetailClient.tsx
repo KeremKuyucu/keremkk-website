@@ -28,6 +28,7 @@ import {
     SiAutohotkey,
 } from "react-icons/si";
 import { Project, CategoryInfo } from "@/app/types";
+import { translations, Language } from "@/app/data/translations";
 
 const getTechIcon = (tech: string) => {
     const iconMap: { [key: string]: React.ReactNode } = {
@@ -52,6 +53,7 @@ interface ProjectDetailClientProps {
     categoryKey: string;
     categoryInfo: CategoryInfo;
     projects: Project[];
+    lang?: Language;
 }
 
 interface GithubData {
@@ -75,9 +77,11 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
     categoryKey,
     categoryInfo: info,
     projects,
+    lang = "en",
 }) => {
     const [githubData, setGithubData] = useState<GithubData>({});
     const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>({});
+    const t = translations[lang].projects;
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -119,6 +123,8 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
         return repo ? githubData[repo] || null : null;
     };
 
+    const backHref = lang === "tr" ? "/tr/projects" : "/projects";
+
     return (
         <main className="min-h-screen bg-transparent overflow-x-hidden relative">
             {/* Page-wide background orbs */}
@@ -137,15 +143,14 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
 
             {/* Hero Section */}
             <section className="relative pt-32 pb-20 px-6 overflow-hidden">
-
                 <div className="container mx-auto max-w-6xl relative z-10">
                     {/* Back Button */}
                     <Link
-                        href="/#projects"
+                        href={backHref}
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-violet-500/50 transition-all duration-300 mb-8 group"
                     >
                         <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-                        <span className="text-sm font-medium">Tüm Projeler</span>
+                        <span className="text-sm font-medium">{t.backToProjects}</span>
                     </Link>
 
                     {/* Category Title */}
@@ -169,7 +174,7 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
                         {/* Stats Bar */}
                         <div className="flex flex-wrap gap-4 mt-6">
                             <div className="px-4 py-2 rounded-xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200 dark:border-gray-800">
-                                <span className="text-sm text-gray-500 dark:text-gray-400">Proje Sayısı</span>
+                                <span className="text-sm text-gray-500 dark:text-gray-400">{t.projectCount}</span>
                                 <p
                                     className={`text-2xl font-bold bg-gradient-to-r ${info.gradient} bg-clip-text text-transparent`}
                                 >
@@ -177,7 +182,7 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
                                 </p>
                             </div>
                             <div className="px-4 py-2 rounded-xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200 dark:border-gray-800">
-                                <span className="text-sm text-gray-500 dark:text-gray-400">Teknolojiler</span>
+                                <span className="text-sm text-gray-500 dark:text-gray-400">{t.technologiesCount}</span>
                                 <p
                                     className={`text-2xl font-bold bg-gradient-to-r ${info.gradient} bg-clip-text text-transparent`}
                                 >
@@ -221,22 +226,22 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
                                                     {ghData?.isPrivate && (
                                                         <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-yellow-500 to-amber-600 text-white shadow-lg flex items-center gap-1.5">
                                                             <FaLock className="text-[10px]" />
-                                                            Private
+                                                            {t.badges.private}
                                                         </span>
                                                     )}
                                                     {project.isNew && (
                                                         <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-lg animate-pulse">
-                                                            ✨ Yeni
+                                                            {t.badges.new}
                                                         </span>
                                                     )}
                                                     {project.isDeveloping && (
                                                         <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-blue-400 to-cyan-500 text-white shadow-lg">
-                                                            🚧 Geliştiriliyor
+                                                            {t.badges.developing}
                                                         </span>
                                                     )}
                                                     {ghData?.isArchived && (
                                                         <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-gray-500 to-gray-600 text-white shadow-lg">
-                                                            📦 Arşivlendi
+                                                            {t.badges.archived}
                                                         </span>
                                                     )}
                                                 </div>
@@ -334,7 +339,7 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
                                                                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                                                             />
                                                         </svg>
-                                                        <span>Son commit: {ghData.lastCommit}</span>
+                                                        <span>{t.lastCommit} {ghData.lastCommit}</span>
                                                     </div>
                                                 )}
 
@@ -348,7 +353,7 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
                                                             className={`inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold text-white bg-gradient-to-r ${info.gradient} hover:shadow-lg hover:scale-[1.02] transition-all duration-300`}
                                                         >
                                                             <FaExternalLinkAlt className="text-xs" />
-                                                            Projeyi Görüntüle
+                                                            {t.viewProject}
                                                         </a>
                                                     )}
                                                     {project.githubLink && !ghData?.isPrivate && (
@@ -359,13 +364,13 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
                                                             className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300 hover:scale-[1.02]"
                                                         >
                                                             <FaGithub />
-                                                            GitHub
+                                                            {t.github}
                                                         </a>
                                                     )}
                                                     {ghData?.isPrivate && (
                                                         <div className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold text-gray-500 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-60">
                                                             <FaLock className="text-xs" />
-                                                            Private Repo
+                                                            {t.privateRepo}
                                                         </div>
                                                     )}
                                                 </div>

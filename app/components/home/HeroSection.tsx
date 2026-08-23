@@ -1,9 +1,11 @@
 "use client";
-import { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
 import { FaGithub, FaCode, FaRocket, FaTerminal } from "react-icons/fa";
-import { roles, skills } from "@/app/data/skills";
+import { skills } from "@/app/data/skills";
 import { getTotalProjectCount, getYearsOfExperience } from "@/app/data/projects";
 import Lightning from "@/app/components/home/Lightning";
+import { translations, Language } from "@/app/data/translations";
 
 const particles = [
     { left: 5, top: 10, delay: 0, duration: 6 },
@@ -28,18 +30,25 @@ const particles = [
     { left: 12, top: 42, delay: 3.2, duration: 6.4 },
 ];
 
-const HeroSection: React.FC = () => {
+interface HeroSectionProps {
+    lang?: Language;
+}
+
+const HeroSection: React.FC<HeroSectionProps> = ({ lang = "en" }) => {
     const [isLoaded, setIsLoaded] = useState(false);
     const [currentRole, setCurrentRole] = useState(0);
     const [displayText, setDisplayText] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
 
+    const t = translations[lang].home;
+    const roles = t.roles;
+
     // Dynamic stats calculated from actual data
     const stats = useMemo(() => [
-        { number: `${getTotalProjectCount()}+`, label: "Proje", icon: FaCode },
-        { number: `${skills.length}+`, label: "Teknoloji", icon: FaRocket },
-        { number: `${getYearsOfExperience()}+`, label: "Yıl Deneyim", icon: FaTerminal },
-    ], []);
+        { number: `${getTotalProjectCount()}+`, label: t.stats.projects, icon: FaCode },
+        { number: `${skills.length}+`, label: t.stats.technologies, icon: FaRocket },
+        { number: `${getYearsOfExperience()}+`, label: t.stats.yearsExperience, icon: FaTerminal },
+    ], [t.stats]);
 
     useEffect(() => {
         setIsLoaded(true);
@@ -47,7 +56,7 @@ const HeroSection: React.FC = () => {
 
     // Typing animation
     useEffect(() => {
-        const currentText = roles[currentRole];
+        const currentText = roles[currentRole % roles.length];
         const timeout = setTimeout(() => {
             if (!isDeleting) {
                 if (displayText.length < currentText.length) {
@@ -66,7 +75,9 @@ const HeroSection: React.FC = () => {
         }, isDeleting ? 50 : 100);
 
         return () => clearTimeout(timeout);
-    }, [displayText, isDeleting, currentRole]);
+    }, [displayText, isDeleting, currentRole, roles]);
+
+    const projectsHref = lang === "tr" ? "/tr/projects" : "/projects";
 
     return (
         <header
@@ -110,14 +121,14 @@ const HeroSection: React.FC = () => {
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                     </span>
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Yeni projeler geliştiriyorum</span>
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300">{t.statusBadge}</span>
                 </div>
 
                 {/* Main Title */}
                 <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
-                    <span className="block text-gray-900 dark:text-white">Merhaba, ben</span>
+                    <span className="block text-gray-900 dark:text-white">{t.greeting}</span>
                     <span className="block bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent animate-gradient-x">
-                        Kerem Kuyucu
+                        {t.name}
                     </span>
                 </h1>
 
@@ -128,21 +139,21 @@ const HeroSection: React.FC = () => {
                         <span className="animate-pulse">|</span>
                     </span>
                     <br />
-                    <span className="text-lg">Hobi projeleri üreterek kendimi geliştiriyorum</span>
+                    <span className="text-lg">{t.bioLine}</span>
                 </p>
 
                 {/* CTA Buttons */}
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-                    <a
-                        href="/projects"
+                    <Link
+                        href={projectsHref}
                         className="group relative px-8 py-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-2xl font-semibold text-lg overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-violet-500/25"
                     >
                         <span className="relative z-10 flex items-center gap-2">
                             <FaRocket className="group-hover:rotate-12 transition-transform" />
-                            Projelerimi Gör
+                            {t.viewProjects}
                         </span>
                         <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </a>
+                    </Link>
                     <a
                         href="https://github.com/KeremKuyucu"
                         target="_blank"
@@ -150,7 +161,7 @@ const HeroSection: React.FC = () => {
                         className="group px-8 py-4 bg-gray-900 dark:bg-white dark:text-gray-900 text-white rounded-2xl font-semibold text-lg flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-xl"
                     >
                         <FaGithub className="text-xl group-hover:rotate-12 transition-transform" />
-                        GitHub Profilim
+                        {t.githubProfile}
                     </a>
                 </div>
 
@@ -176,7 +187,7 @@ const HeroSection: React.FC = () => {
 
             {/* Scroll Indicator */}
             <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce">
-                <span className="text-sm text-gray-500 dark:text-gray-400">Aşağı Kaydır</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">{t.scrollDown}</span>
                 <div className="w-6 h-10 border-2 border-gray-400 dark:border-gray-600 rounded-full flex justify-center pt-2">
                     <div className="w-1.5 h-3 bg-gray-400 dark:bg-gray-600 rounded-full animate-scroll-indicator" />
                 </div>

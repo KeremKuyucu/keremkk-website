@@ -1,11 +1,18 @@
 "use client";
-import Link from "next/link";
+import React from "react";
 import Image from "next/image";
 import profilePic from "../../../public/imgs/logo.png";
 import { FaAward, FaCode } from "react-icons/fa";
 import { socialLinks } from "../layout/Footer";
+import { translations, Language } from "@/app/data/translations";
 
-const AboutHero: React.FC = () => {
+interface AboutHeroProps {
+    lang?: Language;
+}
+
+const AboutHero: React.FC<AboutHeroProps> = ({ lang = "en" }) => {
+    const t = translations[lang].about;
+
     return (
         <section className="relative pt-32 pb-20 px-6">
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
@@ -49,7 +56,7 @@ const AboutHero: React.FC = () => {
                                     <div className="relative z-10 text-gray-500 dark:text-gray-400 group-hover/btn:text-white transition-colors duration-300 text-lg">
                                         {link.icon}
                                     </div>
-                                    {/* Simple Tooltip */}
+                                    {/* Tooltip */}
                                     <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-[10px] rounded opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
                                         {link.label}
                                     </span>
@@ -62,36 +69,36 @@ const AboutHero: React.FC = () => {
                     <div className="text-center md:text-left space-y-6 scroll-reveal" style={{ transitionDelay: "0.2s" }}>
                         <div>
                             <h2 className="text-sm font-bold tracking-wider text-blue-600 dark:text-blue-400 uppercase mb-2">
-                                Hakkımda
+                                {t.badge}
                             </h2>
                             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-                                Ben <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-violet-600">Kerem Kuyucu</span>
+                                {t.greetingPrefix} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-violet-600">{t.greetingName}</span>
                             </h1>
                         </div>
 
                         <div className="space-y-4 text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
                             <p>
-                                <strong className="text-gray-900 dark:text-white">Bilecik Şeyh Edebali Üniversitesi</strong> Elektrik-Elektronik Mühendisliği öğrencisiyim.
-                                Teknolojiye olan tutkum beni sürekli yeni şeyler öğrenmeye ve üretmeye itiyor.
+                                <strong className="text-gray-900 dark:text-white">{t.p1Bold}</strong>
+                                {t.p1Text}
                             </p>
                             <p>
-                                <strong className="text-gray-900 dark:text-white">Full-Stack & Mobile App Developer</strong> olarak
-                                (Flutter, Next.js, C++) projeler geliştiriyorum. Problem çözmeyi, algoritma kurmayı ve temiz kod yazmayı seviyorum.
+                                <strong className="text-gray-900 dark:text-white">{t.p2Bold}</strong>
+                                {t.p2Text}
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center md:justify-start">
                                 <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800">
                                     <FaAward className="text-2xl text-blue-600" />
                                     <div className="text-left">
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Başarı</p>
-                                        <p className="text-sm font-bold text-blue-700 dark:text-blue-300">TÜBİTAK Bölge 3.sü</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{t.achievementLabel}</p>
+                                        <p className="text-sm font-bold text-blue-700 dark:text-blue-300">{t.achievementValue}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3 p-4 bg-violet-50 dark:bg-violet-900/20 rounded-2xl border border-violet-100 dark:border-violet-800">
                                     <FaCode className="text-2xl text-violet-600" />
                                     <div className="text-left">
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Deneyim</p>
-                                        <p className="text-sm font-bold text-violet-700 dark:text-violet-300">2+ Yıl Kodlama</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{t.experienceLabel}</p>
+                                        <p className="text-sm font-bold text-violet-700 dark:text-violet-300">{t.experienceValue}</p>
                                     </div>
                                 </div>
                             </div>
