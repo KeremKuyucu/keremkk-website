@@ -6,8 +6,11 @@ function getCorsHeaders(origin: string | null) {
   if (origin) {
     try {
       const hostname = new URL(origin).hostname;
-      // Allow keremkk.com.tr, its subdomains, and localhost for dev
-      if (hostname === 'keremkk.com.tr' || hostname.endsWith('.keremkk.com.tr')) {
+      // Allow keremkk.com.tr, its subdomains
+      if (
+        hostname === 'keremkk.com.tr' ||
+        hostname.endsWith('.keremkk.com.tr')
+      ) {
         allowedOrigin = origin;
       }
     } catch (e) {
@@ -81,3 +84,47 @@ export async function OPTIONS(request: Request) {
     headers: getCorsHeaders(origin),
   });
 }
+
+/*
+================================================================================
+ 📖 TELEMETRY & APP LOGS API DOKÜMANTASYONU (AGENT & DEVELOPER REHBERİ)
+================================================================================
+
+Bu endpoint, mobil/web uygulamalarından veya arka plan servislerinden gelen
+analitik, telemetri ve olay (event) loglarını toplar.
+
+📍 ENDPOINT BİLGİSİ:
+  - URL: https://keremkk.com.tr/api/logs
+  - Metot     : POST
+  - Başlıklar : Content-Type: application/json
+  - CORS      : keremkk.com.tr, alt alan adları ve localhost desteklenir.
+
+--------------------------------------------------------------------------------
+📥 REQUEST BODY (JSON ŞEMASI):
+--------------------------------------------------------------------------------
+Aşağıdaki 5 alanın TÜMÜ zorunludur:
+
+{
+  "uid": "string",        // [ZORUNLU] Cihaz veya kullanıcıya özel benzersiz ID (UUID / Device ID / User ID)
+  "timestamp": "string",  // [ZORUNLU] ISO-8601 zaman damgası (Örn: "2026-08-27T20:30:00.000Z")
+  "event": "string",      // [ZORUNLU] Olay adı (Örn: "app_opened_daily", "login", "level_completed", "error")
+  "platform": "string",   // [ZORUNLU] Çalıştığı platform ("android", "ios", "web", "windows", "macos", "linux")
+  "app": "string"         // [ZORUNLU] Uygulama adı veya tanımlayıcısı (Örn: "geogame", "portfolio")
+}
+
+* Not: IP Adresi (ip_address) ve Tarayıcı/Cihaz bilgisi (user_agent) istek başlıklarından (headers)
+  sunucu tarafından otomatik olarak ayrıştırılıp veritabanına eklenir.
+
+--------------------------------------------------------------------------------
+📤 YANIT (RESPONSE) FORMATLARI:
+--------------------------------------------------------------------------------
+- 201 Created:
+    { "success": true }
+
+- 400 Bad Request (Eksik parametre):
+    { "error": "Missing required fields" }
+
+- 500 Internal Server Error (Sunucu veya veritabanı hatası):
+    { "error": "Internal Server Error" }
+
+*/

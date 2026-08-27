@@ -4,6 +4,7 @@ import "./globals.css";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { Analytics } from "@vercel/analytics/next";
+import WebsiteVisitorTracker from "@/app/components/analytics/WebsiteVisitorTracker";
 config.autoAddCss = false;
 
 const productSans = localFont({
@@ -67,6 +68,7 @@ export default function RootLayout({
       <body className={`${productSans.className} antialiased`}>
         {children}
         <Analytics />
+        <WebsiteVisitorTracker />
       </body>
     </html>
   );

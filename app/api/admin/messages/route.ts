@@ -29,3 +29,44 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "Failed to fetch messages" }, { status: 500 });
     }
 }
+
+export async function DELETE(request: NextRequest) {
+    try {
+        const authToken = request.headers.get("x-auth-token");
+        const isValid = await validateSession(authToken);
+
+        if (!isValid) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const body = await request.json();
+        const { id, ids } = body;
+
+        const supabase = createAdminClient();
+
+        if (id) {
+            const { error } = await supabase
+                .from('contact_messages')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+            return NextResponse.json({ success: true, deleted: [id] });
+        }
+
+        if (Array.isArray(ids) && ids.length > 0) {
+            const { error } = await supabase
+                .from('contact_messages')
+                .delete()
+                .in('id', ids);
+
+            if (error) throw error;
+            return NextResponse.json({ success: true, deleted: ids });
+        }
+
+        return NextResponse.json({ error: "Missing message ID" }, { status: 400 });
+    } catch (error) {
+        console.error("Error deleting message:", error);
+        return NextResponse.json({ error: "Failed to delete message" }, { status: 500 });
+    }
+}
