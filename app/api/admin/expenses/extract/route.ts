@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { validateSession } from "@/lib/server-utils";
 import { GoogleGenAI, Type } from "@google/genai";
 import * as XLSX from "xlsx";
-import { EXPENSE_CATEGORIES as CATEGORIES } from "@/lib/expense-categories";
+import {
+    EXPENSE_CATEGORIES as CATEGORIES,
+    isExpenseCategory,
+} from "@/lib/expense-categories";
 
 // ---------- Config ----------
 
@@ -10,8 +13,6 @@ const GEMINI_MODEL = "gemini-2.5-flash";
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
 const GEMINI_CHUNK_SIZE = 100;
-
-
 
 // ---------- Types ----------
 
@@ -1017,7 +1018,7 @@ export async function POST(
 
                         const category =
                             classification &&
-                            CATEGORIES.includes(
+                            isExpenseCategory(
                                 classification.category
                             )
                                 ? classification.category
@@ -1102,4 +1103,3 @@ export async function POST(
         );
     }
 }
-

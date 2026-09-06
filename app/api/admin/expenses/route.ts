@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateSession } from "@/lib/server-utils";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { EXPENSE_CATEGORIES as CATEGORIES } from "@/lib/expense-categories";
+import {
+    EXPENSE_CATEGORIES as CATEGORIES,
+    isExpenseCategory,
+} from "@/lib/expense-categories";
 
 // ---------- Types ----------
 
@@ -546,7 +549,7 @@ export async function PATCH(request: NextRequest) {
             );
         }
 
-        if (!CATEGORIES.includes(category)) {
+        if (!isExpenseCategory(category)) {
             return NextResponse.json(
                 {
                     error: "Geçersiz kategori.",

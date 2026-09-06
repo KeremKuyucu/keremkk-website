@@ -38,6 +38,7 @@ import {
     EXPENSE_CATEGORIES as CATEGORIES,
     EXPENSE_CATEGORY_COLORS as CATEGORY_COLORS,
     EXPENSE_CATEGORY_ICONS as CATEGORY_ICONS,
+    isExpenseCategory,
 } from "@/lib/expense-categories";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -524,7 +525,7 @@ export default function ExpenseTracker({
         setEditingExpenseId(expense.id);
         setEditingDescription(expense.description);
         setEditingCategory(
-            CATEGORIES.includes(expense.category)
+            isExpenseCategory(expense.category)
                 ? expense.category
                 : "Diğer"
         );
@@ -559,7 +560,7 @@ export default function ExpenseTracker({
             return;
         }
 
-        if (!CATEGORIES.includes(editingCategory)) {
+        if (!isExpenseCategory(editingCategory)) {
             return;
         }
 

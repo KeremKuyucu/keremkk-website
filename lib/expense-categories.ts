@@ -27,6 +27,14 @@ export const EXPENSE_CATEGORIES = [
 export type ExpenseCategory =
     (typeof EXPENSE_CATEGORIES)[number];
 
+export function isExpenseCategory(
+    value: string
+): value is ExpenseCategory {
+    return EXPENSE_CATEGORIES.some(
+        (category) => category === value
+    );
+}
+
 export const EXPENSE_CATEGORY_COLORS: Record<
     string,
     string
