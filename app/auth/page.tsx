@@ -38,10 +38,10 @@ export default function AuthHomePage() {
           Shared Authentication Service
         </div>
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
-          Kerem Kuyucu&apos;s
+          KeremKK
           <br />
           <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-            Apps & Auth
+            Auth
           </span>
         </h1>
         <p className="text-gray-600 dark:text-gray-400 text-lg leading-relaxed mb-4">
