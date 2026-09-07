@@ -43,8 +43,7 @@ export default function AuthTosEN() {
             <p>
               These Terms of Service govern your use of the shared authentication service provided
               by Kerem Kuyucu (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) and used across all applications
-              developed by Kerem Kuyucu. By creating an account or signing in, you agree to be
-              bound by these terms.
+              developed by Kerem Kuyucu. By signing in, you agree to be bound by these terms.
             </p>
 
             <div>
@@ -63,14 +62,11 @@ export default function AuthTosEN() {
                 2. Account Creation and Security
               </h2>
               <p className="mb-3">
-                When creating an account, you agree to the following:
+                Accounts are created exclusively through Google Sign-In (OAuth 2.0). By signing in,
+                you agree to the following:
               </p>
               <ul className="list-disc pl-6 space-y-2">
-                <li>You agree to provide accurate, current, and complete information.</li>
-                <li>
-                  You are responsible for maintaining the confidentiality of your account
-                  credentials, especially your password.
-                </li>
+                <li>You agree to use a valid and active Google account for sign-in.</li>
                 <li>You are responsible for all activities that occur under your account.</li>
                 <li>
                   If you discover any unauthorized access to your account, you must immediately
@@ -183,11 +179,18 @@ export default function AuthTosEN() {
 
             <div>
               <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
-                8. Age Restriction
+                8. Age and Parental Supervision
               </h2>
+              <p className="mb-3">
+                Our applications are rated PEGI 3 and are designed to be suitable for all ages.
+                Since sign-in is handled through Google Sign-In, users are required to have a
+                valid Google account. Google&apos;s policies on account eligibility for minors apply.
+              </p>
               <p>
-                You must be at least 13 years old to use this service. Users under 13 may only
-                use the service under the direct supervision of a parent or legal guardian.
+                We encourage parents and guardians to supervise their children&apos;s use of our
+                applications. Our apps include built-in parental control features (such as a
+                parental PIN and the option to hide other users&apos; names) accessible from the
+                in-app settings.
               </p>
             </div>
 

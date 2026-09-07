@@ -43,7 +43,7 @@ export default function AuthTosTR() {
             <p>
               Bu Kullanım Koşulları, Kerem Kuyucu tarafından sağlanan ve birden fazla uygulama
               tarafından kullanılan ortak kimlik doğrulama hizmetinin kullanımını düzenlemektedir.
-              Hesap oluşturarak veya giriş yaparak bu koşulları kabul etmiş olursunuz.
+              Giriş yaparak bu koşulları kabul etmiş olursunuz.
             </p>
 
             <div>
@@ -62,11 +62,11 @@ export default function AuthTosTR() {
                 2. Hesap Oluşturma ve Güvenlik
               </h2>
               <p className="mb-3">
-                Hesap oluştururken aşağıdaki kurallara uymayı kabul edersiniz:
+                Hesaplar yalnızca Google ile Giriş (OAuth 2.0) aracılığıyla oluşturulmaktadır.
+                Giriş yaparak aşağıdaki kurallara uymayı kabul edersiniz:
               </p>
               <ul className="list-disc pl-6 space-y-2">
-                <li>Doğru, güncel ve eksiksiz bilgi sağlamayı kabul edersiniz.</li>
-                <li>Hesap kimlik bilgilerinizin (özellikle şifrenizin) gizliliğini korumakla yükümlüsünüz.</li>
+                <li>Giriş için geçerli ve aktif bir Google hesabı kullanmayı kabul edersiniz.</li>
                 <li>Hesabınız altında gerçekleşen tüm faaliyetlerden sorumlusunuz.</li>
                 <li>
                   Hesabınıza yetkisiz erişim tespit ederseniz derhal{" "}
@@ -156,12 +156,19 @@ export default function AuthTosTR() {
 
             <div>
               <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
-                8. Yaş Kısıtlaması
+                8. Yaş ve Ebeveyn Gözetimi
               </h2>
+              <p className="mb-3">
+                Uygulamalarımız PEGI 3 derecelendirmesine sahip olup her yaşa uygun şekilde
+                tasarlanmıştır. Giriş Google ile Giriş üzerinden yapıldığından, kullanıcıların
+                geçerli bir Google hesabına sahip olması gerekmektedir. Küçüklerin hesap
+                uygunluğuna ilişkin Google&apos;ın politikaları geçerlidir.
+              </p>
               <p>
-                Bu hizmeti kullanabilmek için en az 13 yaşında olmanız gerekmektedir. 13 yaşın
-                altındaki kullanıcılar, hizmeti yalnızca bir ebeveyn veya yasal vasi gözetiminde
-                kullanabilir.
+                Ebeveyn ve vasilerin çocuklarının uygulamalarımızı kullanmasını denetlemelerini
+                öneririz. Uygulamalarımız, uygulama içi ayarlardan erişilebilen yerleşik ebeveyn
+                kontrol özelliklerine (ebeveyn PIN&apos;i ve diğer kullanıcıların isimlerini gizleme
+                seçeneği gibi) sahiptir.
               </p>
             </div>
 

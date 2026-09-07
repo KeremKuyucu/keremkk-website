@@ -46,8 +46,8 @@ export default function AuthPrivacyPolicyEN() {
               shared authentication service used across all our applications.
             </p>
             <p>
-              By creating an account or signing in, you agree to the collection and use of
-              information in accordance with this policy.
+              By signing in, you agree to the collection and use of information in accordance with
+              this policy.
             </p>
 
             <div>
@@ -55,26 +55,27 @@ export default function AuthPrivacyPolicyEN() {
                 1. Information We Collect
               </h2>
               <p className="mb-3">
-                When you create an account or sign in, we collect the following information:
+                When you sign in with Google, we receive the following information from your Google
+                account:
               </p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>
-                  <strong>Email address:</strong> Used for account creation, authentication, and
-                  account recovery.
+                  <strong>Email address:</strong> Used for account identification and
+                  authentication.
                 </li>
                 <li>
                   <strong>Display name / Username:</strong> Used to identify you within the
                   applications you use (e.g., leaderboards, profiles).
                 </li>
                 <li>
-                  <strong>Password:</strong> Stored in encrypted form using one-way cryptographic
-                  hashing. Your password is never stored or transmitted in plain text.
-                </li>
-                <li>
-                  <strong>Profile picture (optional):</strong> If you choose to set one, used solely
-                  for display purposes.
+                  <strong>Profile picture (optional):</strong> If provided by your Google account,
+                  used solely for display purposes.
                 </li>
               </ul>
+              <p className="mt-3">
+                We do not collect or store passwords. Authentication is handled entirely through
+                Google Sign-In (OAuth 2.0).
+              </p>
               <p className="mt-3">
                 Additionally, we may collect unique device identifiers and basic usage statistics
                 (e.g., login timestamps) for security and service improvement purposes.
@@ -87,9 +88,8 @@ export default function AuthPrivacyPolicyEN() {
               </h2>
               <ul className="list-disc pl-6 space-y-2">
                 <li>To create and manage your account across our applications.</li>
-                <li>To authenticate your identity when you sign in.</li>
+                <li>To authenticate your identity when you sign in via Google.</li>
                 <li>To enable features such as leaderboards and cross-app profiles.</li>
-                <li>To send essential account-related notifications (e.g., password reset emails).</li>
                 <li>To detect and prevent fraudulent or unauthorized access.</li>
                 <li>To comply with applicable legal obligations.</li>
               </ul>
@@ -100,8 +100,7 @@ export default function AuthPrivacyPolicyEN() {
                 3. Data Storage and Security
               </h2>
               <p>
-                All data is stored securely on the Supabase infrastructure. Passwords are protected
-                using one-way cryptographic hashing and are never stored in plain text. We apply
+                All data is stored securely on the Supabase infrastructure. We apply
                 industry-standard security measures including HTTPS encryption for all data in
                 transit. Your data is retained only as long as necessary to provide and maintain
                 the service or as required by law.
@@ -137,9 +136,19 @@ export default function AuthPrivacyPolicyEN() {
                     rel="noopener noreferrer"
                     className="text-blue-600 dark:text-blue-400 hover:underline"
                   >
-                    Google (Sign-in with Google)
+                    Google (Sign in with Google)
                   </a>{" "}
-                  – Optional OAuth sign-in provider.
+                  – OAuth 2.0 sign-in provider. By signing in with Google, you are also subject
+                  to{" "}
+                  <a
+                    href="https://policies.google.com/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    Google&apos;s Privacy Policy
+                  </a>
+                  .
                 </li>
               </ul>
             </div>
@@ -173,14 +182,43 @@ export default function AuthPrivacyPolicyEN() {
 
             <div>
               <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
-                7. Children&apos;s Privacy
+                7. Children&apos;s Privacy and Parental Controls
               </h2>
-              <p>
-                Our authentication service is not directed to anyone under the age of 13. We do
-                not knowingly collect personal information from children under 13. If you are a
-                parent or guardian and believe your child has provided us with personal
-                information, please contact us immediately so we can take appropriate action.
+              <p className="mb-3">
+                Our applications are rated PEGI 3 and are designed to be suitable for all ages.
+                Sign-in is handled exclusively through Google Sign-In, which means users must
+                have a valid Google account to access the service. Google&apos;s own policies apply
+                regarding account eligibility for minors.
               </p>
+              <p className="mb-3">
+                We do not knowingly collect any personal information beyond what is provided
+                through the Google Sign-In flow. If you are a parent or guardian and have
+                concerns about your child&apos;s use of our applications, please contact us at{" "}
+                <a
+                  href="mailto:help@keremkk.com.tr"
+                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  help@keremkk.com.tr
+                </a>
+                .
+              </p>
+              <p className="mb-3 font-medium text-gray-900 dark:text-white">Parental Controls</p>
+              <p className="mb-3">
+                Our applications include built-in parental control features accessible from the
+                in-app settings:
+              </p>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>
+                  <strong>Parental PIN:</strong> A parent or guardian can set a PIN code in the
+                  app settings to restrict access to certain settings or features, preventing
+                  children from making unauthorized changes.
+                </li>
+                <li>
+                  <strong>Hide Other Users&apos; Names:</strong> A parent or guardian can enable
+                  this option to hide the usernames of other players (e.g., in leaderboards),
+                  helping to protect children from exposure to inappropriate usernames.
+                </li>
+              </ul>
             </div>
 
             <div>

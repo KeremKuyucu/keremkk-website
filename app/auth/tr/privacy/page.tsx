@@ -46,8 +46,8 @@ export default function AuthPrivacyPolicyTR() {
               bilgilerinizin nasıl toplandığını, kullanıldığını ve korunduğunu açıklamaktadır.
             </p>
             <p>
-              Hesap oluşturarak veya giriş yaparak, bu politikaya uygun olarak bilgilerinizin
-              toplanmasını ve kullanılmasını kabul etmiş olursunuz.
+              Giriş yaparak, bu politikaya uygun olarak bilgilerinizin toplanmasını ve
+              kullanılmasını kabul etmiş olursunuz.
             </p>
 
             <div>
@@ -55,26 +55,26 @@ export default function AuthPrivacyPolicyTR() {
                 1. Topladığımız Bilgiler
               </h2>
               <p className="mb-3">
-                Hesap oluştururken veya giriş yaparken aşağıdaki bilgileri toplarız:
+                Google ile giriş yaptığınızda, Google hesabınızdan aşağıdaki bilgileri alırız:
               </p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>
-                  <strong>E-posta adresi:</strong> Hesap oluşturma, kimlik doğrulama ve hesap
-                  kurtarma işlemleri için kullanılır.
+                  <strong>E-posta adresi:</strong> Hesap tanımlama ve kimlik doğrulama için
+                  kullanılır.
                 </li>
                 <li>
                   <strong>Görünen ad / Kullanıcı adı:</strong> Kullandığınız uygulamalarda sizi
                   tanımlamak için kullanılır (örn. skor tabloları, profiller).
                 </li>
                 <li>
-                  <strong>Şifre:</strong> Tek yönlü kriptografik hashleme ile şifrelenmiş olarak
-                  saklanır. Şifreniz hiçbir zaman düz metin olarak depolanmaz veya iletilmez.
-                </li>
-                <li>
-                  <strong>Profil fotoğrafı (isteğe bağlı):</strong> Seçerseniz, yalnızca görüntüleme
-                  amacıyla kullanılır.
+                  <strong>Profil fotoğrafı (isteğe bağlı):</strong> Google hesabınız tarafından
+                  sağlanmışsa, yalnızca görüntüleme amacıyla kullanılır.
                 </li>
               </ul>
+              <p className="mt-3">
+                Şifre toplamıyor veya depolamıyoruz. Kimlik doğrulama tamamen Google ile Giriş
+                (OAuth 2.0) üzerinden gerçekleştirilmektedir.
+              </p>
               <p className="mt-3">
                 Ayrıca güvenlik ve hizmet iyileştirme amacıyla benzersiz cihaz tanımlayıcıları ve
                 temel kullanım istatistikleri (ör. giriş zaman damgaları) toplanabilir.
@@ -87,9 +87,8 @@ export default function AuthPrivacyPolicyTR() {
               </h2>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Uygulamalarımız genelinde hesabınızı oluşturmak ve yönetmek için.</li>
-                <li>Giriş yaptığınızda kimliğinizi doğrulamak için.</li>
+                <li>Google üzerinden giriş yaptığınızda kimliğinizi doğrulamak için.</li>
                 <li>Skor tabloları ve uygulamalar arası profiller gibi özellikleri etkinleştirmek için.</li>
-                <li>Şifre sıfırlama gibi temel hesap bildirimleri göndermek için.</li>
                 <li>Sahte veya yetkisiz erişimi tespit etmek ve önlemek için.</li>
                 <li>Geçerli yasal yükümlülüklere uymak için.</li>
               </ul>
@@ -100,11 +99,10 @@ export default function AuthPrivacyPolicyTR() {
                 3. Veri Depolama ve Güvenlik
               </h2>
               <p>
-                Tüm veriler Supabase altyapısında güvenli bir şekilde depolanır. Şifreler tek yönlü
-                kriptografik hashleme ile korunur ve hiçbir zaman düz metin olarak saklanmaz.
-                Transit halindeki tüm veriler için HTTPS şifrelemesi dahil olmak üzere endüstri
-                standardı güvenlik önlemleri uygulanır. Verileriniz, hizmetin sağlanması ve
-                sürdürülmesi için gerekli olduğu sürece veya yasaların gerektirdiği kadar saklanır.
+                Tüm veriler Supabase altyapısında güvenli bir şekilde depolanır. Transit halindeki
+                tüm veriler için HTTPS şifrelemesi dahil olmak üzere endüstri standardı güvenlik
+                önlemleri uygulanır. Verileriniz, hizmetin sağlanması ve sürdürülmesi için gerekli
+                olduğu sürece veya yasaların gerektirdiği kadar saklanır.
               </p>
             </div>
 
@@ -138,7 +136,16 @@ export default function AuthPrivacyPolicyTR() {
                   >
                     Google (Google ile Giriş)
                   </a>{" "}
-                  – İsteğe bağlı OAuth giriş sağlayıcısı.
+                  – OAuth 2.0 giriş sağlayıcısı. Google ile giriş yaparak{" "}
+                  <a
+                    href="https://policies.google.com/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    Google&apos;ın Gizlilik Politikasını
+                  </a>
+                  {" "}da kabul etmiş olursunuz.
                 </li>
               </ul>
             </div>
@@ -172,14 +179,44 @@ export default function AuthPrivacyPolicyTR() {
 
             <div>
               <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
-                7. Çocukların Gizliliği
+                7. Çocukların Gizliliği ve Ebeveyn Kontrolleri
               </h2>
-              <p>
-                Kimlik doğrulama hizmetimiz 13 yaşın altındaki kişilere yönelik değildir. 13
-                yaşın altındaki çocuklardan bilerek kişisel bilgi toplamıyoruz. Çocuğunuzun bize
-                kişisel bilgi sağladığına inanan ebeveyn veya vasilerin uygun önlem alabilmemiz
-                için derhal bizimle iletişime geçmesini rica ederiz.
+              <p className="mb-3">
+                Uygulamalarımız PEGI 3 derecelendirmesine sahip olup her yaşa uygun şekilde
+                tasarlanmıştır. Giriş yalnızca Google ile Giriş aracılığıyla yapılmaktadır; bu
+                nedenle hizmete erişmek için geçerli bir Google hesabına sahip olunması
+                gerekmektedir. Küçüklerin hesap uygunluğuna ilişkin Google&apos;ın kendi politikaları
+                geçerlidir.
               </p>
+              <p className="mb-3">
+                Google ile Giriş akışı dışında bilerek hiçbir kişisel bilgi toplamıyoruz.
+                Çocuğunuzun uygulamalarımızı kullanımı hakkında endişeleriniz varsa{" "}
+                <a
+                  href="mailto:help@keremkk.com.tr"
+                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  help@keremkk.com.tr
+                </a>
+                {" "}adresinden bizimle iletişime geçebilirsiniz.
+              </p>
+              <p className="mb-3 font-medium text-gray-900 dark:text-white">Ebeveyn Kontrolleri</p>
+              <p className="mb-3">
+                Uygulamalarımız, uygulama içi ayarlardan erişilebilen yerleşik ebeveyn kontrol
+                özelliklerine sahiptir:
+              </p>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>
+                  <strong>Ebeveyn PIN&apos;i:</strong> Bir ebeveyn veya vasi, belirli ayarlara veya
+                  özelliklere erişimi kısıtlamak için uygulama ayarlarından bir PIN kodu
+                  belirleyebilir. Bu sayede çocukların izinsiz değişiklik yapması önlenir.
+                </li>
+                <li>
+                  <strong>Diğer Kullanıcıların İsimlerini Gizle:</strong> Bir ebeveyn veya vasi,
+                  diğer oyuncuların kullanıcı adlarını (ör. skor tablolarında) gizlemek için bu
+                  seçeneği etkinleştirebilir. Bu özellik, çocukların uygunsuz kullanıcı adlarına
+                  maruz kalmasını engellemeye yardımcı olur.
+                </li>
+              </ul>
             </div>
 
             <div>
