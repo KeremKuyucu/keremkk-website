@@ -5,7 +5,11 @@ import { usePathname } from "next/navigation";
 import { FaHome, FaUser, FaCode, FaEnvelope } from "react-icons/fa";
 import { translations, Language } from "@/app/data/translations";
 
-const Navbar: React.FC = () => {
+interface NavbarProps {
+  showLangSwitcher?: boolean;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ showLangSwitcher = true }) => {
   const pathname = usePathname() || "/";
   const isTr = pathname === "/tr" || pathname.startsWith("/tr/");
   const lang: Language = isTr ? "tr" : "en";
@@ -79,28 +83,30 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Language Switcher */}
-          <div className="inline-flex p-1 bg-gray-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-semibold">
-            <Link
-              href={enHref}
-              className={`px-2.5 py-1 rounded-lg transition-all ${
-                !isTr
-                  ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                  : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-              }`}
-            >
-              EN
-            </Link>
-            <Link
-              href={trHref}
-              className={`px-2.5 py-1 rounded-lg transition-all ${
-                isTr
-                  ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                  : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-              }`}
-            >
-              TR
-            </Link>
-          </div>
+          {showLangSwitcher && (
+            <div className="inline-flex p-1 bg-gray-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-semibold">
+              <Link
+                href={enHref}
+                className={`px-2.5 py-1 rounded-lg transition-all ${
+                  !isTr
+                    ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                    : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                }`}
+              >
+                EN
+              </Link>
+              <Link
+                href={trHref}
+                className={`px-2.5 py-1 rounded-lg transition-all ${
+                  isTr
+                    ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                    : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                }`}
+              >
+                TR
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </nav>

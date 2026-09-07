@@ -11,7 +11,7 @@ export const metadata = {
 export default function DeleteAccountPageEN() {
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-black transition-colors duration-300">
-      <Navbar />
+      <Navbar showLangSwitcher={false} />
 
       <section className="pt-32 pb-20 px-6 max-w-4xl mx-auto">
         <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100 dark:border-gray-800">
