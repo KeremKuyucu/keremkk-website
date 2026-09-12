@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Navbar from "@/app/components/layout/Navbar";
 import FooterComponent from "@/app/components/layout/Footer";
+import AuthAppCards from "@/app/components/auth/AuthAppCards";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -8,23 +9,6 @@ export const metadata: Metadata = {
   description:
     "Kerem Kuyucu tarafından geliştirilen uygulamalar ve ortak kimlik doğrulama hizmeti hakkında bilgi edinin.",
 };
-
-const apps = [
-  {
-    name: "GeoGame",
-    description:
-      "An educational geography app where you test your knowledge of capitals, flags, distances, and continents.",
-    icon: "🌍",
-    color: "from-blue-500 to-cyan-400",
-  },
-  {
-    name: "Okey Defteri",
-    description:
-      "A score tracking app for the classic Turkish tile game Okey — keep tallies, track rounds, and settle scores.",
-    icon: "🎲",
-    color: "from-orange-500 to-rose-400",
-  },
-];
 
 export default function AuthHomePage() {
   return (
@@ -63,29 +47,15 @@ export default function AuthHomePage() {
 
       {/* Apps */}
       <section className="pb-20 px-6 max-w-4xl mx-auto">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-8 text-center">
-          Applications using this auth service
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {apps.map((app) => (
-            <div
-              key={app.name}
-              className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col gap-4"
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-12 h-12 rounded-xl bg-gradient-to-br ${app.color} flex items-center justify-center text-2xl shadow-sm`}
-                >
-                  {app.icon}
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{app.name}</h3>
-              </div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed flex-1">
-                {app.description}
-              </p>
-            </div>
-          ))}
+        <div className="text-center mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Applications using this auth service
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Click any application to launch on Android or open the web version.
+          </p>
         </div>
+        <AuthAppCards />
       </section>
 
       {/* Legal Links */}
