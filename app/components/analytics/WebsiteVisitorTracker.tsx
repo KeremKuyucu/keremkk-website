@@ -44,19 +44,8 @@ export default function WebsiteVisitorTracker() {
     const trackVisit = async () => {
       try {
         const uid = getOrCreateVisitorId();
-        const todayStr = new Date().toISOString().split("T")[0];
-        const lastDailyLogKey = "keremkk_last_daily_visit";
-        const lastDailyDate = localStorage.getItem(lastDailyLogKey);
 
-        const isFirstVisitToday = lastDailyDate !== todayStr;
-
-        // If first visit today, send app_opened_daily (for daily unique active metrics)
-        // Otherwise send page_view
-        const eventName = isFirstVisitToday ? "app_opened_daily" : "page_view";
-
-        if (isFirstVisitToday) {
-          localStorage.setItem(lastDailyLogKey, todayStr);
-        }
+        const eventName = "page_view";
 
         const payload = {
           uid,
