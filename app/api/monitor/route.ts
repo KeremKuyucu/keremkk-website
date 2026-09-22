@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getMonitorClient, parseMonitorProjects, MonitorProjectConfig } from '@/lib/supabase/monitor'
+import { getMonitorClient, getMonitorProjects, MonitorProjectConfig } from '@/lib/supabase/monitor'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 // -----------------------------------------------------------------------------
 // Types
@@ -9,6 +10,7 @@ export const runtime = 'nodejs'
 
 type HealthResult = {
     id: string
+    name: string
     status: 'ok' | 'error' | 'timeout'
     data?: unknown
     error?: string
@@ -47,6 +49,7 @@ async function checkProject(project: MonitorProjectConfig): Promise<HealthResult
         if (result.error) {
             return {
                 id: project.id,
+                name: project.name,
                 status: 'error',
                 error: result.error.message,
                 duration,
@@ -56,6 +59,7 @@ async function checkProject(project: MonitorProjectConfig): Promise<HealthResult
 
         return {
             id: project.id,
+            name: project.name,
             status: 'ok',
             data: result.data,
             duration,
@@ -66,6 +70,7 @@ async function checkProject(project: MonitorProjectConfig): Promise<HealthResult
 
         return {
             id: project.id,
+            name: project.name,
             status: err instanceof Error && err.message === 'timeout'
                 ? 'timeout'
                 : 'error',
@@ -82,10 +87,11 @@ async function checkProject(project: MonitorProjectConfig): Promise<HealthResult
 
 export async function GET(req: NextRequest) {
     const expectedParam = req.nextUrl.searchParams.get('expected')
+    let expectedCount: number | null = null
 
     if (expectedParam !== null) {
-        const expected = Number(expectedParam)
-        if (!Number.isInteger(expected) || expected <= 0) {
+        expectedCount = Number(expectedParam)
+        if (!Number.isInteger(expectedCount) || expectedCount <= 0) {
             return NextResponse.json(
                 { error: '`expected` must be a positive integer' },
                 { status: 400, headers: RESPONSE_HEADERS },
@@ -93,30 +99,36 @@ export async function GET(req: NextRequest) {
         }
     }
 
-    const raw = process.env.SUPABASE_MONITOR_PROJECTS
-
-    if (!raw) {
-        return NextResponse.json(
-            { error: 'SUPABASE_MONITOR_PROJECTS not configured' },
-            { status: 503, headers: RESPONSE_HEADERS },
-        )
-    }
-
     let projects: MonitorProjectConfig[]
 
     try {
-        projects = parseMonitorProjects(raw)
-    } catch {
+        projects = await getMonitorProjects()
+    } catch (err) {
+        console.error('[monitor] Error fetching monitor projects from Supabase:', err)
         return NextResponse.json(
-            { error: 'Invalid SUPABASE_MONITOR_PROJECTS format' },
+            {
+                error: 'Failed to fetch monitor projects from database',
+                details: err instanceof Error ? err.message : 'Unknown error',
+            },
             { status: 500, headers: RESPONSE_HEADERS },
         )
     }
 
     if (projects.length === 0) {
         return NextResponse.json(
-            { error: 'No valid projects configured' },
+            { error: 'No active monitor projects found' },
             { status: 503, headers: RESPONSE_HEADERS },
+        )
+    }
+
+    if (expectedCount !== null && projects.length !== expectedCount) {
+        return NextResponse.json(
+            {
+                error: `Project count mismatch: expected ${expectedCount}, but found ${projects.length} configured project(s).`,
+                expected: expectedCount,
+                actual: projects.length,
+            },
+            { status: 409, headers: RESPONSE_HEADERS },
         )
     }
 

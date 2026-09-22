@@ -1,4 +1,10 @@
 {
+  "crons": [
+    {
+      "path": "/api/monitor",
+      "schedule": "0 0 * * *"
+    }
+  ],
   "redirects": [
     {
       "source": "/cv",

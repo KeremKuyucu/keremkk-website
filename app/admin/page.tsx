@@ -5,7 +5,8 @@ import NotesManager from "@/app/components/admin/NotesManager";
 import MessagesManager from "@/app/components/admin/MessagesManager";
 import AnalyticsManager from "@/app/components/admin/AnalyticsManager";
 import ExpenseTracker from "@/app/components/admin/ExpenseTracker";
-import { FaEnvelope } from "react-icons/fa";
+import MonitorManager from "@/app/components/admin/MonitorManager";
+import { FaEnvelope, FaServer } from "react-icons/fa";
 
 // --- Admin Modules Configuration ---
 interface AdminModule {
@@ -39,6 +40,12 @@ const MODULES: AdminModule[] = [
         label: "Harcamalar",
         icon: FaWallet,
         component: ExpenseTracker
+    },
+    {
+        id: "monitor",
+        label: "Monitör",
+        icon: FaServer,
+        component: MonitorManager
     }
 ];
 
