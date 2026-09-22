@@ -47,10 +47,11 @@ interface AnalyticsManagerProps {
 export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
     // Data states
     const [logs, setLogs] = useState<AppLog[]>([]);
+    const [totalInDb, setTotalInDb] = useState<number>(0);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-    const [logLimit, setLogLimit] = useState<number>(300);
+    const [logLimit, setLogLimit] = useState<number | "all">("all");
     const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
 
     // Filters
@@ -58,9 +59,9 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
     const [selectedApp, setSelectedApp] = useState<string>("all");
     const [selectedPlatform, setSelectedPlatform] = useState<string>("all");
     const [selectedEvent, setSelectedEvent] = useState<string>("all");
-    const [selectedDateRange, setSelectedDateRange] = useState<"all" | "today" | "yesterday" | "7d" | "30d">("all");
+    const [selectedDateRange, setSelectedDateRange] = useState<"all" | "today" | "yesterday" | "7d" | "30d" | "90d">("all");
     const [activeChartTab, setActiveChartTab] = useState<"trend" | "hourly" | "platforms" | "events">("trend");
-    const [trendDaysRange, setTrendDaysRange] = useState<7 | 14 | 30 | "all">(14);
+    const [trendDaysRange, setTrendDaysRange] = useState<7 | 14 | 30 | 90 | "all">(14);
 
     // Pagination
     const [currentPage, setCurrentPage] = useState<number>(1);
@@ -81,7 +82,9 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
             });
             if (res.ok) {
                 const data = await res.json();
-                setLogs(data.logs || []);
+                const fetchedLogs = data.logs || [];
+                setLogs(fetchedLogs);
+                setTotalInDb(data.total_count || fetchedLogs.length || 0);
                 setLastUpdated(new Date());
             }
         } catch (e) {
@@ -237,6 +240,14 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
 
     // Filter logs based on all filters
     const filteredLogs = useMemo(() => {
+        const now = new Date();
+        const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const yesterdayMidnight = todayMidnight - 86400000;
+        const sevenDaysAgo = todayMidnight - 7 * 86400000;
+        const thirtyDaysAgo = todayMidnight - 30 * 86400000;
+        const ninetyDaysAgo = todayMidnight - 90 * 86400000;
+        const query = searchQuery.toLowerCase().trim();
+
         return logs.filter(log => {
             // App filter
             if (selectedApp !== "all" && log.app_name !== selectedApp) return false;
@@ -249,21 +260,18 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
 
             // Date Range filter
             if (selectedDateRange !== "all") {
-                const logDate = new Date(log.timestamp);
-                const now = new Date();
-                const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-                const yesterdayMidnight = todayMidnight - 86400000;
-                const logTime = logDate.getTime();
+                const logTime = new Date(log.timestamp).getTime();
+                if (isNaN(logTime)) return false;
 
                 if (selectedDateRange === "today" && logTime < todayMidnight) return false;
                 if (selectedDateRange === "yesterday" && (logTime < yesterdayMidnight || logTime >= todayMidnight)) return false;
-                if (selectedDateRange === "7d" && logTime < todayMidnight - 7 * 86400000) return false;
-                if (selectedDateRange === "30d" && logTime < todayMidnight - 30 * 86400000) return false;
+                if (selectedDateRange === "7d" && logTime < sevenDaysAgo) return false;
+                if (selectedDateRange === "30d" && logTime < thirtyDaysAgo) return false;
+                if (selectedDateRange === "90d" && logTime < ninetyDaysAgo) return false;
             }
 
             // Search query
-            if (searchQuery.trim()) {
-                const query = searchQuery.toLowerCase().trim();
+            if (query) {
                 const matchUid = log.uid?.toLowerCase().includes(query);
                 const matchEvent = log.event?.toLowerCase().includes(query);
                 const matchApp = log.app_name?.toLowerCase().includes(query);
@@ -286,13 +294,17 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
 
     // Aggregations and Metrics
     const metrics = useMemo(() => {
-        const todayStr = new Date().toISOString().split("T")[0];
-        const todayLogs = filteredLogs.filter(l => l.timestamp.startsWith(todayStr));
+        const now = new Date();
+        const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const todayLogs = filteredLogs.filter(l => {
+            const t = new Date(l.timestamp).getTime();
+            return !isNaN(t) && t >= todayMidnight;
+        });
         
         const uniqueUsersAll = new Set(filteredLogs.map(l => l.uid)).size;
         const uniqueUsersToday = new Set(todayLogs.map(l => l.uid)).size;
-        const totalAppOpensToday = todayLogs.filter(l => l.event === "app_opened_daily" || l.event.toLowerCase().includes("open")).length;
-        const totalAppOpensAll = filteredLogs.filter(l => l.event === "app_opened_daily" || l.event.toLowerCase().includes("open")).length;
+        const totalAppOpensToday = todayLogs.filter(l => l.event === "app_opened_daily" || l.event?.toLowerCase().includes("open")).length;
+        const totalAppOpensAll = filteredLogs.filter(l => l.event === "app_opened_daily" || l.event?.toLowerCase().includes("open")).length;
         
         const uniqueIPs = new Set(filteredLogs.map(l => l.ip_address).filter(Boolean)).size;
 
@@ -317,6 +329,7 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
         });
         const topAppEntry = Object.entries(appCounts).sort((a, b) => b[1] - a[1])[0];
         const topApp = topAppEntry ? topAppEntry[0] : "-";
+        const topAppCount = topAppEntry ? topAppEntry[1] : 0;
 
         return {
             uniqueUsersAll,
@@ -326,7 +339,8 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
             totalAppOpensAll,
             uniqueIPs,
             topPlatform,
-            topApp
+            topApp,
+            topAppCount
         };
     }, [filteredLogs]);
 
@@ -336,9 +350,10 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
 
         if (trendDaysRange === "all") {
             filteredLogs.forEach(log => {
-                const dateStr = log.timestamp.split("T")[0];
                 const d = new Date(log.timestamp);
-                const label = isNaN(d.getTime()) ? dateStr : d.toLocaleDateString("tr-TR", { day: "numeric", month: "short" });
+                if (isNaN(d.getTime())) return;
+                const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                const label = d.toLocaleDateString("tr-TR", { day: "numeric", month: "short" });
                 if (!daysMap[dateStr]) {
                     daysMap[dateStr] = { count: 0, uids: new Set<string>(), date: dateStr, label };
                 }
@@ -350,13 +365,15 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
             for (let i = count - 1; i >= 0; i--) {
                 const d = new Date();
                 d.setDate(d.getDate() - i);
-                const dateStr = d.toISOString().split("T")[0];
+                const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
                 const label = d.toLocaleDateString("tr-TR", { day: "numeric", month: "short" });
                 daysMap[dateStr] = { count: 0, uids: new Set<string>(), date: dateStr, label };
             }
 
             filteredLogs.forEach(log => {
-                const dateStr = log.timestamp.split("T")[0];
+                const d = new Date(log.timestamp);
+                if (isNaN(d.getTime())) return;
+                const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
                 if (daysMap[dateStr]) {
                     daysMap[dateStr].count += 1;
                     daysMap[dateStr].uids.add(log.uid);
@@ -518,7 +535,11 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
                             </span>
                         </div>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-                            {lastUpdated ? `Son güncelleme: ${lastUpdated.toLocaleTimeString("tr-TR")}` : "Veriler alınıyor..."} • Toplam {logs.length} kayıt hafızada
+                            {lastUpdated ? `Son güncelleme: ${lastUpdated.toLocaleTimeString("tr-TR")}` : "Veriler alınıyor..."} • {
+                                totalInDb > 0 && logs.length >= totalInDb
+                                    ? `Tüm ${totalInDb.toLocaleString("tr-TR")} kayıt hafızada (Veritabanı ile tam senkron)`
+                                    : `${logs.length.toLocaleString("tr-TR")} / Toplam ${totalInDb.toLocaleString("tr-TR")} kayıt hafızada`
+                            }
                         </p>
                     </div>
                 </div>
@@ -542,14 +563,15 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
                     {/* Limit Selector */}
                     <select
                         value={logLimit}
-                        onChange={(e) => setLogLimit(Number(e.target.value))}
+                        onChange={(e) => setLogLimit(e.target.value === "all" ? "all" : Number(e.target.value))}
                         className="px-3 py-2 text-xs font-semibold bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-gray-700 dark:text-gray-300 outline-none hover:bg-gray-200 dark:hover:bg-zinc-700 cursor-pointer transition-colors"
                         title="Alınacak maksimum log sayısı"
                     >
-                        <option value={100}>100 Log</option>
-                        <option value={300}>300 Log</option>
-                        <option value={500}>500 Log</option>
-                        <option value={1000}>1000 Log</option>
+                        <option value="all">Tüm Loglar {totalInDb > 0 ? `(${totalInDb.toLocaleString("tr-TR")})` : "(Sınırsız)"}</option>
+                        <option value={5000}>Son 5.000 Log</option>
+                        <option value={2000}>Son 2.000 Log</option>
+                        <option value={1000}>Son 1.000 Log</option>
+                        <option value={500}>Son 500 Log</option>
                     </select>
 
                     {/* Manual Refresh */}
@@ -616,11 +638,15 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
                         </div>
                     </div>
                     <div className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
-                        {metrics.totalLogs}
+                        {metrics.totalLogs.toLocaleString("tr-TR")}
                     </div>
                     <div className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-purple-600 dark:text-purple-400 truncate">
                         <FaHistory className="text-[10px] shrink-0" />
-                        <span className="truncate">Tüm logların %{logs.length > 0 ? Math.round((metrics.totalLogs / logs.length) * 100) : 100}</span>
+                        <span className="truncate">
+                            {totalInDb > 0 && metrics.totalLogs === totalInDb
+                                ? "Veritabanındaki tüm kayıtlar (%100)"
+                                : `Tüm kayıtların %${totalInDb > 0 ? Math.round((metrics.totalLogs / totalInDb) * 100) : 100} (${metrics.totalLogs}/${totalInDb})`}
+                        </span>
                     </div>
                 </div>
 
@@ -675,7 +701,7 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
                     </div>
                     <div className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-rose-600 dark:text-rose-400 truncate">
                         <FaLayerGroup className="text-[10px] shrink-0" />
-                        <span className="truncate">En aktif: {metrics.topApp}</span>
+                        <span className="truncate">En aktif: {metrics.topApp} {metrics.topAppCount > 0 ? `(${metrics.topAppCount.toLocaleString("tr-TR")} log)` : ""}</span>
                     </div>
                 </div>
             </div>
@@ -740,7 +766,7 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
                         <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400 px-1">
                             <div className="flex items-center gap-1.5">
                                 <span className="font-semibold text-gray-700 dark:text-gray-300 mr-1">Grafik Aralığı:</span>
-                                {([7, 14, 30, "all"] as const).map((r) => (
+                                {([7, 14, 30, 90, "all"] as const).map((r) => (
                                     <button
                                         key={r}
                                         onClick={() => setTrendDaysRange(r)}
@@ -1011,13 +1037,14 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
                         <span className="text-xs font-semibold text-gray-400 mr-1 flex items-center gap-1">
                             <FaFilter className="text-[10px]" /> Süre:
                         </span>
-                        {(["all", "today", "yesterday", "7d", "30d"] as const).map((range) => {
+                        {(["all", "today", "yesterday", "7d", "30d", "90d"] as const).map((range) => {
                             const labels: Record<string, string> = {
                                 all: "Tümü",
                                 today: "Bugün",
                                 yesterday: "Dün",
                                 "7d": "Son 7 Gün",
-                                "30d": "Son 30 Gün"
+                                "30d": "Son 30 Gün",
+                                "90d": "Son 90 Gün"
                             };
                             return (
                                 <button

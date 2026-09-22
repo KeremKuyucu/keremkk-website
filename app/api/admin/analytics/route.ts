@@ -10,28 +10,57 @@ export async function GET(request: Request) {
 
     try {
         const url = new URL(request.url);
-        const limitParam = parseInt(url.searchParams.get("limit") || "300", 10);
-        const limit = Math.min(Math.max(isNaN(limitParam) ? 300 : limitParam, 10), 1000);
-
+        const limitParam = url.searchParams.get("limit") || "all";
         const appParam = url.searchParams.get("app");
+
+        const isAll = limitParam.toLowerCase() === "all";
+        const targetLimit = isAll ? 20000 : Math.max(parseInt(limitParam, 10) || 300, 10);
 
         const supabase = createAdminClient();
 
-        let query = supabase
-            .from('app_logs')
-            .select('*')
-            .order('timestamp', { ascending: false })
-            .limit(limit);
+        const CHUNK_SIZE = 1000;
+        const allLogs: any[] = [];
+        let from = 0;
+        let totalCount = 0;
 
-        if (appParam && appParam !== "all") {
-            query = query.eq('app_name', appParam);
+        while (allLogs.length < targetLimit) {
+            const currentFetchSize = Math.min(CHUNK_SIZE, targetLimit - allLogs.length);
+            const to = from + currentFetchSize - 1;
+
+            let query = supabase
+                .from('app_logs')
+                .select('*', { count: 'exact' })
+                .order('timestamp', { ascending: false })
+                .range(from, to);
+
+            if (appParam && appParam !== "all") {
+                query = query.eq('app_name', appParam);
+            }
+
+            const { data: logs, count, error: logsError } = await query;
+            if (logsError) throw logsError;
+
+            if (typeof count === 'number') {
+                totalCount = count;
+            }
+
+            if (!logs || logs.length === 0) {
+                break;
+            }
+
+            allLogs.push(...logs);
+
+            if (logs.length < currentFetchSize || (totalCount > 0 && allLogs.length >= totalCount)) {
+                break;
+            }
+
+            from += logs.length;
         }
 
-        const { data: logs, error: logsError } = await query;
-
-        if (logsError) throw logsError;
-
-        return NextResponse.json({ logs: logs || [] });
+        return NextResponse.json({
+            logs: allLogs,
+            total_count: totalCount || allLogs.length
+        });
     } catch (error) {
         console.error("Analytics GET error:", error);
         return NextResponse.json({ error: "Internal Error" }, { status: 500 });
