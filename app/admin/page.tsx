@@ -1,12 +1,13 @@
 "use client";
 import { useState } from "react";
-import { FaLock, FaStickyNote, FaSignOutAlt, FaChartBar, FaWallet } from "react-icons/fa";
+import { FaLock, FaStickyNote, FaSignOutAlt, FaChartBar, FaWallet, FaEnvelope, FaServer, FaLink, FaCreditCard } from "react-icons/fa";
 import NotesManager from "@/app/components/admin/NotesManager";
 import MessagesManager from "@/app/components/admin/MessagesManager";
 import AnalyticsManager from "@/app/components/admin/AnalyticsManager";
 import ExpenseTracker from "@/app/components/admin/ExpenseTracker";
+import SubscriptionManager from "@/app/components/admin/SubscriptionManager";
+import LinkManager from "@/app/components/admin/LinkManager";
 import MonitorManager from "@/app/components/admin/MonitorManager";
-import { FaEnvelope, FaServer } from "react-icons/fa";
 
 // --- Admin Modules Configuration ---
 interface AdminModule {
@@ -40,6 +41,18 @@ const MODULES: AdminModule[] = [
         label: "Harcamalar",
         icon: FaWallet,
         component: ExpenseTracker
+    },
+    {
+        id: "subscriptions",
+        label: "Abonelikler",
+        icon: FaCreditCard,
+        component: SubscriptionManager
+    },
+    {
+        id: "links",
+        label: "Kısa Linkler",
+        icon: FaLink,
+        component: LinkManager
     },
     {
         id: "monitor",
