@@ -8,33 +8,33 @@
   "redirects": [
     {
       "source": "/cv",
-      "destination": "#",
-      "permanent": true
+      "destination": "/go/cv",
+      "permanent": false
     },
     {
       "source": "/github",
-      "destination": "https://github.com/KeremKuyucu",
-      "permanent": true
+      "destination": "/go/github",
+      "permanent": false
     },
     {
       "source": "/linkedin",
-      "destination": "https://www.linkedin.com/in/kerem-kuyucu/",
-      "permanent": true
+      "destination": "/go/linkedin",
+      "permanent": false
     },
     {
       "source": "/signal",
-      "destination": "https://signal.me/#eu/ARcpLe2E-_qPXnH6-I26hgbYj_Qco2bpvsoBu7Be67wvl5fAzPxLWIMrJulQBptb",
-      "permanent": true
+      "destination": "/go/signal",
+      "permanent": false
     },
     {
       "source": "/discord",
-      "destination": "https://discord.com/users/483678328646270996",
-      "permanent": true
+      "destination": "/go/discord",
+      "permanent": false
     },
     {
       "source": "/source-code",
-      "destination": "https://github.com/KeremKuyucu/keremkk-website",
-      "permanent": true
+      "destination": "/go/source-code",
+      "permanent": false
     }
   ]
 }

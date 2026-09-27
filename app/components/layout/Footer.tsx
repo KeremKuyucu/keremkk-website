@@ -30,28 +30,28 @@ export const socialLinks = [
     isMailto: true,
   },
   {
-    href: "/github",
+    href: "/go/github",
     label: "GitHub",
     icon: <FaGithub />,
     color: "from-gray-700 to-black dark:from-gray-600 dark:to-gray-900",
     shadow: "shadow-gray-500/20",
   },
   {
-    href: "/discord",
+    href: "/go/discord",
     label: "Discord",
     icon: <FaDiscord />,
     color: "from-indigo-500 to-violet-500",
     shadow: "shadow-indigo-500/20",
   },
   {
-    href: "/linkedin",
+    href: "/go/linkedin",
     label: "LinkedIn",
     icon: <FaLinkedin />,
     color: "from-blue-600 to-indigo-600",
     shadow: "shadow-blue-600/20",
   },
   {
-    href: "/signal",
+    href: "/go/signal",
     label: "Signal",
     icon: <FaSignalMessenger />,
     color: "from-sky-500 to-blue-500",
@@ -197,7 +197,7 @@ const FooterComponent: React.FC = () => {
 
           <div className="flex items-center gap-4">
             <a
-              href="/source-code"
+              href="/go/source-code"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center gap-1.5 text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"

@@ -155,7 +155,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ lang = "en" }) => {
                         <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </Link>
                     <a
-                        href="https://github.com/KeremKuyucu"
+                        href="/go/github"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="group px-8 py-4 bg-gray-900 dark:bg-white dark:text-gray-900 text-white rounded-2xl font-semibold text-lg flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-xl"
