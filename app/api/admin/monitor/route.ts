@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { validateSession } from "@/lib/server-utils";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import {
+    checkMonitorTarget,
+    recordMonitorResult,
+    MonitorTargetType,
+} from "@/lib/supabase/monitor";
+import { sendMonitorAlertEmail } from "@/lib/email";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,14 +24,21 @@ export async function GET(request: Request) {
         const supabase = createAdminClient();
         const { data: projects, error } = await supabase
             .from("monitor_projects")
-            .select("*")
+            .select("id, name, supabase_url, supabase_key, type, enabled, last_tested_at, last_ping_ms, last_status, last_error, created_at, updated_at")
             .order("created_at", { ascending: true });
 
         if (error) {
             throw error;
         }
 
-        return NextResponse.json({ success: true, projects: projects || [] });
+        // Normalize type
+        const normalized = (projects || []).map((p) => ({
+            ...p,
+            type: (p.type === "website" ? "website" : "supabase") as MonitorTargetType,
+            last_ping_ms: p.last_ping_ms !== undefined && p.last_ping_ms !== null ? Number(p.last_ping_ms) : null,
+        }));
+
+        return NextResponse.json({ success: true, projects: normalized });
     } catch (error) {
         console.error("[admin/monitor] GET error:", error);
         return NextResponse.json(
@@ -47,78 +59,93 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json();
-        const { action, name, supabase_url, supabase_key, enabled } = body;
+        const {
+            action,
+            id,
+            name,
+            type = "supabase",
+            supabase_url,
+            url,
+            supabase_key,
+            enabled,
+            send_alert = true,
+        } = body;
 
-        // Action: Live Health Check Test
+        const targetUrl = String(supabase_url || url || "").trim();
+        const targetType: MonitorTargetType = type === "website" ? "website" : "supabase";
+
+        // Action: Live Health Check Test (Single Target)
         if (action === "test") {
-            if (!supabase_url || !supabase_key) {
+            if (!targetUrl) {
                 return NextResponse.json(
-                    { error: "supabase_url and supabase_key are required for testing" },
+                    { error: "URL adresi zorunludur." },
                     { status: 400 },
                 );
             }
 
-            const cleanUrl = String(supabase_url).trim().replace(/\/+$/, "");
-            const cleanKey = String(supabase_key).trim();
+            if (targetType === "supabase" && !supabase_key) {
+                return NextResponse.json(
+                    { error: "Supabase projeleri için Key zorunludur." },
+                    { status: 400 },
+                );
+            }
 
-            const testClient = createSupabaseClient(cleanUrl, cleanKey, {
-                auth: {
-                    persistSession: false,
-                    autoRefreshToken: false,
-                    detectSessionInUrl: false,
-                },
+            const result = await checkMonitorTarget({
+                id: id || "preview-test",
+                name: name || (targetType === "website" ? "Web Sitesi" : "Supabase Projesi"),
+                type: targetType,
+                url: targetUrl,
+                key: supabase_key,
             });
 
-            const start = Date.now();
-            try {
-                const result = await Promise.race([
-                    testClient.rpc("healthcheck"),
-                    new Promise<never>((_, reject) =>
-                        setTimeout(() => reject(new Error("Timeout (10s)")), 10_000),
-                    ),
-                ]);
+            // Eğer kayıtlı bir proje test edildiyse veritabanına son test tarihini ve ping süresini işle
+            if (id) {
+                await recordMonitorResult(id, result);
 
-                const duration = Date.now() - start;
-
-                if (result.error) {
-                    return NextResponse.json({
-                        ok: false,
-                        status: "error",
-                        error: result.error.message,
-                        duration,
+                // Eğer test başarısız olduysa ve bildirim isteniyorsa e-posta uyarısı gönder
+                if (result.status !== "ok" && send_alert) {
+                    await sendMonitorAlertEmail({
+                        projectName: name || "İzlenen Hedef",
+                        projectType: targetType,
+                        targetUrl,
+                        status: result.status,
+                        error: result.error,
+                        duration: result.duration,
+                        timestamp: result.server_time,
                     });
                 }
-
-                return NextResponse.json({
-                    ok: true,
-                    status: "ok",
-                    data: result.data,
-                    duration,
-                });
-            } catch (testErr) {
-                const duration = Date.now() - start;
-                const isTimeout =
-                    testErr instanceof Error && testErr.message.includes("Timeout");
-                return NextResponse.json({
-                    ok: false,
-                    status: isTimeout ? "timeout" : "error",
-                    error:
-                        testErr instanceof Error ? testErr.message : "Connection failed",
-                    duration,
-                });
             }
+
+            return NextResponse.json({
+                ok: result.status === "ok",
+                status: result.status,
+                duration: result.duration,
+                error: result.error,
+                data: result.data,
+                last_tested_at: result.server_time,
+                last_ping_ms: result.duration,
+                last_status: result.status,
+                last_error: result.error,
+            });
         }
 
         // Action: Create Project
-        if (!name || !supabase_url || !supabase_key) {
+        if (!name || !targetUrl) {
             return NextResponse.json(
-                { error: "Proje adı, Supabase URL ve Key zorunludur." },
+                { error: "Proje / Site adı ve URL zorunludur." },
                 { status: 400 },
             );
         }
 
-        const cleanUrl = String(supabase_url).trim().replace(/\/+$/, "");
-        const cleanKey = String(supabase_key).trim();
+        if (targetType === "supabase" && !supabase_key) {
+            return NextResponse.json(
+                { error: "Supabase projeleri için Anon / Service Key zorunludur." },
+                { status: 400 },
+            );
+        }
+
+        const cleanUrl = targetUrl.replace(/\/+$/, "");
+        const cleanKey = supabase_key ? String(supabase_key).trim() : null;
         const cleanName = String(name).trim();
 
         const supabase = createAdminClient();
@@ -128,6 +155,7 @@ export async function POST(request: Request) {
                 name: cleanName,
                 supabase_url: cleanUrl,
                 supabase_key: cleanKey,
+                type: targetType,
                 enabled: enabled !== undefined ? Boolean(enabled) : true,
                 updated_at: new Date().toISOString(),
             })
@@ -149,7 +177,7 @@ export async function POST(request: Request) {
 }
 
 // -----------------------------------------------------------------------------
-// PUT: Update project (name, url, key, enabled)
+// PUT: Update project (name, type, url, key, enabled)
 // -----------------------------------------------------------------------------
 export async function PUT(request: Request) {
     const token = request.headers.get("x-auth-token");
@@ -159,7 +187,7 @@ export async function PUT(request: Request) {
 
     try {
         const body = await request.json();
-        const { id, name, supabase_url, supabase_key, enabled } = body;
+        const { id, name, type, supabase_url, url, supabase_key, enabled } = body;
 
         if (!id) {
             return NextResponse.json({ error: "Proje ID zorunludur." }, { status: 400 });
@@ -170,10 +198,14 @@ export async function PUT(request: Request) {
         };
 
         if (name !== undefined) updateData.name = String(name).trim();
-        if (supabase_url !== undefined) {
-            updateData.supabase_url = String(supabase_url).trim().replace(/\/+$/, "");
+        if (type !== undefined) updateData.type = type === "website" ? "website" : "supabase";
+        if (supabase_url !== undefined || url !== undefined) {
+            const rawUrl = supabase_url !== undefined ? supabase_url : url;
+            updateData.supabase_url = String(rawUrl).trim().replace(/\/+$/, "");
         }
-        if (supabase_key !== undefined) updateData.supabase_key = String(supabase_key).trim();
+        if (supabase_key !== undefined) {
+            updateData.supabase_key = supabase_key ? String(supabase_key).trim() : null;
+        }
         if (enabled !== undefined) updateData.enabled = Boolean(enabled);
 
         const supabase = createAdminClient();

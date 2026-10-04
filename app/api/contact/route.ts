@@ -1,16 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendEmail } from "@/lib/email";
 
-// ============================================================================
-// 📧 RESEND E-POSTA BİLDİRİM YAPILANDIRMASI
-// ============================================================================
-const RESEND_CONFIG = {
-    host: "smtp.resend.com",
-    port: 465,
-    user: "resend",
-    toEmail: process.env.NOTIFICATION_TO_EMAIL,
-    fromEmail: process.env.NOTIFICATION_FROM_EMAIL,
-};
+
 
 // In-memory sliding window rate limiter
 // Max 3 contact messages per IP within 5 minutes
@@ -139,83 +131,60 @@ export async function POST(request: NextRequest) {
         }
 
         // 6. Notifications
-
         // --- Option A: Resend Email Notification (Direct to Proton Mail / Inbox) ---
-        const resendToken = process.env.RESEND_TOKEN || process.env.RESEND_API_KEY;
-        const toEmail = RESEND_CONFIG.toEmail;
-        const fromEmail = RESEND_CONFIG.fromEmail;
-
-        if (resendToken && toEmail && fromEmail) {
-            try {
-                const emailHtml = `
-                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 28px; background-color: #ffffff; border-radius: 18px; border: 1px solid #e5e7eb;">
-                    <div style="border-bottom: 2px solid #8b5cf6; padding-bottom: 16px; margin-bottom: 24px;">
-                        <h2 style="color: #111827; margin: 0; font-size: 20px; font-weight: 800;">📨 Web Sitenden Yeni İletişim Mesajı</h2>
-                        <p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">keremkk.com.tr üzerinden yeni bir ziyaretçi formu doldurdu</p>
-                    </div>
-
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
-                        <tr>
-                            <td style="padding: 8px 0; color: #6b7280; font-size: 13px; width: 110px;"><strong>Gönderen:</strong></td>
-                            <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: bold;">${escapeHtml(cleanName)}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px 0; color: #6b7280; font-size: 13px;"><strong>E-posta:</strong></td>
-                            <td style="padding: 8px 0; color: #8b5cf6; font-size: 14px; font-weight: bold;">
-                                <a href="mailto:${escapeHtml(cleanEmail)}" style="color: #8b5cf6; text-decoration: none;">${escapeHtml(cleanEmail)}</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px 0; color: #6b7280; font-size: 13px;"><strong>Konu:</strong></td>
-                            <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">${escapeHtml(cleanSubject)}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px 0; color: #6b7280; font-size: 13px;"><strong>IP Adresi:</strong></td>
-                            <td style="padding: 8px 0; color: #4b5563; font-size: 13px; font-family: monospace;">${escapeHtml(ipAddress)}</td>
-                        </tr>
-                    </table>
-
-                    <div style="background-color: #f9fafb; border-radius: 14px; padding: 20px; border-left: 4px solid #8b5cf6; margin-bottom: 24px;">
-                        <p style="color: #6b7280; font-size: 11px; text-transform: uppercase; font-weight: bold; margin: 0 0 8px 0; letter-spacing: 0.5px;">Mesaj:</p>
-                        <p style="color: #1f2937; font-size: 14px; line-height: 1.6; margin: 0; white-space: pre-wrap;">${escapeHtml(cleanMessage)}</p>
-                    </div>
-
-                    <div style="text-align: center; margin: 28px 0;">
-                        <a href="mailto:${escapeHtml(cleanEmail)}?subject=Re: ${encodeURIComponent(cleanSubject)}" style="display: inline-block; background-color: #8b5cf6; color: #ffffff; text-decoration: none; padding: 13px 32px; border-radius: 12px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);">
-                            ✉️ ${escapeHtml(cleanName)} Kişisine Yanıt Ver
-                        </a>
-                    </div>
-
-                    <div style="border-top: 1px solid #f3f4f6; padding-top: 16px; text-align: center; color: #9ca3af; font-size: 11px;">
-                        <span>Cihaz: ${escapeHtml(userAgent.slice(0, 100))}</span> • <span>Tarih: ${new Date().toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" })}</span>
-                    </div>
+        try {
+            const emailHtml = `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 28px; background-color: #ffffff; border-radius: 18px; border: 1px solid #e5e7eb;">
+                <div style="border-bottom: 2px solid #8b5cf6; padding-bottom: 16px; margin-bottom: 24px;">
+                    <h2 style="color: #111827; margin: 0; font-size: 20px; font-weight: 800;">📨 Web Sitenden Yeni İletişim Mesajı</h2>
+                    <p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">keremkk.com.tr üzerinden yeni bir ziyaretçi formu doldurdu</p>
                 </div>
-                `;
 
-                const resendRes = await fetch("https://api.resend.com/emails", {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${resendToken}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        from: fromEmail,
-                        to: [toEmail],
-                        reply_to: cleanEmail,
-                        subject: `📨 Yeni İletişim Mesajı: ${cleanSubject} (${cleanName})`,
-                        html: emailHtml,
-                    }),
-                });
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+                    <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 13px; width: 110px;"><strong>Gönderen:</strong></td>
+                        <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: bold;">${escapeHtml(cleanName)}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 13px;"><strong>E-posta:</strong></td>
+                        <td style="padding: 8px 0; color: #8b5cf6; font-size: 14px; font-weight: bold;">
+                            <a href="mailto:${escapeHtml(cleanEmail)}" style="color: #8b5cf6; text-decoration: none;">${escapeHtml(cleanEmail)}</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 13px;"><strong>Konu:</strong></td>
+                        <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">${escapeHtml(cleanSubject)}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 13px;"><strong>IP Adresi:</strong></td>
+                        <td style="padding: 8px 0; color: #4b5563; font-size: 13px; font-family: monospace;">${escapeHtml(ipAddress)}</td>
+                    </tr>
+                </table>
 
-                if (!resendRes.ok) {
-                    const errText = await resendRes.text();
-                    console.error("Resend API error:", resendRes.status, errText);
-                } else {
-                    console.log("✅ Resend e-posta bildirimi başarıyla gönderildi!");
-                }
-            } catch (resendErr) {
-                console.error("Resend notification error:", resendErr);
-            }
+                <div style="background-color: #f9fafb; border-radius: 14px; padding: 20px; border-left: 4px solid #8b5cf6; margin-bottom: 24px;">
+                    <p style="color: #6b7280; font-size: 11px; text-transform: uppercase; font-weight: bold; margin: 0 0 8px 0; letter-spacing: 0.5px;">Mesaj:</p>
+                    <p style="color: #1f2937; font-size: 14px; line-height: 1.6; margin: 0; white-space: pre-wrap;">${escapeHtml(cleanMessage)}</p>
+                </div>
+
+                <div style="text-align: center; margin: 28px 0;">
+                    <a href="mailto:${escapeHtml(cleanEmail)}?subject=Re: ${encodeURIComponent(cleanSubject)}" style="display: inline-block; background-color: #8b5cf6; color: #ffffff; text-decoration: none; padding: 13px 32px; border-radius: 12px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);">
+                        ✉️ ${escapeHtml(cleanName)} Kişisine Yanıt Ver
+                    </a>
+                </div>
+
+                <div style="border-top: 1px solid #f3f4f6; padding-top: 16px; text-align: center; color: #9ca3af; font-size: 11px;">
+                    <span>Cihaz: ${escapeHtml(userAgent.slice(0, 100))}</span> • <span>Tarih: ${new Date().toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" })}</span>
+                </div>
+            </div>
+            `;
+
+            await sendEmail({
+                replyTo: cleanEmail,
+                subject: `📨 Yeni İletişim Mesajı: ${cleanSubject} (${cleanName})`,
+                html: emailHtml,
+            });
+        } catch (resendErr) {
+            console.error("Resend notification error:", resendErr);
         }
         return NextResponse.json({ success: true, message: "Mesajınız başarıyla gönderildi!" });
     } catch (error) {
