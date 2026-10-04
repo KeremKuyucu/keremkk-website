@@ -10,55 +10,50 @@ export async function GET(request: Request) {
 
     try {
         const url = new URL(request.url);
-        const limitParam = url.searchParams.get("limit") || "all";
+        const limitParam = url.searchParams.get("limit") || "300";
         const appParam = url.searchParams.get("app");
+        const searchParam = url.searchParams.get("search");
 
         const isAll = limitParam.toLowerCase() === "all";
-        const targetLimit = isAll ? 20000 : Math.max(parseInt(limitParam, 10) || 300, 10);
+        const targetLimit = isAll ? 5000 : Math.max(parseInt(limitParam, 10) || 300, 10);
 
         const supabase = createAdminClient();
 
-        const CHUNK_SIZE = 1000;
-        const allLogs: any[] = [];
-        let from = 0;
-        let totalCount = 0;
+        let query = supabase
+            .from("app_error_logs")
+            .select("*", { count: "exact" })
+            .order("timestamp", { ascending: false })
+            .limit(targetLimit);
 
-        while (allLogs.length < targetLimit) {
-            const currentFetchSize = Math.min(CHUNK_SIZE, targetLimit - allLogs.length);
-            const to = from + currentFetchSize - 1;
-
-            let query = supabase
-                .from('app_logs')
-                .select('*', { count: 'exact' })
-                .order('timestamp', { ascending: false })
-                .range(from, to);
-
-            if (appParam && appParam !== "all") {
-                query = query.eq('app_name', appParam);
-            }
-
-            const { data: logs, count, error: logsError } = await query;
-            if (logsError) throw logsError;
-
-            if (typeof count === 'number') {
-                totalCount = count;
-            }
-
-            if (!logs || logs.length === 0) {
-                break;
-            }
-
-            allLogs.push(...logs);
-
-            if (logs.length < currentFetchSize || (totalCount > 0 && allLogs.length >= totalCount)) {
-                break;
-            }
-
-            from += logs.length;
+        if (appParam && appParam !== "all") {
+            query = query.eq("app_name", appParam);
         }
 
+        if (searchParam && searchParam.trim()) {
+            const s = searchParam.trim();
+            query = query.or(`message.ilike.%${s}%,event.ilike.%${s}%,uid.ilike.%${s}%,ip_address.ilike.%${s}%`);
+        }
+
+        const { data: logs, count, error: logsError } = await query;
+
+        if (logsError) {
+            // If table does not exist yet in Supabase
+            if (logsError.code === "42P01" || logsError.message?.includes("does not exist")) {
+                return NextResponse.json({
+                    logs: [],
+                    total_count: 0,
+                    users: {},
+                    tableMissing: true,
+                    error: "Table 'app_error_logs' does not exist yet. Please create it in Supabase.",
+                });
+            }
+            throw logsError;
+        }
+
+        const errorLogs = logs || [];
+
         // Map unique UIDs to Supabase users (auth.users and profiles)
-        const uniqueUids = Array.from(new Set(allLogs.map((l) => l.uid).filter(Boolean)));
+        const uniqueUids = Array.from(new Set(errorLogs.map((l) => l.uid).filter(Boolean)));
         const usersMap: Record<string, { name: string; email?: string; avatar_url?: string }> = {};
 
         try {
@@ -81,7 +76,7 @@ export async function GET(request: Request) {
                 }
             }
         } catch (e) {
-            console.error("Error fetching auth users:", e);
+            console.error("Error fetching auth users for error-logs:", e);
         }
 
         try {
@@ -106,41 +101,17 @@ export async function GET(request: Request) {
                 }
             }
         } catch {
-            // Profiles table may not exist
-        }
-
-        // 3. For any missing UIDs that look like valid UUIDs, try single lookup
-        const missingUids = uniqueUids.filter((uid) => !usersMap[uid] && uid.length === 36);
-        for (const mUid of missingUids.slice(0, 20)) {
-            try {
-                const { data: singleUser } = await supabase.auth.admin.getUserById(mUid);
-                if (singleUser?.user) {
-                    const meta = singleUser.user.user_metadata || {};
-                    const name =
-                        meta.full_name ||
-                        meta.name ||
-                        meta.display_name ||
-                        (singleUser.user.email ? singleUser.user.email.split("@")[0] : null);
-
-                    usersMap[mUid] = {
-                        name: name || "Kayıtlı Kullanıcı",
-                        email: singleUser.user.email,
-                        avatar_url: meta.avatar_url,
-                    };
-                }
-            } catch {
-                // Not a valid auth user
-            }
+            // Ignore if profiles table does not exist
         }
 
         return NextResponse.json({
-            logs: allLogs,
-            total_count: totalCount || allLogs.length,
-            users: usersMap
+            logs: errorLogs,
+            total_count: count ?? errorLogs.length,
+            users: usersMap,
         });
     } catch (error) {
-        console.error("Analytics GET error:", error);
-        return NextResponse.json({ error: "Internal Error" }, { status: 500 });
+        console.error("Admin Error Logs GET error:", error);
+        return NextResponse.json({ error: "Failed to load error logs" }, { status: 500 });
     }
 }
 
@@ -152,15 +123,28 @@ export async function DELETE(request: Request) {
 
     try {
         const body = await request.json();
-        const { id, ids } = body;
+        const { id, ids, clear_all, app } = body;
 
         const supabase = createAdminClient();
 
+        if (clear_all) {
+            let query = supabase.from("app_error_logs").delete();
+            if (app && app !== "all") {
+                query = query.eq("app_name", app);
+            } else {
+                query = query.neq("id", "00000000-0000-0000-0000-000000000000"); // deletes all
+            }
+
+            const { error } = await query;
+            if (error) throw error;
+            return NextResponse.json({ success: true, message: "Cleared all error logs" });
+        }
+
         if (id) {
             const { error } = await supabase
-                .from('app_logs')
+                .from("app_error_logs")
                 .delete()
-                .eq('id', id);
+                .eq("id", id);
 
             if (error) throw error;
             return NextResponse.json({ success: true, deleted: [id] });
@@ -168,9 +152,9 @@ export async function DELETE(request: Request) {
 
         if (Array.isArray(ids) && ids.length > 0) {
             const { error } = await supabase
-                .from('app_logs')
+                .from("app_error_logs")
                 .delete()
-                .in('id', ids);
+                .in("id", ids);
 
             if (error) throw error;
             return NextResponse.json({ success: true, deleted: ids });
@@ -178,7 +162,7 @@ export async function DELETE(request: Request) {
 
         return NextResponse.json({ error: "Missing log ID(s)" }, { status: 400 });
     } catch (error) {
-        console.error("Analytics DELETE error:", error);
+        console.error("Admin Error Logs DELETE error:", error);
         return NextResponse.json({ error: "Internal Error" }, { status: 500 });
     }
 }

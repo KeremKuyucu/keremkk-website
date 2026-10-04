@@ -26,6 +26,7 @@ interface ContactMessage {
     subject: string;
     message: string;
     user_agent?: string;
+    ip_address?: string;
     timestamp: number;
 }
 
@@ -484,11 +485,18 @@ export default function MessagesManager({ authToken }: MessagesManagerProps) {
                             {/* Detail Footer Info */}
                             <div className="p-4 md:p-5 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-zinc-800/30 flex flex-wrap items-center justify-between gap-2 text-[11px] text-gray-400">
                                 <span className="font-mono truncate">ID: {selectedMessage.id}</span>
-                                {selectedMessage.user_agent && (
-                                    <span className="flex items-center gap-1 truncate max-w-xs" title={selectedMessage.user_agent}>
-                                        <FaLaptop className="text-[10px]" /> {selectedMessage.user_agent}
-                                    </span>
-                                )}
+                                <div className="flex items-center gap-3">
+                                    {selectedMessage.ip_address && (
+                                        <span className="font-mono text-gray-500 dark:text-gray-400">
+                                            IP: {selectedMessage.ip_address}
+                                        </span>
+                                    )}
+                                    {selectedMessage.user_agent && (
+                                        <span className="flex items-center gap-1 truncate max-w-xs" title={selectedMessage.user_agent}>
+                                            <FaLaptop className="text-[10px]" /> {selectedMessage.user_agent}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ) : (

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateSession } from "@/lib/server-utils";
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import * as XLSX from "xlsx";
 import {
     EXPENSE_CATEGORIES as CATEGORIES,
@@ -9,7 +9,7 @@ import {
 
 // ---------- Config ----------
 
-const GEMINI_MODEL = "gemini-2.5-flash";
+const GEMINI_MODEL = "gemini-3.5-flash-lite";
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
 const GEMINI_CHUNK_SIZE = 100;
@@ -550,6 +550,58 @@ function parseSpreadsheet(
     };
 }
 
+// ---------- Gemini: Retry & Fallback Helper ----------
+
+async function callGeminiWithRetry(
+    ai: GoogleGenAI,
+    params: Parameters<typeof ai.models.generateContent>[0],
+    maxRetries = 4
+) {
+    const candidateModels = [
+        params.model || GEMINI_MODEL,
+        "gemini-3.5-flash-lite",
+        "gemini-3.8-flash",
+        "gemini-3.5-flash",
+    ];
+
+    let lastError: any = null;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        const currentModel = candidateModels[attempt % candidateModels.length];
+        try {
+            return await ai.models.generateContent({
+                ...params,
+                model: currentModel,
+            });
+        } catch (error: any) {
+            lastError = error;
+            const status = error?.status || error?.code || error?.error?.code;
+            const msg = String(error?.message || "");
+            const isTransient =
+                status === 503 ||
+                status === 429 ||
+                status === 500 ||
+                status === 504 ||
+                msg.includes("high demand") ||
+                msg.includes("UNAVAILABLE") ||
+                msg.includes("temporarily") ||
+                msg.includes("RESOURCE_EXHAUSTED");
+
+            if (!isTransient || attempt === maxRetries - 1) {
+                throw error;
+            }
+
+            const delay = (attempt + 1) * 2000 + Math.random() * 1000;
+            console.warn(
+                `[Gemini Retry] Model ${currentModel} returned ${status || "error"} (${msg.slice(0, 80)}...). Retrying attempt ${attempt + 1}/${maxRetries} in ${Math.round(delay)}ms...`
+            );
+            await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+    }
+
+    throw lastError;
+}
+
 // ---------- Gemini: Spreadsheet Classification ----------
 
 async function classifySpreadsheetExpenses(
@@ -593,7 +645,7 @@ async function classifySpreadsheetExpenses(
         );
 
         const response =
-            await ai.models.generateContent({
+            await callGeminiWithRetry(ai, {
                 model: GEMINI_MODEL,
                 contents: [
                     {
@@ -623,7 +675,7 @@ ${JSON.stringify(
                     temperature: 0,
                     maxOutputTokens: 16384,
                     thinkingConfig: {
-                        thinkingBudget: 512,
+                        thinkingLevel: ThinkingLevel.LOW,
                     },
                     responseMimeType:
                         "application/json",
@@ -693,7 +745,7 @@ async function extractFromImageOrPdf(
         );
 
     const response =
-        await ai.models.generateContent({
+        await callGeminiWithRetry(ai, {
             model: GEMINI_MODEL,
             contents: [
                 {
@@ -728,7 +780,7 @@ Sadece gerçek harcama ve çekim işlemlerini çıkar.
                 temperature: 0,
                 maxOutputTokens: 65536,
                 thinkingConfig: {
-                    thinkingBudget: 1024,
+                    thinkingLevel: ThinkingLevel.LOW,
                 },
                 responseMimeType:
                     "application/json",

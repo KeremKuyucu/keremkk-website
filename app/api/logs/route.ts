@@ -30,8 +30,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { uid, timestamp, event, platform, app } = body;
 
-    // Validate required fields
-    if (!uid || !timestamp || !event || !platform || !app) {
+    // Validate required fields (timestamp is now optional, server provides source of truth)
+    if (!uid || !event || !platform || !app) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400, headers: getCorsHeaders(origin) }
@@ -42,6 +42,10 @@ export async function POST(request: Request) {
     const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
+    // Log zamanı her zaman güvenilir sunucu saatidir.
+    // İstemcilerin cihaz saatini ileri alması (time-skip hilesi) veya yanlış saat ayarları logları bozamaz.
+    const finalTimestamp = new Date().toISOString();
+
     const supabase = createAdminClient();
 
     const { error } = await supabase
@@ -49,7 +53,7 @@ export async function POST(request: Request) {
       .insert([
         {
           uid,
-          timestamp,
+          timestamp: finalTimestamp,
           event,
           platform,
           app_name: app,
@@ -102,14 +106,13 @@ analitik, telemetri ve olay (event) loglarını toplar.
 --------------------------------------------------------------------------------
 📥 REQUEST BODY (JSON ŞEMASI):
 --------------------------------------------------------------------------------
-Aşağıdaki 5 alanın TÜMÜ zorunludur:
+Aşağıdaki 4 alan zorunludur (timestamp opsiyoneldir, sunucu kendi güvenilir saatini kullanır):
 
 {
   "uid": "string",        // [ZORUNLU] Cihaz veya kullanıcıya özel benzersiz ID (UUID / Device ID / User ID)
-  "timestamp": "string",  // [ZORUNLU] ISO-8601 zaman damgası (Örn: "2026-08-27T20:30:00.000Z")
   "event": "string",      // [ZORUNLU] Olay adı (Örn: "app_opened_daily", "login", "level_completed", "error")
   "platform": "string",   // [ZORUNLU] Çalıştığı platform ("android", "ios", "web", "windows", "macos", "linux")
-  "app": "string"         // [ZORUNLU] Uygulama adı veya tanımlayıcısı (Örn: "geogame", "portfolio")
+  "app": "string"        // [ZORUNLU] Uygulama adı veya tanımlayıcısı (Örn: "geogame", "portfolio")
 }
 
 * Not: IP Adresi (ip_address) ve Tarayıcı/Cihaz bilgisi (user_agent) istek başlıklarından (headers)

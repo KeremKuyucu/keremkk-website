@@ -30,28 +30,28 @@ export const socialLinks = [
     isMailto: true,
   },
   {
-    href: "/go/github",
+    href: "https://github.com/KeremKuyucu",
     label: "GitHub",
     icon: <FaGithub />,
     color: "from-gray-700 to-black dark:from-gray-600 dark:to-gray-900",
     shadow: "shadow-gray-500/20",
   },
   {
-    href: "/go/discord",
+    href: "https://discord.com/users/483678328646270996",
     label: "Discord",
     icon: <FaDiscord />,
     color: "from-indigo-500 to-violet-500",
     shadow: "shadow-indigo-500/20",
   },
   {
-    href: "/go/linkedin",
+    href: "https://www.linkedin.com/in/kerem-kuyucu/",
     label: "LinkedIn",
     icon: <FaLinkedin />,
     color: "from-blue-600 to-indigo-600",
     shadow: "shadow-blue-600/20",
   },
   {
-    href: "/go/signal",
+    href: "https://signal.me/#eu/ARcpLe2E-_qPXnH6-I26hgbYj_Qco2bpvsoBu7Be67wvl5fAzPxLWIMrJulQBptb",
     label: "Signal",
     icon: <FaSignalMessenger />,
     color: "from-sky-500 to-blue-500",
@@ -197,7 +197,7 @@ const FooterComponent: React.FC = () => {
 
           <div className="flex items-center gap-4">
             <a
-              href="/go/source-code"
+              href="https://github.com/KeremKuyucu/keremkk-website"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center gap-1.5 text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"

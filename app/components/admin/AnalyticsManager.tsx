@@ -25,7 +25,8 @@ import {
     FaFileCsv,
     FaFileCode,
     FaLayerGroup,
-    FaLaptop
+    FaLaptop,
+    FaBug
 } from "react-icons/fa";
 
 export interface AppLog {
@@ -40,13 +41,21 @@ export interface AppLog {
     created_at?: string;
 }
 
-interface AnalyticsManagerProps {
-    authToken: string;
+export interface UserProfileInfo {
+    name: string;
+    email?: string;
+    avatar_url?: string;
 }
 
-export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
+interface AnalyticsManagerProps {
+    authToken: string;
+    onNavigate?: (moduleId: string) => void;
+}
+
+export default function AnalyticsManager({ authToken, onNavigate }: AnalyticsManagerProps) {
     // Data states
     const [logs, setLogs] = useState<AppLog[]>([]);
+    const [usersMap, setUsersMap] = useState<Record<string, UserProfileInfo>>({});
     const [totalInDb, setTotalInDb] = useState<number>(0);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
@@ -85,6 +94,9 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
                 const fetchedLogs = data.logs || [];
                 setLogs(fetchedLogs);
                 setTotalInDb(data.total_count || fetchedLogs.length || 0);
+                if (data.users) {
+                    setUsersMap(data.users);
+                }
                 setLastUpdated(new Date());
             }
         } catch (e) {
@@ -160,16 +172,27 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
         const diffDays = Math.floor(diffHours / 24);
 
         let relative = "";
-        if (diffSec < 60) relative = "Az önce";
-        else if (diffMin < 60) relative = `${diffMin} dk önce`;
-        else if (diffHours < 24) relative = `${diffHours} sa önce`;
-        else if (diffDays === 1) relative = "Dün";
-        else if (diffDays < 7) relative = `${diffDays} gün önce`;
-        else relative = `${Math.floor(diffDays / 7)} hf önce`;
+        if (diffSec < 0) {
+            relative = "Gelecek tarih (Hatalı)";
+        } else if (diffSec < 60) {
+            relative = "Az önce";
+        } else if (diffMin < 60) {
+            relative = `${diffMin} dk önce`;
+        } else if (diffHours < 24) {
+            relative = `${diffHours} sa önce`;
+        } else if (diffDays === 1) {
+            relative = "Dün";
+        } else if (diffDays < 7) {
+            relative = `${diffDays} gün önce`;
+        } else {
+            relative = `${Math.floor(diffDays / 7)} hf önce`;
+        }
 
+        const isCurrentYear = date.getFullYear() === now.getFullYear();
         const formatted = date.toLocaleString("tr-TR", {
             day: "numeric",
             month: "short",
+            ...(isCurrentYear ? {} : { year: "numeric" }),
             hour: "2-digit",
             minute: "2-digit",
             second: "2-digit"
@@ -273,12 +296,15 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
             // Search query
             if (query) {
                 const matchUid = log.uid?.toLowerCase().includes(query);
+                const userName = (usersMap[log.uid]?.name || "").toLowerCase();
+                const userEmail = (usersMap[log.uid]?.email || "").toLowerCase();
+                const matchName = userName.includes(query) || userEmail.includes(query);
                 const matchEvent = log.event?.toLowerCase().includes(query);
                 const matchApp = log.app_name?.toLowerCase().includes(query);
                 const matchPlatform = log.platform?.toLowerCase().includes(query);
                 const matchIp = log.ip_address?.toLowerCase().includes(query);
                 const matchUa = log.user_agent?.toLowerCase().includes(query);
-                if (!matchUid && !matchEvent && !matchApp && !matchPlatform && !matchIp && !matchUa) {
+                if (!matchUid && !matchName && !matchEvent && !matchApp && !matchPlatform && !matchIp && !matchUa) {
                     return false;
                 }
             }
@@ -546,6 +572,17 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
 
                 {/* Actions & Tools */}
                 <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+                    {onNavigate && (
+                        <button
+                            onClick={() => onNavigate("error-logs")}
+                            className="px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 border bg-red-500/10 text-red-500 dark:text-red-400 border-red-500/20 hover:bg-red-500/20 transition-all"
+                            title="Hata Analizi sekmesine git"
+                        >
+                            <FaBug />
+                            <span>Hata Analizi</span>
+                        </button>
+                    )}
+
                     {/* Auto-Refresh Toggle */}
                     <button
                         onClick={() => setAutoRefresh(!autoRefresh)}
@@ -1127,7 +1164,7 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
                                     <th className="px-5 py-3.5 font-bold text-gray-500 dark:text-gray-400">Uygulama</th>
                                     <th className="px-5 py-3.5 font-bold text-gray-500 dark:text-gray-400">Olay (Event)</th>
                                     <th className="px-5 py-3.5 font-bold text-gray-500 dark:text-gray-400">Platform</th>
-                                    <th className="px-5 py-3.5 font-bold text-gray-500 dark:text-gray-400">Kullanıcı (UID)</th>
+                                    <th className="px-5 py-3.5 font-bold text-gray-500 dark:text-gray-400">Kullanıcı / UID</th>
                                     <th className="px-5 py-3.5 font-bold text-gray-500 dark:text-gray-400">IP / Ağ</th>
                                     <th className="px-5 py-3.5 font-bold text-gray-500 dark:text-gray-400 text-right">İşlemler</th>
                                 </tr>
@@ -1182,27 +1219,59 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
                                                 </span>
                                             </td>
 
-                                            {/* UID */}
+                                            {/* UID / Kullanıcı */}
                                             <td className="px-5 py-3.5">
-                                                <div className="flex items-center gap-1.5">
-                                                    <span className="font-mono text-[11px] text-gray-600 dark:text-gray-400 truncate max-w-[130px] sm:max-w-[180px]" title={log.uid}>
-                                                        {log.uid}
-                                                    </span>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleCopy(log.uid, `uid-${log.id}`);
-                                                        }}
-                                                        className="p-1 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
-                                                        title="UID Kopyala"
-                                                    >
-                                                        {copiedField === `uid-${log.id}` ? (
-                                                            <FaCheck className="text-emerald-500 text-[10px]" />
-                                                        ) : (
-                                                            <FaCopy className="text-[10px]" />
-                                                        )}
-                                                    </button>
-                                                </div>
+                                                {usersMap[log.uid] ? (
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span className="font-bold text-xs text-gray-900 dark:text-gray-100 truncate max-w-[130px] sm:max-w-[180px]" title={usersMap[log.uid].name}>
+                                                                {usersMap[log.uid].name}
+                                                            </span>
+                                                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-violet-100 dark:bg-violet-950/70 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800 shrink-0">
+                                                                Kayıtlı
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1">
+                                                            <span className="font-mono text-[10px] text-gray-400 dark:text-gray-500 truncate max-w-[110px] sm:max-w-[150px]" title={log.uid}>
+                                                                {log.uid}
+                                                            </span>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleCopy(log.uid, `uid-${log.id}`);
+                                                                }}
+                                                                className="p-0.5 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
+                                                                title="UID Kopyala"
+                                                            >
+                                                                {copiedField === `uid-${log.id}` ? (
+                                                                    <FaCheck className="text-emerald-500 text-[9px]" />
+                                                                ) : (
+                                                                    <FaCopy className="text-[9px]" />
+                                                                )}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="font-mono text-[11px] text-gray-600 dark:text-gray-400 truncate max-w-[130px] sm:max-w-[180px]" title={log.uid}>
+                                                            {log.uid}
+                                                        </span>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleCopy(log.uid, `uid-${log.id}`);
+                                                            }}
+                                                            className="p-1 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
+                                                            title="UID Kopyala"
+                                                        >
+                                                            {copiedField === `uid-${log.id}` ? (
+                                                                <FaCheck className="text-emerald-500 text-[10px]" />
+                                                            ) : (
+                                                                <FaCopy className="text-[10px]" />
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </td>
 
                                             {/* IP Address */}
@@ -1348,31 +1417,54 @@ export default function AnalyticsManager({ authToken }: AnalyticsManagerProps) {
                             {/* User & Network Information */}
                             <div className="space-y-3">
                                 {/* UID Section */}
-                                <div className="p-4 bg-gray-50 dark:bg-zinc-800/60 rounded-2xl border border-gray-100 dark:border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                    <div className="space-y-1">
-                                        <span className="text-gray-400 font-semibold block">Kullanıcı (UID)</span>
-                                        <span className="font-mono text-gray-800 dark:text-gray-200 select-all break-all">
-                                            {selectedLog.uid}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-2 shrink-0 mt-2 sm:mt-0">
-                                        <button
-                                            onClick={() => handleCopy(selectedLog.uid, "modal-uid")}
-                                            className="px-3 py-1.5 bg-white dark:bg-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-600 rounded-xl font-bold text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-zinc-600 flex items-center gap-1.5 transition"
-                                        >
-                                            {copiedField === "modal-uid" ? <FaCheck className="text-emerald-500" /> : <FaCopy />}
-                                            <span>{copiedField === "modal-uid" ? "Kopyalandı" : "Kopyala"}</span>
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                setSearchQuery(selectedLog.uid);
-                                                setSelectedLog(null);
-                                            }}
-                                            className="px-3 py-1.5 bg-violet-600 text-white rounded-xl font-bold hover:bg-violet-700 transition"
-                                            title="Bu kullanıcının diğer loglarını göster"
-                                        >
-                                            Filtrele
-                                        </button>
+                                <div className="p-4 bg-gray-50 dark:bg-zinc-800/60 rounded-2xl border border-gray-100 dark:border-white/5 space-y-2">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                        <div className="space-y-1">
+                                            <span className="text-gray-400 font-semibold block">Kullanıcı Bilgisi</span>
+                                            {usersMap[selectedLog.uid] ? (
+                                                <div className="space-y-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-sm font-bold text-gray-900 dark:text-white">
+                                                            {usersMap[selectedLog.uid].name}
+                                                        </span>
+                                                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-violet-100 dark:bg-violet-950/70 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
+                                                            Kayıtlı Kullanıcı
+                                                        </span>
+                                                    </div>
+                                                    {usersMap[selectedLog.uid].email && (
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                                                            {usersMap[selectedLog.uid].email}
+                                                        </p>
+                                                    )}
+                                                    <p className="font-mono text-gray-600 dark:text-gray-400 select-all break-all text-[11px] pt-1">
+                                                        UID: {selectedLog.uid}
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                <span className="font-mono text-gray-800 dark:text-gray-200 select-all break-all">
+                                                    {selectedLog.uid}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-2 shrink-0 mt-2 sm:mt-0">
+                                            <button
+                                                onClick={() => handleCopy(selectedLog.uid, "modal-uid")}
+                                                className="px-3 py-1.5 bg-white dark:bg-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-600 rounded-xl font-bold text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-zinc-600 flex items-center gap-1.5 transition"
+                                            >
+                                                {copiedField === "modal-uid" ? <FaCheck className="text-emerald-500" /> : <FaCopy />}
+                                                <span>{copiedField === "modal-uid" ? "Kopyalandı" : "Kopyala"}</span>
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setSearchQuery(selectedLog.uid);
+                                                    setSelectedLog(null);
+                                                }}
+                                                className="px-3 py-1.5 bg-violet-600 text-white rounded-xl font-bold hover:bg-violet-700 transition"
+                                                title="Bu kullanıcının diğer loglarını göster"
+                                            >
+                                                Filtrele
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
 

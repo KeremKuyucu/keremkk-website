@@ -17,12 +17,16 @@ import {
     FaChevronLeft,
     FaChevronRight,
     FaExternalLinkAlt,
-    FaShieldAlt
+    FaShieldAlt,
+    FaBug
 } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
+import { createClient } from "@/lib/supabase/client";
 import OverviewDashboard from "@/app/components/admin/OverviewDashboard";
 import NotesManager from "@/app/components/admin/NotesManager";
 import MessagesManager from "@/app/components/admin/MessagesManager";
 import AnalyticsManager from "@/app/components/admin/AnalyticsManager";
+import ErrorLogsManager from "@/app/components/admin/ErrorLogsManager";
 import ExpenseTracker from "@/app/components/admin/ExpenseTracker";
 import SubscriptionManager from "@/app/components/admin/SubscriptionManager";
 import LinkManager from "@/app/components/admin/LinkManager";
@@ -62,6 +66,12 @@ const MODULES: AdminModule[] = [
         component: AnalyticsManager
     },
     {
+        id: "error-logs",
+        label: "Hata Analizi",
+        icon: FaBug,
+        component: ErrorLogsManager
+    },
+    {
         id: "expenses",
         label: "Harcamalar",
         icon: FaWallet,
@@ -87,10 +97,13 @@ const MODULES: AdminModule[] = [
     }
 ];
 
+const SUPER_ADMIN_UID = "5f0df305-3684-4e5a-bd66-8101c1c6aff9";
+
 export default function AdminPage() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [password, setPassword] = useState("");
+    const [checkingAuth, setCheckingAuth] = useState(true);
     const [authToken, setAuthToken] = useState<string | null>(null);
+    const [userEmail, setUserEmail] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
 
@@ -101,50 +114,139 @@ export default function AdminPage() {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    // Session Persistence: Auto-restore session from localStorage
-    useEffect(() => {
-        const savedToken = localStorage.getItem("admin_session_token");
-        if (savedToken) {
-            setAuthToken(savedToken);
-            setIsAuthenticated(true);
+    // Verify user authorization (Super admin UID or admin_users table)
+    const verifyUser = async (supabase: ReturnType<typeof createClient>, uid: string, email?: string): Promise<boolean> => {
+        if (uid === SUPER_ADMIN_UID) {
+            return true;
         }
+        try {
+            const query = email 
+                ? `user_id.eq.${uid},email.eq.${email}` 
+                : `user_id.eq.${uid}`;
+            const { data } = await supabase
+                .from("admin_users")
+                .select("role")
+                .or(query)
+                .maybeSingle();
+            return !!data;
+        } catch {
+            return false;
+        }
+    };
+
+    // Check URL parameters and current session on mount
+    useEffect(() => {
+        const supabase = createClient();
+
+        if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            const err = params.get("error");
+            if (err === "unauthorized") {
+                setErrorMessage("Yetkisiz Erişim: Bu Google hesabı yönetici yetkisine sahip değil.");
+            } else if (err === "auth_failed") {
+                setErrorMessage("Giriş işlemi tamamlanamadı veya iptal edildi.");
+            }
+        }
+
+        const checkSession = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.user) {
+                    const isAllowed = await verifyUser(supabase, session.user.id, session.user.email);
+                    if (isAllowed) {
+                        setAuthToken(session.access_token);
+                        setUserEmail(session.user.email ?? null);
+                        setIsAuthenticated(true);
+                    } else {
+                        await supabase.auth.signOut();
+                        setIsAuthenticated(false);
+                        setErrorMessage("Yetkisiz Erişim: Bu Google hesabı yönetici yetkisine sahip değil.");
+                    }
+                }
+            } catch (err) {
+                console.error("Auth check failed:", err);
+            } finally {
+                setCheckingAuth(false);
+            }
+        };
+
+        checkSession();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED") && session?.user) {
+                const isAllowed = await verifyUser(supabase, session.user.id, session.user.email);
+                if (isAllowed) {
+                    setAuthToken(session.access_token);
+                    setUserEmail(session.user.email ?? null);
+                    setIsAuthenticated(true);
+                    setErrorMessage("");
+                } else {
+                    await supabase.auth.signOut();
+                    setIsAuthenticated(false);
+                    setErrorMessage("Yetkisiz Erişim: Bu Google hesabı yönetici yetkisine sahip değil.");
+                }
+            } else if (event === "SIGNED_OUT") {
+                setIsAuthenticated(false);
+                setAuthToken(null);
+                setUserEmail(null);
+            }
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
     }, []);
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!password) return;
-
+    const handleGoogleLogin = async () => {
         setIsLoading(true);
         setErrorMessage("");
 
         try {
-            const res = await fetch("/api/auth", {
-                method: "POST",
-                headers: { "x-sync-password": password }
+            const supabase = createClient();
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: "google",
+                options: {
+                    redirectTo: `${window.location.origin}/api/auth/callback?next=/admin`,
+                },
             });
 
-            if (res.ok) {
-                const { token } = await res.json();
-                setAuthToken(token);
-                setIsAuthenticated(true);
-                setPassword("");
-                localStorage.setItem("admin_session_token", token);
-            } else {
-                setErrorMessage("Giriş başarısız: Şifre hatalı");
+            if (error) {
+                setErrorMessage(error.message);
+                setIsLoading(false);
             }
-        } catch (error) {
-            setErrorMessage("Bağlantı hatası");
-        } finally {
+        } catch {
+            setErrorMessage("Google ile giriş başlatılamadı.");
             setIsLoading(false);
         }
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        const supabase = createClient();
+        await supabase.auth.signOut();
         setAuthToken(null);
+        setUserEmail(null);
         setIsAuthenticated(false);
         setActiveTab(MODULES[0].id);
         localStorage.removeItem("admin_session_token");
     };
+
+    // --- Loading State ---
+    if (checkingAuth) {
+        return (
+            <div className="min-h-screen flex items-center justify-center p-4 bg-[#fafafa] dark:bg-black relative overflow-hidden">
+                <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-violet-500/10 blur-[100px]" />
+                <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-fuchsia-500/10 blur-[100px]" />
+                <div className="flex flex-col items-center gap-4 relative z-10">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white shadow-xl shadow-violet-500/25 animate-pulse">
+                        <FaShieldAlt className="text-2xl" />
+                    </div>
+                    <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 animate-pulse">
+                        Yönetici oturumu kontrol ediliyor...
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     // --- Render Login Screen ---
     if (!isAuthenticated) {
@@ -154,30 +256,29 @@ export default function AdminPage() {
                 <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-violet-500/10 blur-[100px]" />
                 <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-fuchsia-500/10 blur-[100px]" />
 
-                <form onSubmit={handleLogin} className="w-full max-w-md bg-white/60 dark:bg-zinc-900/60 backdrop-blur-2xl p-8 rounded-3xl border border-white/40 dark:border-zinc-800 shadow-2xl flex flex-col items-center gap-6 relative z-10">
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white shadow-lg shadow-violet-500/25 mb-2">
-                        <FaLock className="text-3xl" />
+                <div className="w-full max-w-md bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl p-8 md:p-10 rounded-3xl border border-white/60 dark:border-zinc-800 shadow-2xl flex flex-col items-center gap-6 relative z-10">
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white shadow-xl shadow-violet-500/25">
+                        <FaShieldAlt className="text-3xl" />
                     </div>
 
                     <div className="text-center">
-                        <h1 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight mb-2">Yönetim Paneli</h1>
-                        <p className="text-gray-500 dark:text-gray-400 text-sm">Devam etmek için yönetici şifresini girin.</p>
+                        <h1 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight mb-2">
+                            Yönetim Paneli
+                        </h1>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
+                            Panele erişmek için yetkili Google hesabınız ile oturum açın.
+                        </p>
                     </div>
 
-                    <div className="w-full space-y-3">
-                        <input
-                            type="password"
-                            className="w-full px-5 py-4 rounded-xl bg-white dark:bg-black/60 border border-gray-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-violet-500 placeholder-gray-400 font-medium transition-all"
-                            placeholder="Şifre"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            autoFocus
-                        />
+                    <div className="w-full space-y-4">
                         <button
-                            disabled={isLoading || !password}
-                            className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold text-base hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 shadow-lg cursor-pointer"
+                            type="button"
+                            onClick={handleGoogleLogin}
+                            disabled={isLoading}
+                            className="w-full py-4 px-6 bg-white dark:bg-zinc-800/90 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-zinc-700/80 rounded-2xl font-bold text-base hover:bg-gray-50 dark:hover:bg-zinc-700 active:scale-[0.98] transition-all disabled:opacity-50 shadow-md hover:shadow-lg flex items-center justify-center gap-3 cursor-pointer group"
                         >
-                            {isLoading ? "Doğrulanıyor..." : "Giriş Yap"}
+                            <FcGoogle className="text-2xl group-hover:scale-110 transition-transform shrink-0" />
+                            <span>{isLoading ? "Yönlendiriliyor..." : "Google ile Giriş Yap"}</span>
                         </button>
                     </div>
 
@@ -186,7 +287,12 @@ export default function AdminPage() {
                             {errorMessage}
                         </div>
                     )}
-                </form>
+
+                    <div className="text-[11px] text-gray-400 dark:text-gray-500 text-center flex items-center gap-1.5">
+                        <FaLock className="text-[10px]" />
+                        <span>Yalnızca yetkilendirilmiş Google hesapları erişebilir.</span>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -218,7 +324,7 @@ export default function AdminPage() {
                                     </h2>
                                     <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
                                         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                                        <span>Yönetici</span>
+                                        <span className="truncate max-w-[130px]" title={userEmail ?? undefined}>{userEmail ?? "Süper Yönetici"}</span>
                                     </div>
                                 </div>
                             )}
@@ -337,7 +443,7 @@ export default function AdminPage() {
                                     </div>
                                     <div>
                                         <div className="text-sm font-bold">Kerem KK</div>
-                                        <div className="text-xs text-emerald-500 font-semibold">Oturum Açık</div>
+                                        <div className="text-xs text-emerald-500 font-semibold truncate max-w-[150px]" title={userEmail ?? undefined}>{userEmail ?? "Oturum Açık"}</div>
                                     </div>
                                 </div>
                                 <button

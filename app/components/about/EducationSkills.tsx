@@ -60,9 +60,7 @@ const EducationSkills: React.FC<EducationSkillsProps> = ({ lang = "en" }) => {
 
                 {/* CV Download */}
                 <a
-                    href="/go/cv"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href="#"
                     className="group mt-6 flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:border-violet-500 dark:hover:border-violet-500 shadow-sm hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-300"
                 >
                     <div className="p-3 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white group-hover:scale-110 transition-transform duration-300">

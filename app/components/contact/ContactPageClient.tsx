@@ -17,6 +17,7 @@ const ContactPageClient: React.FC<ContactPageClientProps> = ({ lang = "en" }) =>
         email: "",
         subject: "",
         message: "",
+        website_url: "",
     });
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
     const [errorMessage, setErrorMessage] = useState("");
@@ -68,7 +69,7 @@ const ContactPageClient: React.FC<ContactPageClientProps> = ({ lang = "en" }) =>
 
             if (res.ok) {
                 setStatus("success");
-                setFormData({ name: "", email: "", subject: "", message: "" });
+                setFormData({ name: "", email: "", subject: "", message: "", website_url: "" });
             } else {
                 const data = await res.json();
                 setStatus("error");
@@ -147,6 +148,18 @@ const ContactPageClient: React.FC<ContactPageClientProps> = ({ lang = "en" }) =>
                                         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                                             {t.formTitle}
                                         </h2>
+
+                                        {/* Honeypot field for bot spam protection - hidden from human users */}
+                                        <div className="hidden" aria-hidden="true" style={{ display: "none" }}>
+                                            <input
+                                                type="text"
+                                                name="website_url"
+                                                value={formData.website_url}
+                                                onChange={handleChange}
+                                                tabIndex={-1}
+                                                autoComplete="off"
+                                            />
+                                        </div>
 
                                         {/* Name */}
                                         <div className="relative">

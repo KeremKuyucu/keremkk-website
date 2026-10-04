@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 function getCorsHeaders(origin: string | null) {
     let allowedOrigin = "https://keremkk.com.tr";
@@ -9,7 +10,9 @@ function getCorsHeaders(origin: string | null) {
 
             if (
                 hostname === "keremkk.com.tr" ||
-                hostname.endsWith(".keremkk.com.tr")
+                hostname.endsWith(".keremkk.com.tr") ||
+                hostname === "localhost" ||
+                hostname === "127.0.0.1"
             ) {
                 allowedOrigin = origin;
             }
@@ -34,7 +37,6 @@ export async function POST(request: Request) {
 
         const {
             uid,
-            timestamp,
             event,
             platform,
             app,
@@ -44,28 +46,11 @@ export async function POST(request: Request) {
         } = body;
 
         // Required fields
-        if (!uid || !timestamp || !event || !platform || !app || !message) {
+        if (!uid || !event || !platform || !app || !message) {
             return NextResponse.json(
-                { error: "Missing required fields" },
+                { error: "Missing required fields (uid, event, platform, app, message)" },
                 {
                     status: 400,
-                    headers: corsHeaders,
-                }
-            );
-        }
-
-        const botToken = process.env.BOT_TOKEN;
-        const channelId = "1549880972819046561";
-
-        if (!botToken || !channelId) {
-            console.error(
-                "Discord error logger is not configured. Missing BOT_TOKEN or DISCORD_ERROR_CHANNEL_ID."
-            );
-
-            return NextResponse.json(
-                { error: "Error logging service is not configured" },
-                {
-                    status: 500,
                     headers: corsHeaders,
                 }
             );
@@ -81,136 +66,60 @@ export async function POST(request: Request) {
             request.headers.get("user-agent") ||
             "unknown";
 
-        // Parse timestamp
-        const date = new Date(timestamp);
-        const unixTimestamp = isNaN(date.getTime())
-            ? Math.floor(Date.now() / 1000)
-            : Math.floor(date.getTime() / 1000);
+        // Always use authoritative server time to prevent clock skew / exploits
+        const serverNow = new Date().toISOString();
 
-        // Safely convert values to strings
-        const safeMessage = String(message).slice(0, 1000);
+        // Safely format strings & metadata
+        const safeMessage = String(message).slice(0, 5000);
         const safeStackTrace = stackTrace
-            ? String(stackTrace).slice(0, 1000)
+            ? String(stackTrace).slice(0, 10000)
             : null;
 
-        // Metadata
-        let metadataText: string | null = null;
-
+        let parsedMetadata: any = null;
         if (metadata !== undefined && metadata !== null) {
-            try {
-                metadataText = JSON.stringify(
-                    metadata,
-                    null,
-                    2
-                ).slice(0, 1000);
-            } catch {
-                metadataText = String(metadata).slice(0, 1000);
+            if (typeof metadata === "object") {
+                parsedMetadata = metadata;
+            } else if (typeof metadata === "string") {
+                try {
+                    parsedMetadata = JSON.parse(metadata);
+                } catch {
+                    parsedMetadata = { raw: metadata };
+                }
             }
         }
 
-        const fields = [
-            {
-                name: "Event",
-                value: `\`${String(event).slice(0, 100)}\``,
-                inline: true,
-            },
-            {
-                name: "Platform",
-                value: `\`${String(platform).slice(0, 100)}\``,
-                inline: true,
-            },
-            {
-                name: "UID",
-                value: `\`${String(uid).slice(0, 200)}\``,
-                inline: false,
-            },
-            {
-                name: "Message",
-                value: `\`\`\`\n${safeMessage}\n\`\`\``,
-                inline: false,
-            },
-            {
-                name: "IP",
-                value: `\`${String(ipAddress).slice(0, 200)}\``,
-                inline: true,
-            },
-            {
-                name: "User Agent",
-                value: `\`${String(userAgent).slice(0, 500)}\``,
-                inline: false,
-            },
-            {
-                name: "Time",
-                value: `<t:${unixTimestamp}:F>`,
-                inline: false,
-            },
-        ];
+        const supabase = createAdminClient();
 
-        if (safeStackTrace) {
-            fields.push({
-                name: "Stack Trace",
-                value: `\`\`\`\n${safeStackTrace}\n\`\`\``,
-                inline: false,
-            });
-        }
-
-        if (metadataText) {
-            fields.push({
-                name: "Metadata",
-                value: `\`\`\`json\n${metadataText}\n\`\`\``,
-                inline: false,
-            });
-        }
-
-        const embed = {
-            title: `🔴 ${app} Error`,
-            color: 0xff3333,
-            fields,
-            footer: {
-                text: "GeoGame Error Logger",
-            },
-            timestamp: new Date().toISOString(),
-        };
-
-        // Send directly to Discord using the bot
-        const discordResponse = await fetch(
-            `https://discord.com/api/v10/channels/${channelId}/messages`,
-            {
-                method: "POST",
-                headers: {
-                    Authorization: `Bot ${botToken}`,
-                    "Content-Type": "application/json",
+        const { error: dbError } = await supabase
+            .from("app_error_logs")
+            .insert([
+                {
+                    uid: String(uid).slice(0, 200),
+                    app_name: String(app).slice(0, 100),
+                    platform: String(platform).slice(0, 50),
+                    event: String(event).slice(0, 150),
+                    message: safeMessage,
+                    stack_trace: safeStackTrace,
+                    metadata: parsedMetadata,
+                    ip_address: String(ipAddress).slice(0, 150),
+                    user_agent: String(userAgent).slice(0, 500),
+                    timestamp: serverNow,
                 },
-                body: JSON.stringify({
-                    embeds: [embed],
-                }),
-            }
-        );
+            ]);
 
-        if (!discordResponse.ok) {
-            const discordError = await discordResponse.text();
-
-            console.error(
-                "Discord API error:",
-                discordResponse.status,
-                discordError
-            );
-
+        if (dbError) {
+            console.error("Supabase app_error_logs insert error:", dbError);
             return NextResponse.json(
+                { error: "Failed to save error log", details: dbError.message },
                 {
-                    error: "Failed to send error log",
-                },
-                {
-                    status: 502,
+                    status: 500,
                     headers: corsHeaders,
                 }
             );
         }
 
         return NextResponse.json(
-            {
-                success: true,
-            },
+            { success: true },
             {
                 status: 201,
                 headers: corsHeaders,
@@ -220,9 +129,7 @@ export async function POST(request: Request) {
         console.error("Error Logs API error:", error);
 
         return NextResponse.json(
-            {
-                error: "Internal Server Error",
-            },
+            { error: "Internal Server Error" },
             {
                 status: 500,
                 headers: corsHeaders,
