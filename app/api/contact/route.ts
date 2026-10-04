@@ -187,7 +187,7 @@ export async function POST(request: NextRequest) {
                     </div>
 
                     <div style="border-top: 1px solid #f3f4f6; padding-top: 16px; text-align: center; color: #9ca3af; font-size: 11px;">
-                        <span>Cihaz: ${escapeHtml(userAgent.slice(0, 100))}</span> • <span>Tarih: ${new Date().toLocaleString("tr-TR")}</span>
+                        <span>Cihaz: ${escapeHtml(userAgent.slice(0, 100))}</span> • <span>Tarih: ${new Date().toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" })}</span>
                     </div>
                 </div>
                 `;
