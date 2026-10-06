@@ -1,6 +1,6 @@
 // Centralized project data for dynamic stats and consistency with bilingual support
 import React from 'react';
-import { FaMobile, FaServer, FaDesktop, FaCode, FaGraduationCap, FaGamepad, FaKeyboard } from 'react-icons/fa';
+import { FaMobile, FaDesktop, FaGraduationCap, FaGamepad, FaKeyboard, FaKey, FaMicrochip, FaGlobe } from 'react-icons/fa';
 import { Project, CategoryInfo } from '../types';
 import { Language } from './translations';
 
@@ -26,40 +26,12 @@ export const categoryInfoEN: { [key: string]: CategoryInfo } = {
         gradient: "from-cyan-500 to-blue-600",
         description: "Media & microphone controller for Windows Copilot key",
     },
-    PikaMed: {
-        name: "PikaMed",
-        slug: "pikamed",
-        icon: React.createElement(FaServer, { className: "text-xl" }),
-        gradient: "from-rose-500 to-pink-600",
-        description: "AI-assisted healthcare & patient monitoring system",
-    },
     DiscordStorage: {
         name: "DiscordStorage",
         slug: "discordstorage",
         icon: React.createElement(FaDesktop, { className: "text-xl" }),
         gradient: "from-violet-500 to-purple-600",
-        description: "File storage and archiving solution over Discord",
-    },
-    Analytics: {
-        name: "Analytics",
-        slug: "analytics",
-        icon: React.createElement(FaCode, { className: "text-xl" }),
-        gradient: "from-amber-500 to-orange-600",
-        description: "Privacy-friendly web analytics & monitoring service",
-    },
-    kısaLink: {
-        name: "kısaLink",
-        slug: "kisalink",
-        icon: React.createElement(FaCode, { className: "text-xl" }),
-        gradient: "from-cyan-500 to-blue-600",
-        description: "Open-source high performance URL shortener",
-    },
-    Auth: {
-        name: "Auth",
-        slug: "auth",
-        icon: React.createElement(FaServer, { className: "text-xl" }),
-        gradient: "from-indigo-500 to-blue-600",
-        description: "Centralized Single Sign-On (SSO) authentication system",
+        description: "File storage and sharing solution over Discord",
     },
     EglYillik: {
         name: "EglYillik",
@@ -67,7 +39,7 @@ export const categoryInfoEN: { [key: string]: CategoryInfo } = {
         icon: React.createElement(FaGraduationCap, { className: "text-xl" }),
         gradient: "from-red-500 to-blue-600",
         description: "Interactive digital graduation yearbook platform",
-    },
+    }
 };
 
 export const categoryInfoTR: { [key: string]: CategoryInfo } = {
@@ -92,40 +64,12 @@ export const categoryInfoTR: { [key: string]: CategoryInfo } = {
         gradient: "from-cyan-500 to-blue-600",
         description: "Windows Copilot tuşu için medya ve mikrofon kontrolörü",
     },
-    PikaMed: {
-        name: "PikaMed",
-        slug: "pikamed",
-        icon: React.createElement(FaServer, { className: "text-xl" }),
-        gradient: "from-rose-500 to-pink-600",
-        description: "Yapay zeka destekli sağlık takip sistemi",
-    },
     DiscordStorage: {
         name: "DiscordStorage",
         slug: "discordstorage",
         icon: React.createElement(FaDesktop, { className: "text-xl" }),
         gradient: "from-violet-500 to-purple-600",
-        description: "Discord üzerinden dosya depolama çözümü",
-    },
-    Analytics: {
-        name: "Analytics",
-        slug: "analytics",
-        icon: React.createElement(FaCode, { className: "text-xl" }),
-        gradient: "from-amber-500 to-orange-600",
-        description: "Web analytics ve izleme servisi",
-    },
-    kısaLink: {
-        name: "kısaLink",
-        slug: "kisalink",
-        icon: React.createElement(FaCode, { className: "text-xl" }),
-        gradient: "from-cyan-500 to-blue-600",
-        description: "Açık kaynak URL kısaltma servisi",
-    },
-    Auth: {
-        name: "Auth",
-        slug: "auth",
-        icon: React.createElement(FaServer, { className: "text-xl" }),
-        gradient: "from-indigo-500 to-blue-600",
-        description: "Merkezi kimlik doğrulama sistemi",
+        description: "Discord altyapısı üzerinden dosya depolama ve paylaşım çözümü",
     },
     EglYillik: {
         name: "EglYillik",
@@ -133,7 +77,7 @@ export const categoryInfoTR: { [key: string]: CategoryInfo } = {
         icon: React.createElement(FaGraduationCap, { className: "text-xl" }),
         gradient: "from-red-500 to-blue-600",
         description: "Eğitim kurumları için dijital mezuniyet albümü",
-    },
+    }
 };
 
 export const projectsByCategoryEN: { [key: string]: Project[] } = {
@@ -148,26 +92,6 @@ export const projectsByCategoryEN: { [key: string]: Project[] } = {
             techStack: ["Flutter", "Dart", "Supabase"],
             githubLink: "https://github.com/KeremKuyucu/GeoGame",
             viewLink: "https://geogame.keremkk.com.tr",
-        },
-        {
-            imageUrl: "/imgs/projects/geogamecpp.png",
-            altText: "GeoGame C++",
-            title: "GeoGame - C++ Version",
-            description: "High-performance native desktop game optimized with Windows API and low-level resource management.",
-            longDescription: "The original native desktop implementation of GeoGame built in C++ with the SFML library. Automatically syncs dataset files on startup to ensure up-to-date geography content. Features capital cities, flag identification, and continent quizzes. Archived in favor of the Flutter release.",
-            features: ["Low-latency UI", "Win32 API integration", "Efficient memory management", "Open source"],
-            techStack: ["C++", "SFML"],
-            githubLink: "https://github.com/KeremKuyucu/GeoGameCPP",
-        },
-        {
-            imageUrl: "/imgs/projects/geogamecdn.png",
-            altText: "GeoGame CDN",
-            title: "GeoGame CDN",
-            description: "Dedicated API and static asset delivery service for the GeoGame ecosystem.",
-            longDescription: "Centralized content delivery and data service for GeoGame. Powers country datasets, flags, and geographic metrics. Runs serverless on Next.js API Routes and Vercel edge infrastructure.",
-            features: ["Optimized asset delivery", "Next.js API Routes", "Centralized content", "Open source"],
-            techStack: ["Next.js"],
-            githubLink: "https://github.com/KeremKuyucu/geogame-cdn",
         }
     ],
     OkeyDefteri: [
@@ -179,7 +103,7 @@ export const projectsByCategoryEN: { [key: string]: Project[] } = {
             longDescription: "A modern smart score tracking mobile application designed for Okey 101 matches. Features 4-player table management, single-tap penalty/score entries, end-round tile counting calculator, and paired gameplay support. Includes a dynamic nickname engine that assigns situational titles to players each round, player/team statistics, local SharedPreferences persistence, JSON backups, and automatic update checks via GitHub Releases.",
             features: ["Live Table & Score Tracking", "Tile Calculator & Stats", "Dynamic Nickname Engine", "Open source"],
             techStack: ["Flutter", "Dart"],
-            githubLink: "https://github.com/KeremKuyucu/okey-defteri-flutter",
+            githubLink: "https://github.com/KeremKuyucu/OkeyDefteri",
             isNew: true,
             isDeveloping: false
         }
@@ -198,116 +122,26 @@ export const projectsByCategoryEN: { [key: string]: Project[] } = {
             isDeveloping: false
         }
     ],
-    PikaMed: [
-        {
-            imageUrl: "/imgs/projects/pikamed.png",
-            altText: "PikaMed",
-            title: "PikaMed - Health Tracking System",
-            description: "AI-driven mobile health application delivering personalized patient insights and tracking.",
-            longDescription: "A comprehensive healthcare and patient tracking application built as a Deneyap graduation project. Powered by Firebase Authentication, real-time push alerts, and Gemini AI for intelligent diagnostic insights. Features biometric charts, medication tracking, and doctor-patient communications.",
-            features: ["LLM / AI Integration", "Biometric visualization", "User-centric design", "Open source"],
-            techStack: ["Flutter", "Dart"],
-            githubLink: "https://github.com/KeremKuyucu/PikaMed-Mobile",
-        },
-        {
-            imageUrl: "/imgs/projects/pikamedwebsite.png",
-            altText: "PikaMed Website",
-            title: "PikaMed Website",
-            description: "High-performance web landing page showcasing the PikaMed ecosystem and user documentation.",
-            longDescription: "Promotional and documentation website for the PikaMed mobile health ecosystem. Designed as an SEO-optimized, responsive landing page using Next.js with fast load times and clean component architecture.",
-            features: ["SEO Optimization", "Responsive design", "Fast page loads", "Open source"],
-            techStack: ["Next.js"],
-            githubLink: "https://github.com/KeremKuyucu/PikaMed-website",
-            viewLink: "https://pikamed.keremkk.com.tr",
-        },
-        {
-            imageUrl: "/imgs/projects/pikamedapi.png",
-            altText: "PikaMed API",
-            title: "PikaMed API Server",
-            description: "Scalable backend architecture ensuring data integrity and secure communications across PikaMed.",
-            longDescription: "Central backend API connecting mobile clients, admin dashboard, and web services. Features RESTful endpoints for patient data, medical reports, and AI predictions.",
-            features: ["Secure data modeling", "RESTful architecture", "Fast response times", "Open source"],
-            techStack: ["Next.js"],
-            githubLink: "https://github.com/KeremKuyucu/pikamed-apiserver",
-        },
-        {
-            imageUrl: "/imgs/projects/pikamedpanel.png",
-            altText: "PikaMed Panel",
-            title: "PikaMed Admin Dashboard",
-            description: "Operational administration dashboard providing user management and medical analytics.",
-            longDescription: "Administrative panel for PikaMed administrators and doctors. Features Google Auth RBAC, doctor directory management, rich Mailjet notification dispatch, patient records inspection, and dark mode.",
-            features: ["Role-based access control", "Analytics interface", "Real-time monitoring", "Open source"],
-            techStack: ["Next.js"],
-            githubLink: "https://github.com/KeremKuyucu/pikamed-panel",
-        },
-    ],
     DiscordStorage: [
-        {
-            imageUrl: "/imgs/projects/discordstoragecpp.png",
-            altText: "DiscordStorageCPP",
-            title: "DiscordStorage - C++ Version",
-            description: "Performance-focused desktop client using Discord infrastructure as a distributed file repository.",
-            longDescription: "A native C++ desktop tool providing file storage and retrieval via Discord API. Offers both an interactive CLI and automation modes. Built with LibCurl, DPP, and nlohmann/json.",
-            features: ["Multi-part chunk upload", "Low overhead", "System-level integration", "Open source"],
-            techStack: ["C++", "Win32 API"],
-            githubLink: "https://github.com/KeremKuyucu/DiscordStorageCPP",
-        },
         {
             imageUrl: "/imgs/projects/discordstorage.png",
             altText: "DiscordStorage",
             title: "DiscordStorage - Flutter Version",
-            description: "Cross-platform graphical client for seamless file archiving through Discord server channels.",
+            description: "Cross-platform graphical client for seamless file archiving and retrieval through Discord server channels.",
             longDescription: "Experimental cross-platform storage client using Discord channels as backend storage. Automatically splits large files into multi-part chunks, validates checksums with SHA-256, and supports both Android and Windows desktop.",
-            features: ["File chunking & encryption", "Visual file browser", "Mobile & Desktop", "Open source"],
+            features: ["File chunking & integrity", "Visual file browser", "Mobile & Desktop", "Open source"],
             techStack: ["Flutter", "Dart"],
             githubLink: "https://github.com/KeremKuyucu/DiscordStorage",
         },
         {
-            imageUrl: "/imgs/projects/discordstoragedart.png",
-            altText: "DiscordStorageDart",
-            title: "DiscordStorage - Dart CLI",
-            description: "Lightweight command-line tool for fast file uploads and downloads via terminal.",
-            longDescription: "Portable CLI tool written in Dart to replace C++ dependencies. Provides fast upload, download, and listing commands suitable for shell scripts and automated backups.",
-            features: ["Fast CLI commands", "Automation friendly", "Lightweight runtime", "Open source"],
-            techStack: ["Dart"],
-            githubLink: "https://github.com/KeremKuyucu/DiscordStorageDart",
-        },
-    ],
-    Analytics: [
-        {
-            imageUrl: "/imgs/projects/analytics.png",
-            altText: "Analytics",
-            title: "Analytics - Web Dashboard",
-            description: "Privacy-oriented lightweight analytics service tracking web traffic without third-party trackers.",
-            longDescription: "Lightweight, privacy-first web traffic tracking service. Counts unique visits using anonymized UIDs without intrusive third-party scripts. Features a Next.js visualization dashboard with Supabase storage.",
-            features: ["Minimalist JS footprint", "Privacy-first tracking", "Custom dashboard", "Open source"],
-            techStack: ["Next.js", "Supabase"],
-            githubLink: "https://github.com/KeremKuyucu/analytics-service-basic",
-        }
-    ],
-    kısaLink: [
-        {
-            imageUrl: "/imgs/projects/kısalink.png",
-            altText: "kısaLink",
-            title: "kısaLink - URL Shortener",
-            description: "High-throughput serverless URL shortening and link analytics platform with Firebase integration.",
-            longDescription: "Fast, custom URL management and redirection platform. Uses Firebase Realtime Database for instant routing and real-time click tracking on serverless infrastructure.",
-            features: ["Real-time redirects", "Click analytics", "Serverless architecture", "Open source"],
-            techStack: ["Next.js", "Firebase"],
-            githubLink: "https://github.com/KeremKuyucu/shortlink",
-        }
-    ],
-    Auth: [
-        {
-            imageUrl: "/imgs/projects/keremkkauth.png",
-            altText: "KeremKK-Auth",
-            title: "KeremKK-Auth - SSO Service",
-            description: "Single Sign-On (SSO) authentication gateway connecting all ecosystem applications.",
-            longDescription: "Centralized identity provider for all keremkk.com.tr applications. Built upon Supabase Auth and Resend for email verifications, password resets, and seamless single sign-on across GeoGame, Analytics, and tools.",
-            features: ["Secure session management", "Centralized user DB"],
-            techStack: ["Next.js", "Supabase", "Resend"],
-            githubLink: "https://github.com/KeremKuyucu/keremkk-auth",
-            viewLink: "https://accounts.keremkk.com.tr",
+            imageUrl: "/imgs/projects/discordstorageshare.jpg",
+            altText: "DiscordStorage Share",
+            title: "DiscordStorage-Share - Web Sharing Module",
+            description: "Next.js web module for sharing and downloading files stored on Discord directly via message IDs.",
+            longDescription: "A modern Next.js web application integrated with the DiscordStorage ecosystem. Allows users to share and download uploaded files using their Discord message ID without requiring additional databases or temporary file storage servers.",
+            features: ["Direct Message ID Sharing", "No External Database Required", "Zero-storage Web Client", "Open source"],
+            techStack: ["Next.js", "TypeScript", "Tailwind CSS"],
+            githubLink: "https://github.com/KeremKuyucu/discordStorage-share",
         }
     ],
     EglYillik: [
@@ -323,7 +157,7 @@ export const projectsByCategoryEN: { [key: string]: Project[] } = {
                 "Resend-Integrated Notification System",
             ],
             techStack: ["Next.js", "Supabase", "Resend", "Tailwind CSS", "TypeScript"],
-            githubLink: "https://github.com/KeremKuyucu/Egl-yillik",
+            githubLink: "https://github.com/KeremKuyucu/egl-yillik",
             isNew: false,
             isDeveloping: false
         }
@@ -337,31 +171,11 @@ export const projectsByCategoryTR: { [key: string]: Project[] } = {
             altText: "GeoGame",
             title: "GeoGame - Flutter Versiyonu",
             description: "Platformlar arası tutarlı deneyim sunan, zengin animasyonlu ve genişletilebilir coğrafya öğrenme platformu.",
-            longDescription: "GeoGame, coğrafya bilgisini interaktif oyun modlarıyla test eden ve geliştiren cross-platform bir eğitici oyundur. Başkent, bayrak, mesafe tahmini ve kıta bazlı seviyeler içerir. Android, Windows ve web platformlarında çalışır; İngilizce ve Türkçe dil desteği sunar. Supabase ile liderlik tablosu ve kullanıcı profili yönetimi sağlar. keremkk-auth, geogame-cdn modülleriyle birlikte çalışan açık kaynaklı bir ekosistem parçasıdır.",
+            longDescription: "GeoGame, coğrafya bilgisini interaktif oyun modlarıyla test eden ve geliştiren cross-platform bir eğitici oyundur. Başkent, bayrak, mesafe tahmini ve kıta bazlı seviyeler içerir. Android, Windows ve web platformlarında çalışır; İngilizce ve Türkçe dil desteği sunar. Supabase ile liderlik tablosu ve kullanıcı profili yönetimi sağlar.",
             features: ["Cross-platform mimari", "Gelişmiş state yönetimi", "Modern UI/UX", "Açık kaynak"],
             techStack: ["Flutter", "Dart", "Supabase"],
             githubLink: "https://github.com/KeremKuyucu/GeoGame",
             viewLink: "https://geogame.keremkk.com.tr",
-        },
-        {
-            imageUrl: "/imgs/projects/geogamecpp.png",
-            altText: "GeoGame C++",
-            title: "GeoGame - C++ Versiyonu",
-            description: "Windows API ve düşük seviyeli kaynak yönetimi ile optimize edilmiş yüksek performanslı yerel masaüstü oyunu.",
-            longDescription: "GeoGame'in C++ ile geliştirilmiş orijinal masaüstü sürümüdür. SFML kütüphanesi ile modern UI sunar. Çalıştırıldığında GitHub deposundan gerekli veri dosyalarını otomatik olarak indirerek her zaman güncel içerikle oynanmasını sağlar. Başkent, bayrak ve konum bilgisi testleri ile kıtalar hakkında öğretici içerikler barındırır. Sadece Windows platformu için optimize edilmiş bağımsız bir uygulamadır. Flutter sürümünün geliştirilmesiyle birlikte arşivlenmiştir.",
-            features: ["Düşük gecikmeli UI", "Win32 API Entegrasyonu", "Verimli bellek yönetimi", "Açık kaynak"],
-            techStack: ["C++", "SFML"],
-            githubLink: "https://github.com/KeremKuyucu/GeoGameCPP",
-        },
-        {
-            imageUrl: "/imgs/projects/geogamecdn.png",
-            altText: "GeoGame CDN",
-            title: "GeoGame CDN",
-            description: "Oyun içi statik varlıkların hızlı dağıtımı ve dinamik içerik yönetimi için özelleştirilmiş API servisi.",
-            longDescription: "GeoGame ekosisteminin veri kaynağı servisidir. Ülke bilgileri, bayrak görselleri ve coğrafi veriler gibi oyun içi statik varlıkların merkezi olarak yönetilmesini ve hızlı dağıtılmasını sağlar. Next.js API Routes altyapısı ile Vercel üzerinde serverless olarak çalışır. Oyunun hem Flutter hem de C++ sürümleri bu servisten veri çeker.",
-            features: ["Optimize edilmiş asset servisi", "Next.js API Routes", "Merkezi içerik yönetimi", "Açık kaynak"],
-            techStack: ["Next.js"],
-            githubLink: "https://github.com/KeremKuyucu/geogame-cdn",
         }
     ],
     OkeyDefteri: [
@@ -373,7 +187,7 @@ export const projectsByCategoryTR: { [key: string]: Project[] } = {
             longDescription: "Okey 101 karşılaşmaları için geliştirilmiş modern ve akıllı bir skor takip mobil uygulamasıdır. 4 oyunculu masa düzeni, tek tıkla ceza/puan girişi, otomatik tur yönetimi, el sonu kalan taşları toplayan hesap makinesi ve çiftli puanlama desteği sunar. Oyunun gidişatına göre her tur oyunculara bağlama uygun unvanlar atayan dinamik lakap motoru, detaylı oyuncu/takım istatistikleri, SharedPreferences tabanlı yerel otomatik kayıt, JSON formatında veri yedekleme ve GitHub Releases üzerinden otomatik güncelleme denetleyicisi içerir.",
             features: ["Canlı Masa ve Skor Takibi", "Taş Hesap Makinesi & İstatistikler", "Dinamik Lakap Motoru", "Açık kaynak"],
             techStack: ["Flutter", "Dart"],
-            githubLink: "https://github.com/KeremKuyucu/okey-defteri-flutter",
+            githubLink: "https://github.com/KeremKuyucu/OkeyDefteri",
             isNew: true,
             isDeveloping: false
         }
@@ -392,116 +206,26 @@ export const projectsByCategoryTR: { [key: string]: Project[] } = {
             isDeveloping: false
         }
     ],
-    PikaMed: [
-        {
-            imageUrl: "/imgs/projects/pikamed.png",
-            altText: "PikaMed",
-            title: "PikaMed - Sağlık Takip Sistemi",
-            description: "Kullanıcı verilerini yapay zeka ile işleyerek kişiselleştirilmiş sağlık öngörüleri sunan mobil çözüm.",
-            longDescription: "Deneyap bitirme projesi olarak geliştirilen PikaMed, sağlık hizmetleri ve hasta takibi için tasarlanmış kapsamlı bir mobil uygulamadır. Firebase Authentication ile güvenli kullanıcı girişi, anlık bildirim altyapısı ve Gemini AI ile yapay zeka destekli sağlık analizi sunar. Hasta takip ve kayıt sistemi, biyometrik veri görselleştirme ve kişiselleştirilmiş sağlık öngörüleri içerir. Proje tamamlandıktan sonra API servisleri ve doktor paneli kapatılarak arşivlenmiştir; kodlar referans ve eğitim amaçlı saklanmaktadır.",
-            features: ["LLM / AI Entegrasyonu", "Biyometrik veri görselleştirme", "Kullanıcı odaklı tasarım", "Açık kaynak"],
-            techStack: ["Flutter", "Dart"],
-            githubLink: "https://github.com/KeremKuyucu/PikaMed-Mobile",
-        },
-        {
-            imageUrl: "/imgs/projects/pikamedwebsite.png",
-            altText: "PikaMed Website",
-            title: "PikaMed Website",
-            description: "Proje ekosisteminin tanıtımı ve kullanıcı dokümantasyonu için tasarlanmış yüksek performanslı web arayüzü.",
-            longDescription: "PikaMed mobil uygulamasının tanıtım web sitesidir. Deneyap mezuniyet projesi kapsamında hazırlanmıştır. Projenin özelliklerini, kullanım senaryolarını ve teknik detaylarını sergileyen SEO uyumlu, responsive bir landing page olarak tasarlanmıştır. Next.js ile geliştirilmiş olup hızlı sayfa yükleme süreleri ve modern web standartlarına uygunluk sunar.",
-            features: ["SEO Optimizasyonu", "Responsive tasarım", "Hızlı sayfa yükleme", "Açık kaynak"],
-            techStack: ["Next.js"],
-            githubLink: "https://github.com/KeremKuyucu/PikaMed-website",
-            viewLink: "https://pikamed.keremkk.com.tr",
-        },
-        {
-            imageUrl: "/imgs/projects/pikamedapi.png",
-            altText: "PikaMed API",
-            title: "PikaMed API Server",
-            description: "Tüm PikaMed ekosisteminin veri tutarlılığını ve güvenliğini sağlayan ölçeklenebilir backend mimarisi.",
-            longDescription: "PikaMed ekosisteminin merkezi backend servisidir. Mobil uygulama, yönetim paneli ve web sitesi bu API üzerinden haberleşir. Hasta verileri, doktor bilgileri ve AI analiz sonuçlarının güvenli bir şekilde saklanmasını ve iletilmesini sağlayan RESTful mimari sunar. Kullanıcı kimlik doğrulama, veri validasyonu ve hızlı yanıt süreleri için optimize edilmiştir. Proje arşivlendiğinde servis kapatılmıştır.",
-            features: ["Güvenli veri modelleme", "RESTful mimari", "Hızlı yanıt süreleri", "Açık kaynak"],
-            techStack: ["Next.js"],
-            githubLink: "https://github.com/KeremKuyucu/pikamed-apiserver",
-        },
-        {
-            imageUrl: "/imgs/projects/pikamedpanel.png",
-            altText: "PikaMed Panel",
-            title: "PikaMed Yönetim Paneli",
-            description: "Sistem yöneticileri için veri manipülasyonu ve kullanıcı yönetimi sağlayan operasyonel dashboard.",
-            longDescription: "PikaMed sisteminin yönetim paneli olarak geliştirilmiştir. Google ile giriş ve admin yetkilendirme, kullanıcı-doktor-admin listeleri, doktor ekleme/silme, HTML destekli bildirim gönderimi (Mailjet entegrasyonu), hasta detaylarını görüntüleme ve karanlık mod desteği sunar. API server'a bağlı olarak çalışır ve rol tabanlı erişim kontrolüyle sistem güvenliğini sağlar.",
-            features: ["Rol tabanlı erişim kontrolü", "Veri analitiği arayüzü", "Anlık sistem takibi", "Açık kaynak"],
-            techStack: ["Next.js"],
-            githubLink: "https://github.com/KeremKuyucu/pikamed-panel",
-        },
-    ],
     DiscordStorage: [
-        {
-            imageUrl: "/imgs/projects/discordstoragecpp.png",
-            altText: "DiscordStorageCPP",
-            title: "DiscordStorage - C++ Versiyonu",
-            description: "Discord altyapısını bir dosya sistemi gibi kullanan, performans ve hız odaklı masaüstü uygulaması.",
-            longDescription: "Discord API üzerinden dosya depolama ve yönetimi sağlayan C++ masaüstü uygulamasıdır. İnteraktif menü ve güçlü CLI olmak üzere iki kullanım modu sunar. LibCurl, DPP ve nlohmann/json kütüphaneleri ile geliştirilmiştir. Her dosya için ayrı kanal oluşturma, otomatik güncelleme bildirimi, config.json ile kolay yapılandırma ve otomatik loglama özellikleri içerir. C++ ekosistemindeki bağımlılık yönetimi karmaşıklığı nedeniyle arşivlenmiş, geliştirme Dart ve Flutter sürümlerine taşınmıştır.",
-            features: ["Multi-part upload mantığı", "Düşük overhead", "Sistem seviyesinde entegrasyon", "Açık kaynak"],
-            techStack: ["C++", "Win32 API"],
-            githubLink: "https://github.com/KeremKuyucu/DiscordStorageCPP",
-        },
         {
             imageUrl: "/imgs/projects/discordstorage.png",
             altText: "DiscordStorage",
             title: "DiscordStorage - Flutter Versiyonu",
             description: "Dosya yönetimini Discord sunucuları üzerinden kullanıcı dostu bir arayüzle sunan cross-platform uygulama.",
             longDescription: "Discord kanallarını depolama alanı olarak kullanan deneysel bir cross-platform uygulamadır. Dosyalar otomatik olarak parçalara bölünür, mesaj eki olarak yüklenir ve indirilirken yeniden birleştirilir. SHA-256 checksum ile dosya bütünlüğü doğrulanır. Tek kod tabanından Android ve Windows üzerinde çalışır. Rate limit yönetimi, retry mekanizmaları ve büyük dosya transferleri konusunda pratik deneyim kazanmak amacıyla teknik bir deney projesi olarak geliştirilmiştir.",
-            features: ["Dosya şifreleme mantığı", "Görsel dosya gezgini", "Mobil ve Masaüstü desteği", "Açık kaynak"],
+            features: ["Dosya bütünlüğü & şifreleme", "Görsel dosya gezgini", "Mobil ve Masaüstü desteği", "Açık kaynak"],
             techStack: ["Flutter", "Dart"],
             githubLink: "https://github.com/KeremKuyucu/DiscordStorage",
         },
         {
-            imageUrl: "/imgs/projects/discordstoragedart.png",
-            altText: "DiscordStorageDart",
-            title: "DiscordStorage - Dart CLI Versiyonu",
-            description: "Geliştiriciler için terminal üzerinden hızlı dosya yükleme ve yönetme imkanı tanıyan komut satırı aracı.",
-            longDescription: "DiscordStorage projesinin Dart ile yazılmış komut satırı aracıdır. C++ sürümünün bağımlılık karmaşıklığını ortadan kaldırarak aynı işlevselliği hafif ve taşınabilir bir CLI formatında sunar. Terminal üzerinden dosya listeleme, yükleme ve indirme komutları ile hızlı dosya yönetimi sağlar. Otomasyon ve scripting senaryoları için idealdir, minimal çalışma zamanı gereksinimiyle çalışır.",
-            features: ["Hızlı CLI komutları", "Otomasyon dostu", "Hafif çalışma zamanı", "Açık kaynak"],
-            techStack: ["Dart"],
-            githubLink: "https://github.com/KeremKuyucu/DiscordStorageDart",
-        },
-    ],
-    Analytics: [
-        {
-            imageUrl: "/imgs/projects/analytics.png",
-            altText: "Analytics",
-            title: "Analytics - Web Paneli",
-            description: "Üçüncü taraf takipçiler olmadan web trafiğini izleyen, gizlilik odaklı hafif analiz servisi.",
-            longDescription: "Basit ve gizlilik odaklı bir web analiz servisidir. Benzersiz kullanıcı ID'leri (UID) üzerinden tekil ziyaretçi takibi yapar ve aylık istatistikler sunar. Üçüncü taraf tracking scriptleri kullanmadan, minimal JavaScript footprint ile web trafiğini izler. Supabase veritabanı ile veri saklama ve Next.js ile dashboard görselleştirmesi sağlar.",
-            features: ["Zero-JS footprint (minimalist)", "Gizlilik odaklı takip", "Özel veri görselleştirme", "Açık kaynak"],
-            techStack: ["Next.js", "Supabase"],
-            githubLink: "https://github.com/KeremKuyucu/analytics-service-basic",
-        }
-    ],
-    kısaLink: [
-        {
-            imageUrl: "/imgs/projects/kısalink.png",
-            altText: "kısaLink",
-            title: "kısaLink - URL Kısaltma Servisi",
-            description: "Yüksek trafik yükünü kaldırabilen, Firebase entegrasyonlu ve istatistik destekli link yönetim platformu.",
-            longDescription: "Kısa ve özelleştirilebilir URL'ler oluşturan bir link yönetim platformudur. Firebase Realtime Database ile anlık yönlendirme, tıklama analitiği ve link istatistikleri sunar. Serverless mimari sayesinde yüksek trafik yüklerini sorunsuz karşılar. Next.js üzerinde çalışır ve Vercel'de barınır.",
-            features: ["Gerçek zamanlı yönlendirme", "Tıklama analitiği", "Serverless mimari", "Açık kaynak"],
-            techStack: ["Next.js", "Firebase"],
-            githubLink: "https://github.com/KeremKuyucu/shortlink",
-        }
-    ],
-    Auth: [
-        {
-            imageUrl: "/imgs/projects/keremkkauth.png",
-            altText: "KeremKK-Auth",
-            title: "KeremKK-Auth - Kullanıcı Girişi",
-            description: "Tüm projeler için merkezi bir kimlik doğrulama noktası sağlayan Single Sign-On (SSO) altyapısı.",
-            longDescription: "Tüm keremkk.com.tr projeleri için merkezi kimlik doğrulama servisidir. Supabase Auth altyapısı üzerine inşa edilmiş Single Sign-On (SSO) çözümü sunar. Kullanıcı kayıt, giriş, şifre sıfırlama ve e-posta doğrulama işlemlerini Resend entegrasyonu ile yönetir. GeoGame, Analytics ve diğer projeler bu servis üzerinden kullanıcı kimlik doğrulaması yapar. v0.app ile geliştirilmiş modern auth sayfaları içerir.",
-            features: ["Güvenli session yönetimi", "Merkezi kullanıcı veritabanı"],
-            techStack: ["Next.js", "Supabase", "Resend"],
-            githubLink: "https://github.com/KeremKuyucu/keremkk-auth",
-            viewLink: "https://accounts.keremkk.com.tr",
+            imageUrl: "/imgs/projects/discordstorageshare.jpg",
+            altText: "DiscordStorage Share",
+            title: "DiscordStorage-Share - Web Paylaşım Modülü",
+            description: "Discord üzerinde saklanan dosyaların mesaj ID ile doğrudan paylaşılmasını ve indirilmesini sağlayan Next.js web modülü.",
+            longDescription: "DiscordStorage ekosistemiyle entegre çalışan modern bir web arayüzüdür. Kullanıcıların Discord'a yüklenmiş dosyaları ek bir veritabanına veya geçici sunucuya ihtiyaç duymadan sadece mesaj ID'si üzerinden güvenle paylaşmasına ve indirmesine olanak tanır.",
+            features: ["Mesaj ID ile Paylaşım", "Harici Veritabanı Gerektirmez", "Hızlı Web İndirme", "Açık kaynak"],
+            techStack: ["Next.js", "TypeScript", "Tailwind CSS"],
+            githubLink: "https://github.com/KeremKuyucu/discordStorage-share",
         }
     ],
     EglYillik: [
@@ -517,7 +241,7 @@ export const projectsByCategoryTR: { [key: string]: Project[] } = {
                 "Resend Entegrasyonlu Bildirim Sistemi",
             ],
             techStack: ["Next.js", "Supabase", "Resend", "Tailwind CSS", "TypeScript"],
-            githubLink: "https://github.com/KeremKuyucu/Egl-yillik",
+            githubLink: "https://github.com/KeremKuyucu/egl-yillik",
             isNew: false,
             isDeveloping: false
         }
