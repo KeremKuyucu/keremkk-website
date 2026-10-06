@@ -1,6 +1,6 @@
 // Centralized project data for dynamic stats and consistency with bilingual support
 import React from 'react';
-import { FaMobile, FaDesktop, FaGraduationCap, FaGamepad, FaKeyboard, FaKey, FaMicrochip, FaGlobe } from 'react-icons/fa';
+import { FaMobile, FaDesktop, FaGraduationCap, FaGamepad, FaKeyboard } from 'react-icons/fa';
 import { Project, CategoryInfo } from '../types';
 import { Language } from './translations';
 
@@ -96,7 +96,7 @@ export const projectsByCategoryEN: { [key: string]: Project[] } = {
     ],
     OkeyDefteri: [
         {
-            imageUrl: "/imgs/projects/okeydefteri.jpg",
+            imageUrl: "/imgs/projects/okeydefteri.png",
             altText: "Okey Defteri",
             title: "Okey Defteri - Mobile Score Tracker",
             description: "Live score tracker, tile calculator, and dynamic nickname engine for Okey 101 games.",
@@ -110,7 +110,7 @@ export const projectsByCategoryEN: { [key: string]: Project[] } = {
     ],
     CopilotButton: [
         {
-            imageUrl: "/imgs/projects/copilotbutton.jpg",
+            imageUrl: "/imgs/projects/copilotbutton.png",
             altText: "Copilot Button Controller",
             title: "Copilot Button - Windows Controller",
             description: "AutoHotkey tool converting the Windows 11 Copilot key into a game-safe mic mute, media controller, and OSD overlay.",
@@ -134,7 +134,7 @@ export const projectsByCategoryEN: { [key: string]: Project[] } = {
             githubLink: "https://github.com/KeremKuyucu/DiscordStorage",
         },
         {
-            imageUrl: "/imgs/projects/discordstorageshare.jpg",
+            imageUrl: "/imgs/projects/discordstorageshare.png",
             altText: "DiscordStorage Share",
             title: "DiscordStorage-Share - Web Sharing Module",
             description: "Next.js web module for sharing and downloading files stored on Discord directly via message IDs.",
@@ -142,6 +142,7 @@ export const projectsByCategoryEN: { [key: string]: Project[] } = {
             features: ["Direct Message ID Sharing", "No External Database Required", "Zero-storage Web Client", "Open source"],
             techStack: ["Next.js", "TypeScript", "Tailwind CSS"],
             githubLink: "https://github.com/KeremKuyucu/discordStorage-share",
+            viewLink: "https://discordstorage-share.vercel.app/1553713886568644802",
         }
     ],
     EglYillik: [
@@ -158,8 +159,6 @@ export const projectsByCategoryEN: { [key: string]: Project[] } = {
             ],
             techStack: ["Next.js", "Supabase", "Resend", "Tailwind CSS", "TypeScript"],
             githubLink: "https://github.com/KeremKuyucu/egl-yillik",
-            isNew: false,
-            isDeveloping: false
         }
     ]
 };
@@ -180,7 +179,7 @@ export const projectsByCategoryTR: { [key: string]: Project[] } = {
     ],
     OkeyDefteri: [
         {
-            imageUrl: "/imgs/projects/okeydefteri.jpg",
+            imageUrl: "/imgs/projects/okeydefteri.png",
             altText: "Okey Defteri",
             title: "Okey Defteri - Mobil Skor Takipçisi",
             description: "Okey 101 oyunları için geliştirilmiş, canlı skor takibi, el sonu taş hesaplayıcı ve dinamik lakap motoru içeren Flutter uygulaması.",
@@ -188,13 +187,11 @@ export const projectsByCategoryTR: { [key: string]: Project[] } = {
             features: ["Canlı Masa ve Skor Takibi", "Taş Hesap Makinesi & İstatistikler", "Dinamik Lakap Motoru", "Açık kaynak"],
             techStack: ["Flutter", "Dart"],
             githubLink: "https://github.com/KeremKuyucu/OkeyDefteri",
-            isNew: true,
-            isDeveloping: false
         }
     ],
     CopilotButton: [
         {
-            imageUrl: "/imgs/projects/copilotbutton.jpg",
+            imageUrl: "/imgs/projects/copilotbutton.png",
             altText: "Copilot Button Controller",
             title: "Copilot Button - Windows Kontrolörü",
             description: "Windows 11 Copilot tuşunu oyun korumalı mikrofon susturma, medya kontrolü ve özelleştirilebilir OSD eylemlerine dönüştüren AutoHotkey aracı.",
@@ -202,8 +199,7 @@ export const projectsByCategoryTR: { [key: string]: Project[] } = {
             features: ["Anti-Modifier Tuş Koruması", "Mikrofon & Medya OSD Kontrolü", "Özelleştirilebilir Tıklama Eylemleri", "Açık kaynak"],
             techStack: ["AutoHotkey", "Windows"],
             githubLink: "https://github.com/KeremKuyucu/copilot-button",
-            isNew: true,
-            isDeveloping: false
+            isNew: true
         }
     ],
     DiscordStorage: [
@@ -218,7 +214,7 @@ export const projectsByCategoryTR: { [key: string]: Project[] } = {
             githubLink: "https://github.com/KeremKuyucu/DiscordStorage",
         },
         {
-            imageUrl: "/imgs/projects/discordstorageshare.jpg",
+            imageUrl: "/imgs/projects/discordstorageshare.png",
             altText: "DiscordStorage Share",
             title: "DiscordStorage-Share - Web Paylaşım Modülü",
             description: "Discord üzerinde saklanan dosyaların mesaj ID ile doğrudan paylaşılmasını ve indirilmesini sağlayan Next.js web modülü.",
@@ -226,6 +222,7 @@ export const projectsByCategoryTR: { [key: string]: Project[] } = {
             features: ["Mesaj ID ile Paylaşım", "Harici Veritabanı Gerektirmez", "Hızlı Web İndirme", "Açık kaynak"],
             techStack: ["Next.js", "TypeScript", "Tailwind CSS"],
             githubLink: "https://github.com/KeremKuyucu/discordStorage-share",
+            viewLink: "https://discordstorage-share.vercel.app",
         }
     ],
     EglYillik: [
@@ -242,8 +239,6 @@ export const projectsByCategoryTR: { [key: string]: Project[] } = {
             ],
             techStack: ["Next.js", "Supabase", "Resend", "Tailwind CSS", "TypeScript"],
             githubLink: "https://github.com/KeremKuyucu/egl-yillik",
-            isNew: false,
-            isDeveloping: false
         }
     ]
 };
