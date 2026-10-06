@@ -187,6 +187,7 @@ export const projectsByCategoryTR: { [key: string]: Project[] } = {
             features: ["Canlı Masa ve Skor Takibi", "Taş Hesap Makinesi & İstatistikler", "Dinamik Lakap Motoru", "Açık kaynak"],
             techStack: ["Flutter", "Dart"],
             githubLink: "https://github.com/KeremKuyucu/OkeyDefteri",
+            viewLink: "https://okey.keremkk.com.tr",
         }
     ],
     CopilotButton: [
