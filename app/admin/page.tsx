@@ -97,8 +97,6 @@ const MODULES: AdminModule[] = [
     }
 ];
 
-const SUPER_ADMIN_UID = "5f0df305-3684-4e5a-bd66-8101c1c6aff9";
-
 export default function AdminPage() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [checkingAuth, setCheckingAuth] = useState(true);
@@ -114,19 +112,13 @@ export default function AdminPage() {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    // Verify user authorization (Super admin UID or admin_users table)
-    const verifyUser = async (supabase: ReturnType<typeof createClient>, uid: string, email?: string): Promise<boolean> => {
-        if (uid === SUPER_ADMIN_UID) {
-            return true;
-        }
+    // Verify user authorization from admin_users table
+    const verifyUser = async (supabase: ReturnType<typeof createClient>, uid: string): Promise<boolean> => {
         try {
-            const query = email 
-                ? `user_id.eq.${uid},email.eq.${email}` 
-                : `user_id.eq.${uid}`;
             const { data } = await supabase
                 .from("admin_users")
                 .select("role")
-                .or(query)
+                .eq("user_id", uid)
                 .maybeSingle();
             return !!data;
         } catch {
@@ -152,7 +144,7 @@ export default function AdminPage() {
             try {
                 const { data: { session } } = await supabase.auth.getSession();
                 if (session?.user) {
-                    const isAllowed = await verifyUser(supabase, session.user.id, session.user.email);
+                    const isAllowed = await verifyUser(supabase, session.user.id);
                     if (isAllowed) {
                         setAuthToken(session.access_token);
                         setUserEmail(session.user.email ?? null);
@@ -174,7 +166,7 @@ export default function AdminPage() {
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED") && session?.user) {
-                const isAllowed = await verifyUser(supabase, session.user.id, session.user.email);
+                const isAllowed = await verifyUser(supabase, session.user.id);
                 if (isAllowed) {
                     setAuthToken(session.access_token);
                     setUserEmail(session.user.email ?? null);
@@ -227,7 +219,6 @@ export default function AdminPage() {
         setUserEmail(null);
         setIsAuthenticated(false);
         setActiveTab(MODULES[0].id);
-        localStorage.removeItem("admin_session_token");
     };
 
     // --- Loading State ---

@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { SUPER_ADMIN_UID } from "@/lib/server-utils";
 
 export async function GET(request: Request) {
     const requestUrl = new URL(request.url);
@@ -23,31 +22,22 @@ export async function GET(request: Request) {
 
         if (!error && session?.user) {
             const userId = session.user.id;
-            const userEmail = session.user.email;
 
-            // 1. Direct super admin UID check
-            let isAdmin = userId === SUPER_ADMIN_UID;
+            // Check admin_users table
+            let isAdmin = false;
+            try {
+                const adminDb = createAdminClient();
+                const { data: adminRecord } = await adminDb
+                    .from("admin_users")
+                    .select("role")
+                    .eq("user_id", userId)
+                    .maybeSingle();
 
-            // 2. Check admin_users table
-            if (!isAdmin) {
-                try {
-                    const adminDb = createAdminClient();
-                    const query = userEmail 
-                        ? `user_id.eq.${userId},email.eq.${userEmail}`
-                        : `user_id.eq.${userId}`;
-
-                    const { data: adminRecord } = await adminDb
-                        .from("admin_users")
-                        .select("role")
-                        .or(query)
-                        .maybeSingle();
-
-                    if (adminRecord) {
-                        isAdmin = true;
-                    }
-                } catch (e) {
-                    console.error("Error querying admin_users in callback:", e);
+                if (adminRecord) {
+                    isAdmin = true;
                 }
+            } catch (e) {
+                console.error("Error querying admin_users in callback:", e);
             }
 
             if (isAdmin) {
