@@ -41,7 +41,6 @@ export async function POST(request: Request) {
 
     const {
       uid,
-      timestamp: _ignoredTimestamp,
       event,
       platform,
       app,
@@ -185,7 +184,6 @@ Aşağıdaki 4 alan zorunludur:
   "app": "string",          // [ZORUNLU] Uygulama adı veya tanımlayıcısı (Örn: "geogame", "portfolio") ("app_name" de kabul edilir)
   "app_version": "string",  // [OPSİYONEL] Uygulama sürümü (Örn: "1.6.17+23") -> metadata'ya eklenir
   "is_debug": boolean,      // [OPSİYONEL] Debug modu (true/false) -> metadata'ya eklenir
-  "timestamp": "string",    // [OPSİYONEL] Cihaz zamanı (ISO 8601) -> metadata.client_timestamp olarak kaydedilir
   ...additionalData         // [OPSİYONEL] Diğer dinamik event alanları (metadata objesine toplanır)
 }
 

@@ -38,8 +38,7 @@ export interface AppErrorLog {
     metadata?: any;
     ip_address?: string;
     user_agent?: string;
-    timestamp: string;
-    created_at?: string;
+    created_at: string;
 }
 
 export interface UserProfileInfo {
@@ -184,8 +183,8 @@ export default function ErrorLogsManager({ authToken, onNavigate }: ErrorLogsMan
         const uids = new Set<string>();
 
         for (const l of logs) {
-            const t = new Date(l.timestamp).getTime();
-            if (now - t <= oneDayMs) todayCount++;
+            const t = l.created_at ? new Date(l.created_at).getTime() : 0;
+            if (t > 0 && now - t <= oneDayMs) todayCount++;
             if (l.uid) uids.add(l.uid);
         }
 
@@ -391,12 +390,11 @@ create table if not exists public.app_error_logs (
     metadata jsonb null,
     ip_address text null,
     user_agent text null,
-    timestamp timestamp with time zone not null default now(),
     created_at timestamp with time zone not null default now(),
     constraint app_error_logs_pkey primary key (id)
 );
 
-create index if not exists idx_app_error_logs_timestamp on public.app_error_logs (timestamp desc);
+create index if not exists idx_app_error_logs_created_at on public.app_error_logs (created_at desc);
 create index if not exists idx_app_error_logs_app_name on public.app_error_logs (app_name);
 create index if not exists idx_app_error_logs_uid on public.app_error_logs (uid);`;
 
@@ -702,7 +700,7 @@ create index if not exists idx_app_error_logs_uid on public.app_error_logs (uid)
                                 </tr>
                             ) : (
                                 paginatedLogs.map((log) => {
-                                    const { formatted, relative } = formatTimestamp(log.timestamp);
+                                    const { formatted, relative } = formatTimestamp(log.created_at || "");
                                     const userInfo = usersMap[log.uid];
                                     const isSelected = selectedIds.has(log.id);
 
@@ -913,7 +911,9 @@ create index if not exists idx_app_error_logs_uid on public.app_error_logs (uid)
                                 <div className="p-3 bg-gray-50 dark:bg-zinc-800/60 rounded-2xl border border-gray-100 dark:border-white/5">
                                     <span className="text-gray-400 font-semibold block mb-1">Zaman</span>
                                     <span className="font-bold text-gray-900 dark:text-white">
-                                        {new Date(selectedLog.timestamp).toLocaleString("tr-TR")}
+                                        {selectedLog.created_at
+                                            ? new Date(selectedLog.created_at).toLocaleString("tr-TR")
+                                            : "-"}
                                     </span>
                                 </div>
                             </div>

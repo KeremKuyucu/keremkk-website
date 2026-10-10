@@ -53,7 +53,6 @@ export async function POST(request: Request) {
             metadata,
             app_version,
             is_debug,
-            timestamp,
             ...rest
         } = body || {};
 
@@ -81,9 +80,6 @@ export async function POST(request: Request) {
             request.headers.get("user-agent") ||
             "unknown";
 
-        // Always use authoritative server time to prevent clock skew / exploits
-        const serverNow = new Date().toISOString();
-
         // Safely format strings & metadata
         const safeMessage = String(message).slice(0, 5000);
         const safeStackTrace = rawStackTrace
@@ -109,16 +105,17 @@ export async function POST(request: Request) {
         if (is_debug !== undefined && is_debug !== null) {
             parsedMetadata.is_debug = Boolean(is_debug);
         }
-        if (timestamp) {
-            parsedMetadata.client_timestamp = String(timestamp).slice(0, 50);
-        }
 
-        // Capture any additional properties passed in the root body
+        // Capture any additional properties passed in the root body (ignoring timestamp)
         for (const [key, value] of Object.entries(rest)) {
-            if (value !== undefined && value !== null) {
+            if (key !== "timestamp" && key !== "client_timestamp" && value !== undefined && value !== null) {
                 parsedMetadata[key] = value;
             }
         }
+
+        // Ensure timestamp is completely removed from metadata even if provided by client
+        delete parsedMetadata.timestamp;
+        delete parsedMetadata.client_timestamp;
 
         const baseRecord = {
             uid: String(uid).slice(0, 200),
@@ -129,7 +126,6 @@ export async function POST(request: Request) {
             stack_trace: safeStackTrace,
             ip_address: String(ipAddress).slice(0, 150),
             user_agent: String(userAgent).slice(0, 500),
-            timestamp: serverNow,
         };
 
         const hasMetadata = Object.keys(parsedMetadata).length > 0;
@@ -235,7 +231,6 @@ hata, çökme (crash) ve istisna (exception) raporlarını toplar.
   "stackTrace": "string",   // [OPSİYONEL] Stack trace / çağrı yığını ("stack_trace" de geçerlidir)
   "metadata": object,       // [OPSİYONEL] Ekstra bağlam objesi veya JSON dizesi
   "app_version": "string",  // [OPSİYONEL] Uygulama versiyonu (metadata.app_version olarak kaydedilir)
-  "is_debug": boolean,      // [OPSİYONEL] Debug modu (metadata.is_debug olarak kaydedilir)
-  "timestamp": "string"     // [OPSİYONEL] Cihaz zamanı (metadata.client_timestamp olarak kaydedilir)
+  "is_debug": boolean       // [OPSİYONEL] Debug modu (metadata.is_debug olarak kaydedilir)
 }
 */

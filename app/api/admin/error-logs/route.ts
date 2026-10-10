@@ -22,7 +22,7 @@ export async function GET(request: Request) {
         let query = supabase
             .from("app_error_logs")
             .select("*", { count: "exact" })
-            .order("timestamp", { ascending: false })
+            .order("created_at", { ascending: false })
             .limit(targetLimit);
 
         if (appParam && appParam !== "all") {
@@ -39,8 +39,17 @@ export async function GET(request: Request) {
         const { data: logs, count, error: logsError } = await query;
 
         if (logsError) {
-            // If table does not exist yet in Supabase
-            if (logsError.code === "42P01" || logsError.message?.includes("does not exist")) {
+            // Only flag as tableMissing if the table itself doesn't exist
+            const isTableMissing =
+                logsError.code === "42P01" ||
+                Boolean(
+                    logsError.message &&
+                        (logsError.message.includes('relation "app_error_logs" does not exist') ||
+                            logsError.message.includes('relation "public.app_error_logs" does not exist') ||
+                            (logsError.message.includes("app_error_logs") && logsError.message.includes("schema cache")))
+                );
+
+            if (isTableMissing) {
                 return NextResponse.json({
                     logs: [],
                     total_count: 0,
