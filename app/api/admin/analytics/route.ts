@@ -30,7 +30,7 @@ export async function GET(request: Request) {
             let query = supabase
                 .from('app_logs')
                 .select('*', { count: 'exact' })
-                .order('timestamp', { ascending: false })
+                .order('created_at', { ascending: false })
                 .range(from, to);
 
             if (appParam && appParam !== "all") {
@@ -133,9 +133,14 @@ export async function GET(request: Request) {
             }
         }
 
+        const normalizedLogs = allLogs.map((l) => ({
+            ...l,
+            timestamp: l.created_at || l.timestamp,
+        }));
+
         return NextResponse.json({
-            logs: allLogs,
-            total_count: totalCount || allLogs.length,
+            logs: normalizedLogs,
+            total_count: totalCount || normalizedLogs.length,
             users: usersMap
         });
     } catch (error) {

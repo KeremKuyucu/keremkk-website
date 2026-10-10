@@ -290,3 +290,19 @@ export const getCategoryBySlug = (
 export const getAllCategorySlugs = (): string[] => {
     return Object.values(categoryInfoEN).map((info) => info.slug).filter(Boolean) as string[];
 };
+
+// Dinamik olarak tanımlı projelerin GitHub repo adlarını (owner/repo) döndürür
+export const getAllProjectGithubRepos = (): string[] => {
+    const repos = new Set<string>();
+    Object.values(projectsByCategoryEN)
+        .flat()
+        .forEach((p) => {
+            if (p.githubLink) {
+                const match = p.githubLink.match(/github\.com\/([^/]+\/[^/]+)/i);
+                if (match) {
+                    repos.add(match[1]);
+                }
+            }
+        });
+    return Array.from(repos);
+};

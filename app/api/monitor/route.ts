@@ -6,6 +6,7 @@ import {
     HealthResult,
 } from '@/lib/supabase/monitor';
 import { sendMonitorAlertEmail } from '@/lib/email';
+import { validateSession } from '@/lib/server-utils';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -15,6 +16,21 @@ const RESPONSE_HEADERS: HeadersInit = {
 };
 
 export async function GET(req: NextRequest) {
+    // 1. Yetkilendirme kontrolü: Vercel Cron Secret veya Yönetici Oturumu
+    const authHeader = req.headers.get('authorization');
+    const cronSecret = process.env.CRON_SECRET;
+    const isCronAuthorized = Boolean(cronSecret && authHeader === `Bearer ${cronSecret}`);
+
+    const authToken = req.headers.get('x-auth-token');
+    const isAdminAuthorized = authToken ? await validateSession(authToken) : false;
+
+    if (!isCronAuthorized && !isAdminAuthorized) {
+        return NextResponse.json(
+            { error: 'Unauthorized' },
+            { status: 401, headers: RESPONSE_HEADERS }
+        );
+    }
+
     const expectedParam = req.nextUrl.searchParams.get('expected');
     let expectedCount: number | null = null;
 

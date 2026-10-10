@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getAllProjectGithubRepos } from '@/app/data/projects';
 
 interface GitHubRepoData {
     archived: boolean;
@@ -69,7 +70,23 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'No repos provided' }, { status: 400 });
     }
 
-    const repoList = repos.split(',');
+    const repoList = repos
+        .split(',')
+        .map((r) => r.trim())
+        .filter(Boolean);
+
+    // Yalnızca projeler listesinde tanımlı repolara izin ver
+    const allowedRepos = getAllProjectGithubRepos();
+    const allowedSet = new Set(allowedRepos.map((r) => r.toLowerCase()));
+
+    const unauthorizedRepos = repoList.filter((repo) => !allowedSet.has(repo.toLowerCase()));
+    if (unauthorizedRepos.length > 0) {
+        return NextResponse.json(
+            { error: `Unauthorized repository requested: ${unauthorizedRepos.join(', ')}` },
+            { status: 403 }
+        );
+    }
+
     const results: { [key: string]: RepoInfo } = {};
 
     for (const repo of repoList) {

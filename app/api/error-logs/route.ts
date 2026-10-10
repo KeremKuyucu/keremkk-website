@@ -10,9 +10,7 @@ function getCorsHeaders(origin: string | null) {
 
             if (
                 hostname === "keremkk.com.tr" ||
-                hostname.endsWith(".keremkk.com.tr") ||
-                hostname === "localhost" ||
-                hostname === "127.0.0.1"
+                hostname.endsWith(".keremkk.com.tr")
             ) {
                 allowedOrigin = origin;
             }
@@ -33,20 +31,37 @@ export async function POST(request: Request) {
     const corsHeaders = getCorsHeaders(origin);
 
     try {
-        const body = await request.json();
+        let body: any;
+        try {
+            body = await request.json();
+        } catch {
+            return NextResponse.json(
+                { error: "Invalid JSON body" },
+                { status: 400, headers: corsHeaders }
+            );
+        }
 
         const {
             uid,
             event,
             platform,
             app,
+            app_name,
             message,
             stackTrace,
+            stack_trace,
             metadata,
-        } = body;
+            app_version,
+            is_debug,
+            timestamp,
+            ...rest
+        } = body || {};
+
+        const targetApp = app || app_name;
+        const rawStackTrace = stackTrace !== undefined ? stackTrace : stack_trace;
 
         // Required fields
-        if (!uid || !event || !platform || !app || !message) {
+        if (!uid || !event || !platform || !targetApp || !message) {
             return NextResponse.json(
                 { error: "Missing required fields (uid, event, platform, app, message)" },
                 {
@@ -71,14 +86,14 @@ export async function POST(request: Request) {
 
         // Safely format strings & metadata
         const safeMessage = String(message).slice(0, 5000);
-        const safeStackTrace = stackTrace
-            ? String(stackTrace).slice(0, 10000)
+        const safeStackTrace = rawStackTrace
+            ? String(rawStackTrace).slice(0, 10000)
             : null;
 
-        let parsedMetadata: any = null;
+        let parsedMetadata: Record<string, any> = {};
         if (metadata !== undefined && metadata !== null) {
-            if (typeof metadata === "object") {
-                parsedMetadata = metadata;
+            if (typeof metadata === "object" && !Array.isArray(metadata)) {
+                parsedMetadata = { ...metadata };
             } else if (typeof metadata === "string") {
                 try {
                     parsedMetadata = JSON.parse(metadata);
@@ -88,24 +103,71 @@ export async function POST(request: Request) {
             }
         }
 
+        if (app_version !== undefined && app_version !== null) {
+            parsedMetadata.app_version = String(app_version).slice(0, 50);
+        }
+        if (is_debug !== undefined && is_debug !== null) {
+            parsedMetadata.is_debug = Boolean(is_debug);
+        }
+        if (timestamp) {
+            parsedMetadata.client_timestamp = String(timestamp).slice(0, 50);
+        }
+
+        // Capture any additional properties passed in the root body
+        for (const [key, value] of Object.entries(rest)) {
+            if (value !== undefined && value !== null) {
+                parsedMetadata[key] = value;
+            }
+        }
+
+        const baseRecord = {
+            uid: String(uid).slice(0, 200),
+            app_name: String(targetApp).slice(0, 100),
+            platform: String(platform).slice(0, 50),
+            event: String(event).slice(0, 150),
+            message: safeMessage,
+            stack_trace: safeStackTrace,
+            ip_address: String(ipAddress).slice(0, 150),
+            user_agent: String(userAgent).slice(0, 500),
+            timestamp: serverNow,
+        };
+
+        const hasMetadata = Object.keys(parsedMetadata).length > 0;
         const supabase = createAdminClient();
 
-        const { error: dbError } = await supabase
-            .from("app_error_logs")
-            .insert([
-                {
-                    uid: String(uid).slice(0, 200),
-                    app_name: String(app).slice(0, 100),
-                    platform: String(platform).slice(0, 50),
-                    event: String(event).slice(0, 150),
-                    message: safeMessage,
-                    stack_trace: safeStackTrace,
-                    metadata: parsedMetadata,
-                    ip_address: String(ipAddress).slice(0, 150),
-                    user_agent: String(userAgent).slice(0, 500),
-                    timestamp: serverNow,
-                },
-            ]);
+        let dbError = null;
+
+        if (hasMetadata) {
+            const { error: insertWithMetaError } = await supabase
+                .from("app_error_logs")
+                .insert([{ ...baseRecord, metadata: parsedMetadata }]);
+
+            if (insertWithMetaError) {
+                const isMetadataColumnMissing =
+                    insertWithMetaError.code === "PGRST204" ||
+                    insertWithMetaError.code === "42703" ||
+                    (insertWithMetaError.message &&
+                        insertWithMetaError.message.toLowerCase().includes("metadata"));
+
+                if (isMetadataColumnMissing) {
+                    console.warn(
+                        "app_error_logs tablosunda metadata sütunu bulunamadı. Base hata kaydı kaydediliyor:",
+                        insertWithMetaError.message
+                    );
+                    const { error: fallbackError } = await supabase
+                        .from("app_error_logs")
+                        .insert([baseRecord]);
+                    dbError = fallbackError;
+                } else {
+                    dbError = insertWithMetaError;
+                }
+            }
+        } else {
+            const { error: standardInsertError } = await supabase
+                .from("app_error_logs")
+                .insert([baseRecord]);
+            dbError = standardInsertError;
+        }
 
         if (dbError) {
             console.error("Supabase app_error_logs insert error:", dbError);
@@ -146,3 +208,34 @@ export async function OPTIONS(request: Request) {
         headers: getCorsHeaders(origin),
     });
 }
+
+/*
+================================================================================
+ 📖 ERROR LOGS API DOKÜMANTASYONU (AGENT & DEVELOPER REHBERİ)
+================================================================================
+
+Bu endpoint, mobil/web uygulamalarından (Flutter TelemetryService.sendError vb.) gelen
+hata, çökme (crash) ve istisna (exception) raporlarını toplar.
+
+📍 ENDPOINT BİLGİSİ:
+  - URL: https://keremkk.com.tr/api/error-logs
+  - Metot     : POST
+  - Başlıklar : Content-Type: application/json
+  - CORS      : keremkk.com.tr ve alt alan adları desteklenir.
+
+--------------------------------------------------------------------------------
+📥 REQUEST BODY (JSON ŞEMASI):
+--------------------------------------------------------------------------------
+{
+  "uid": "string",          // [ZORUNLU] Cihaz veya kullanıcı UID'si
+  "app": "string",          // [ZORUNLU] Uygulama adı ("geogame" vb.) ("app_name" de geçerlidir)
+  "platform": "string",     // [ZORUNLU] Platform adı ("android", "ios", "web", "windows" vb.)
+  "event": "string",        // [ZORUNLU] Hata kategorisi / olay adı (Örn: "auth_exception", "api_timeout")
+  "message": "string",      // [ZORUNLU] Hata mesajı (max 5000 karakter)
+  "stackTrace": "string",   // [OPSİYONEL] Stack trace / çağrı yığını ("stack_trace" de geçerlidir)
+  "metadata": object,       // [OPSİYONEL] Ekstra bağlam objesi veya JSON dizesi
+  "app_version": "string",  // [OPSİYONEL] Uygulama versiyonu (metadata.app_version olarak kaydedilir)
+  "is_debug": boolean,      // [OPSİYONEL] Debug modu (metadata.is_debug olarak kaydedilir)
+  "timestamp": "string"     // [OPSİYONEL] Cihaz zamanı (metadata.client_timestamp olarak kaydedilir)
+}
+*/

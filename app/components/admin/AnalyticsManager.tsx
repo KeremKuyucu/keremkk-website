@@ -36,6 +36,7 @@ export interface AppLog {
     event: string;
     platform: string;
     app_name?: string;
+    metadata?: Record<string, any>;
     ip_address?: string;
     user_agent?: string;
     created_at?: string;
@@ -1494,6 +1495,49 @@ export default function AnalyticsManager({ authToken, onNavigate }: AnalyticsMan
                                         <p className="font-mono text-[11px] text-gray-600 dark:text-gray-400 break-words leading-relaxed">
                                             {selectedLog.user_agent}
                                         </p>
+                                    </div>
+                                )}
+
+                                {/* Telemetry Extra Metadata */}
+                                {selectedLog.metadata && Object.keys(selectedLog.metadata).length > 0 && (
+                                    <div className="p-4 bg-gray-50 dark:bg-zinc-800/60 rounded-2xl border border-gray-100 dark:border-white/5 space-y-3">
+                                        <span className="text-gray-400 font-semibold block">Ekstra Bilgiler & Metadatas (Telemetry)</span>
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                                            {selectedLog.metadata.app_version && (
+                                                <div className="p-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/5">
+                                                    <span className="text-[10px] text-gray-400 block font-semibold mb-0.5">Versiyon</span>
+                                                    <span className="font-mono font-bold text-gray-800 dark:text-gray-200 text-xs">
+                                                        {selectedLog.metadata.app_version}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {selectedLog.metadata.is_debug !== undefined && (
+                                                <div className="p-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/5">
+                                                    <span className="text-[10px] text-gray-400 block font-semibold mb-0.5">Ortam</span>
+                                                    <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${selectedLog.metadata.is_debug ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" : "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"}`}>
+                                                        {selectedLog.metadata.is_debug ? "Debug" : "Release"}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {selectedLog.metadata.client_timestamp && (
+                                                <div className="p-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/5">
+                                                    <span className="text-[10px] text-gray-400 block font-semibold mb-0.5">Cihaz Zamanı</span>
+                                                    <span className="font-mono text-gray-800 dark:text-gray-200 text-xs">
+                                                        {new Date(selectedLog.metadata.client_timestamp).toLocaleTimeString("tr-TR")}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Other dynamic additionalData fields */}
+                                        {Object.entries(selectedLog.metadata).filter(([k]) => !['app_version', 'is_debug', 'client_timestamp'].includes(k)).length > 0 && (
+                                            <div className="pt-1">
+                                                <span className="text-[10px] text-gray-400 block font-semibold mb-1">Ekstra Alanlar (Additional Data)</span>
+                                                <pre className="p-3 bg-white dark:bg-zinc-900 rounded-xl font-mono text-[11px] text-gray-700 dark:text-gray-300 border border-gray-100 dark:border-white/5 overflow-x-auto leading-relaxed">
+                                                    {JSON.stringify(Object.fromEntries(Object.entries(selectedLog.metadata).filter(([k]) => !['app_version', 'is_debug', 'client_timestamp'].includes(k))), null, 2)}
+                                                </pre>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>

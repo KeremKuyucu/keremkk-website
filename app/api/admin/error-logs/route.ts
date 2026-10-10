@@ -30,8 +30,10 @@ export async function GET(request: Request) {
         }
 
         if (searchParam && searchParam.trim()) {
-            const s = searchParam.trim();
-            query = query.or(`message.ilike.%${s}%,event.ilike.%${s}%,uid.ilike.%${s}%,ip_address.ilike.%${s}%`);
+            const s = searchParam.trim().replace(/[,()]/g, "");
+            if (s) {
+                query = query.or(`message.ilike.%${s}%,event.ilike.%${s}%,uid.ilike.%${s}%,ip_address.ilike.%${s}%`);
+            }
         }
 
         const { data: logs, count, error: logsError } = await query;
