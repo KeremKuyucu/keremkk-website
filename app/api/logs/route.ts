@@ -91,6 +91,8 @@ export async function POST(request: Request) {
       }
     }
 
+    const hasExtraMetadata = Object.keys(extraMetadata).length > 0;
+
     const insertPayload = {
       uid: String(uid).slice(0, 200),
       event: String(event).slice(0, 150),
