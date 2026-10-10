@@ -4,37 +4,5 @@
       "path": "/api/monitor",
       "schedule": "0 0 * * *"
     }
-  ],
-  "redirects": [
-    {
-      "source": "/cv",
-      "destination": "/go/cv",
-      "permanent": false
-    },
-    {
-      "source": "/github",
-      "destination": "/go/github",
-      "permanent": false
-    },
-    {
-      "source": "/linkedin",
-      "destination": "/go/linkedin",
-      "permanent": false
-    },
-    {
-      "source": "/signal",
-      "destination": "/go/signal",
-      "permanent": false
-    },
-    {
-      "source": "/discord",
-      "destination": "/go/discord",
-      "permanent": false
-    },
-    {
-      "source": "/source-code",
-      "destination": "/go/source-code",
-      "permanent": false
-    }
   ]
 }
