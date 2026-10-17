@@ -1116,7 +1116,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                     required
                                     placeholder={
                                         formData.type === "website"
-                                            ? "https://keremkk.com.tr"
+                                            ? "https://keremkuyucu.com.tr"
                                             : "https://xxxxxxxx.supabase.co"
                                     }
                                     value={formData.supabase_url}

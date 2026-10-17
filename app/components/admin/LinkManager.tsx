@@ -108,7 +108,7 @@ export default function LinkManager({ authToken }: LinkManagerProps) {
 
     // Copy short link helper
     const handleCopyShortUrl = (slug: string) => {
-        const fullUrl = `${originUrl || "https://keremkk.com.tr"}/go/${slug}`;
+        const fullUrl = `${originUrl || "https://keremkuyucu.com.tr"}/go/${slug}`;
         navigator.clipboard.writeText(fullUrl);
         setCopiedSlug(slug);
         setTimeout(() => setCopiedSlug(null), 2000);
@@ -715,7 +715,7 @@ export default function LinkManager({ authToken }: LinkManagerProps) {
                                     />
                                 </div>
                                 <p className="text-[11px] text-gray-400 mt-1">
-                                    Önizleme: <span className="font-mono text-violet-600 dark:text-violet-400 font-semibold">{originUrl || "https://keremkk.com.tr"}/go/{formSlug || "..."}</span>
+                                    Önizleme: <span className="font-mono text-violet-600 dark:text-violet-400 font-semibold">{originUrl || "https://keremkuyucu.com.tr"}/go/{formSlug || "..."}</span>
                                 </p>
                             </div>
 

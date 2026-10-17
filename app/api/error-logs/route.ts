@@ -2,15 +2,15 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 function getCorsHeaders(origin: string | null) {
-    let allowedOrigin = "https://keremkk.com.tr";
+    let allowedOrigin = "https://keremkuyucu.com.tr";
 
     if (origin) {
         try {
             const hostname = new URL(origin).hostname;
 
             if (
-                hostname === "keremkk.com.tr" ||
-                hostname.endsWith(".keremkk.com.tr")
+                hostname === "keremkuyucu.com.tr" ||
+                hostname.endsWith(".keremkuyucu.com.tr")
             ) {
                 allowedOrigin = origin;
             }
@@ -214,10 +214,10 @@ Bu endpoint, mobil/web uygulamalarından (Flutter TelemetryService.sendError vb.
 hata, çökme (crash) ve istisna (exception) raporlarını toplar.
 
 📍 ENDPOINT BİLGİSİ:
-  - URL: https://keremkk.com.tr/api/error-logs
+  - URL: https://keremkuyucu.com.tr/api/error-logs
   - Metot     : POST
   - Başlıklar : Content-Type: application/json
-  - CORS      : keremkk.com.tr ve alt alan adları desteklenir.
+  - CORS      : keremkuyucu.com.tr ve alt alan adları desteklenir.
 
 --------------------------------------------------------------------------------
 📥 REQUEST BODY (JSON ŞEMASI):

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: "İletişim - Kerem Kuyucu",
         description: "Benimle iletişime geçin. Proje fikirleri, iş birliği teklifleri veya sadece merhaba demek için mesaj gönderin.",
-        url: "https://keremkk.com.tr/tr/contact",
+        url: "https://keremkuyucu.com.tr/tr/contact",
         siteName: "Kerem Kuyucu",
         locale: "tr_TR",
         type: "website",

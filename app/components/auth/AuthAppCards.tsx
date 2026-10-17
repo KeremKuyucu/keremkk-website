@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FaAndroid, FaGlobe, FaExternalLinkAlt, FaRocket, FaArrowRight } from "react-icons/fa";
+import { FaAndroid, FaWindows, FaGlobe, FaExternalLinkAlt, FaRocket, FaArrowRight } from "react-icons/fa";
 
 export interface AuthApp {
   name: string;
@@ -10,6 +10,7 @@ export interface AuthApp {
   color: string;
   packageId: string;
   webUrl: string;
+  windowsProtocol?: string;
 }
 
 export const apps: AuthApp[] = [
@@ -20,7 +21,8 @@ export const apps: AuthApp[] = [
     icon: "🌍",
     color: "from-blue-500 to-cyan-400",
     packageId: "com.keremkuyucu.geogame",
-    webUrl: "https://geogame.keremkk.com.tr/",
+    webUrl: "https://geogame.keremkuyucu.com.tr/",
+    windowsProtocol: "com.keremkuyucu.geogame://",
   },
   {
     name: "Okey Defteri",
@@ -29,7 +31,7 @@ export const apps: AuthApp[] = [
     icon: "🎲",
     color: "from-orange-500 to-rose-400",
     packageId: "com.keremkuyucu.okeydefteri",
-    webUrl: "https://okey.keremkk.com.tr/",
+    webUrl: "https://okey.keremkuyucu.com.tr/",
   },
 ];
 
@@ -43,6 +45,7 @@ export default function AuthAppCards() {
     setTimeout(() => setLaunchingApp(null), 2000);
 
     const isAndroid = /android/i.test(navigator.userAgent);
+    const isWindows = /windows/i.test(navigator.userAgent);
 
     if (isAndroid) {
       // Android Intent scheme to launch installed app, falling back to webUrl
@@ -59,6 +62,9 @@ export default function AuthAppCards() {
           window.location.href = app.webUrl;
         }
       }, 1500);
+    } else if (isWindows && app.windowsProtocol) {
+      // Windows custom URI scheme registered in Windows registry (Software\Classes\com.keremkuyucu.geogame)
+      window.location.href = app.windowsProtocol;
     } else {
       // Desktop / iOS: Open web version in a new tab
       window.open(app.webUrl, "_blank", "noopener,noreferrer");
@@ -99,7 +105,7 @@ export default function AuthAppCards() {
                       {app.name}
                     </h3>
                     <p className="text-xs text-gray-400 dark:text-gray-500">
-                      Mobile & Web
+                      {app.windowsProtocol ? "Android, Windows & Web" : "Mobile & Web"}
                     </p>
                   </div>
                 </div>
@@ -123,6 +129,16 @@ export default function AuthAppCards() {
                   <FaAndroid className="text-emerald-600 dark:text-emerald-400 text-xs shrink-0" />
                   <span className="truncate max-w-[170px]">{app.packageId}</span>
                 </div>
+
+                {app.windowsProtocol && (
+                  <div
+                    title={`Windows Protocol: ${app.windowsProtocol}`}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 dark:bg-sky-950/40 border border-sky-200/80 dark:border-sky-800/50 text-sky-700 dark:text-sky-300 text-xs font-mono"
+                  >
+                    <FaWindows className="text-sky-600 dark:text-sky-400 text-xs shrink-0" />
+                    <span>Windows</span>
+                  </div>
+                )}
 
                 <div
                   title={`Web URL: ${app.webUrl}`}
@@ -151,6 +167,18 @@ export default function AuthAppCards() {
                 <FaRocket className={`text-xs ${isLaunching ? "animate-bounce" : ""}`} />
                 <span>{isLaunching ? "Opening..." : "Launch App"}</span>
               </button>
+
+              {app.windowsProtocol && (
+                <a
+                  href={app.windowsProtocol}
+                  title="Open Windows App"
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <FaWindows className="text-xs text-sky-600 dark:text-sky-400" />
+                  <span className="text-xs">Windows</span>
+                </a>
+              )}
 
               <a
                 href={app.webUrl}

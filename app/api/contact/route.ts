@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 28px; background-color: #ffffff; border-radius: 18px; border: 1px solid #e5e7eb;">
                 <div style="border-bottom: 2px solid #8b5cf6; padding-bottom: 16px; margin-bottom: 24px;">
                     <h2 style="color: #111827; margin: 0; font-size: 20px; font-weight: 800;">📨 Web Sitenden Yeni İletişim Mesajı</h2>
-                    <p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">keremkk.com.tr üzerinden yeni bir ziyaretçi formu doldurdu</p>
+                    <p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">keremkuyucu.com.tr üzerinden yeni bir ziyaretçi formu doldurdu</p>
                 </div>
 
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">

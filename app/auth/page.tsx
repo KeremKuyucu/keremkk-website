@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Kerem Kuyucu – Apps & Authentication",
   description:
-    "Kerem Kuyucu tarafından geliştirilen uygulamalar ve ortak kimlik doğrulama hizmeti hakkında bilgi edinin.",
+    "Learn about applications developed by Kerem Kuyucu and the shared authentication service.",
 };
 
 export default function AuthHomePage() {
@@ -52,7 +52,7 @@ export default function AuthHomePage() {
             Applications using this auth service
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Click any application to launch on Android or open the web version.
+            Click any application to launch on Android, Windows, or open the web version.
           </p>
         </div>
         <AuthAppCards />
@@ -64,67 +64,35 @@ export default function AuthHomePage() {
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
             Legal & Policies
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                English
-              </p>
-              <div className="flex flex-col gap-2">
-                <Link
-                  href="/auth/en/privacy"
-                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Privacy Policy →
-                </Link>
-                <Link
-                  href="/auth/en/tos"
-                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Terms of Service →
-                </Link>
-                <Link
-                  href="/auth/en/delete-account"
-                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                >
-                  Delete Account →
-                </Link>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                Türkçe
-              </p>
-              <div className="flex flex-col gap-2">
-                <Link
-                  href="/auth/tr/privacy"
-                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Gizlilik Politikası →
-                </Link>
-                <Link
-                  href="/auth/tr/tos"
-                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Kullanım Koşulları →
-                </Link>
-                <Link
-                  href="/auth/tr/delete-account"
-                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                >
-                  Hesabı Sil →
-                </Link>
-              </div>
-            </div>
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+            <Link
+              href="/auth/en/privacy"
+              className="text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            >
+              Privacy Policy →
+            </Link>
+            <Link
+              href="/auth/en/tos"
+              className="text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            >
+              Terms of Service →
+            </Link>
+            <Link
+              href="/auth/en/delete-account"
+              className="text-sm text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+            >
+              Delete Account →
+            </Link>
           </div>
 
           <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Questions? Contact us at{" "}
               <a
-                href="mailto:help@keremkk.com.tr"
+                href="mailto:help@keremkuyucu.com.tr"
                 className="text-blue-600 dark:text-blue-400 hover:underline"
               >
-                help@keremkk.com.tr
+                help@keremkuyucu.com.tr
               </a>
             </p>
           </div>

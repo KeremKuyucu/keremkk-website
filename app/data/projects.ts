@@ -91,7 +91,7 @@ export const projectsByCategoryEN: { [key: string]: Project[] } = {
             features: ["Cross-platform architecture", "Advanced state management", "Modern UI/UX", "Open source"],
             techStack: ["Flutter", "Dart", "Supabase"],
             githubLink: "https://github.com/KeremKuyucu/GeoGame",
-            viewLink: "https://geogame.keremkk.com.tr",
+            viewLink: "https://geogame.keremkuyucu.com.tr",
         }
     ],
     OkeyDefteri: [
@@ -174,7 +174,7 @@ export const projectsByCategoryTR: { [key: string]: Project[] } = {
             features: ["Cross-platform mimari", "Gelişmiş state yönetimi", "Modern UI/UX", "Açık kaynak"],
             techStack: ["Flutter", "Dart", "Supabase"],
             githubLink: "https://github.com/KeremKuyucu/GeoGame",
-            viewLink: "https://geogame.keremkk.com.tr",
+            viewLink: "https://geogame.keremkuyucu.com.tr",
         }
     ],
     OkeyDefteri: [
@@ -187,7 +187,7 @@ export const projectsByCategoryTR: { [key: string]: Project[] } = {
             features: ["Canlı Masa ve Skor Takibi", "Taş Hesap Makinesi & İstatistikler", "Dinamik Lakap Motoru", "Açık kaynak"],
             techStack: ["Flutter", "Dart"],
             githubLink: "https://github.com/KeremKuyucu/OkeyDefteri",
-            viewLink: "https://okey.keremkk.com.tr",
+            viewLink: "https://okey.keremkuyucu.com.tr",
         }
     ],
     CopilotButton: [

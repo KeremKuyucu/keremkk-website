@@ -33,8 +33,9 @@ const productSans = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://keremkuyucu.com.tr"),
   title: "Kerem Kuyucu - Full-Stack & Mobile Developer",
-  authors: [{ name: "Kerem Kuyucu", url: "https://keremkk.com.tr" }],
+  authors: [{ name: "Kerem Kuyucu", url: "https://keremkuyucu.com.tr" }],
   description: "Hello, I'm Kerem. Continuously improving by building hobby projects with modern technologies.",
   keywords: ["Kerem Kuyucu", "Software Developer", "Full-Stack Developer", "Mobile Developer", "Flutter", "Next.js", "Projects"],
   robots: {
@@ -51,11 +52,25 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Kerem Kuyucu - Full-Stack & Mobile Developer",
     description: "Hello, I'm Kerem. Continuously improving by building hobby projects with modern technologies.",
-    url: "https://keremkk.com.tr",
+    url: "https://keremkuyucu.com.tr",
     siteName: "Kerem Kuyucu",
     locale: "en_US",
     type: "website",
-  }
+    images: [
+      {
+        url: "/imgs/logo.png",
+        width: 512,
+        height: 512,
+        alt: "Kerem Kuyucu",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Kerem Kuyucu - Full-Stack & Mobile Developer",
+    description: "Hello, I'm Kerem. Continuously improving by building hobby projects with modern technologies.",
+    images: ["/imgs/logo.png"],
+  },
 };
 
 export default function RootLayout({

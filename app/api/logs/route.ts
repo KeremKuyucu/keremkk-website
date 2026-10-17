@@ -2,14 +2,14 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 function getCorsHeaders(origin: string | null) {
-  let allowedOrigin = 'https://keremkk.com.tr'; // Default origin
+  let allowedOrigin = 'https://keremkuyucu.com.tr'; // Default origin
   if (origin) {
     try {
       const hostname = new URL(origin).hostname;
-      // Allow keremkk.com.tr, its subdomains, and localhost for dev/web builds
+      // Allow keremkuyucu.com.tr, its subdomains, and localhost for dev/web builds
       if (
-        hostname === 'keremkk.com.tr' ||
-        hostname.endsWith('.keremkk.com.tr')
+        hostname === 'keremkuyucu.com.tr' ||
+        hostname.endsWith('.keremkuyucu.com.tr')
       ) {
         allowedOrigin = origin;
       }
@@ -167,10 +167,10 @@ Bu endpoint, mobil/web uygulamalarından (Flutter TelemetryService vb.) veya ark
 analitik, telemetri ve olay (event) loglarını toplar.
 
 📍 ENDPOINT BİLGİSİ:
-  - URL: https://keremkk.com.tr/api/logs
+  - URL: https://keremkuyucu.com.tr/api/logs
   - Metot     : POST
   - Başlıklar : Content-Type: application/json
-  - CORS      : keremkk.com.tr ve alt alan adları desteklenir.
+  - CORS      : keremkuyucu.com.tr ve alt alan adları desteklenir.
 
 --------------------------------------------------------------------------------
 📥 REQUEST BODY (JSON ŞEMASI):

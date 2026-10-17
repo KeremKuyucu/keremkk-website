@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: "Projects - Kerem Kuyucu",
         description: "Explore all my projects including mobile applications, web services, desktop tools, and open-source software.",
-        url: "https://keremkk.com.tr/projects",
+        url: "https://keremkuyucu.com.tr/projects",
         siteName: "Kerem Kuyucu",
         locale: "en_US",
         type: "website",

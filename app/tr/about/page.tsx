@@ -1,41 +1,21 @@
-"use client";
-import React, { useEffect } from "react";
-import Navbar from "@/app/components/layout/Navbar";
-import FooterComponent from "@/app/components/layout/Footer";
-import AboutHero from "@/app/components/about/AboutHero";
-import EducationSkills from "@/app/components/about/EducationSkills";
-import CertificatesSection from "@/app/components/about/CertificatesSection";
+import type { Metadata } from "next";
+import AboutPageClient from "@/app/components/about/AboutPageClient";
+
+export const metadata: Metadata = {
+  title: "Hakkımda - Kerem Kuyucu",
+  description:
+    "Kerem Kuyucu hakkında bilgi edinin. Yazılım geliştirme serüveni, yetenekler, eğitim geçmişi ve sertifikalar.",
+  openGraph: {
+    title: "Hakkımda - Kerem Kuyucu",
+    description:
+      "Kerem Kuyucu hakkında bilgi edinin. Yazılım geliştirme serüveni, yetenekler, eğitim geçmişi ve sertifikalar.",
+    url: "https://keremkuyucu.com.tr/tr/about",
+    siteName: "Kerem Kuyucu",
+    locale: "tr_TR",
+    type: "profile",
+  },
+};
 
 export default function TurkishAboutPage() {
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-    document.querySelectorAll(".scroll-reveal").forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <main className="min-h-screen bg-gray-50 dark:bg-black transition-colors duration-300 overflow-x-hidden">
-      <Navbar />
-      <AboutHero lang="tr" />
-
-      {/* Main Content Grid */}
-      <section className="py-20 px-6 max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-12 gap-12">
-          <EducationSkills lang="tr" />
-          <CertificatesSection lang="tr" />
-        </div>
-      </section>
-
-      <FooterComponent />
-    </main>
-  );
+  return <AboutPageClient lang="tr" />;
 }

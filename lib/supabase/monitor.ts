@@ -170,7 +170,7 @@ export async function checkMonitorTarget(target: {
                 signal: controller.signal,
                 redirect: 'follow',
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (compatible; KeremKKMonitor/1.0; +https://keremkk.com.tr)',
+                    'User-Agent': 'Mozilla/5.0 (compatible; KeremKKMonitor/1.0; +https://keremkuyucu.com.tr)',
                     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                 },
             });

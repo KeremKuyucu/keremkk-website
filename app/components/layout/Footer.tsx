@@ -22,7 +22,7 @@ import { translations, Language } from "@/app/data/translations";
 
 export const socialLinks = [
   {
-    href: "mailto:contact@keremkk.com.tr",
+    href: "mailto:contact@keremkuyucu.com.tr",
     label: "Email",
     icon: <FaEnvelope />,
     color: "from-blue-500 to-cyan-500",

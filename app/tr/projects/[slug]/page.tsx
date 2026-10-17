@@ -16,16 +16,32 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const category = getCategoryBySlug(slug, "tr");
     if (!category) return { title: "Proje Bulunamadı" };
 
+    const mainImage = category.projects[0]?.imageUrl || "/imgs/logo.png";
+
     return {
         title: `${category.info.name} - Kerem Kuyucu`,
         description: category.info.description,
         openGraph: {
             title: `${category.info.name} - Kerem Kuyucu`,
             description: category.info.description,
-            url: `https://keremkk.com.tr/tr/projects/${slug}`,
+            url: `https://keremkuyucu.com.tr/tr/projects/${slug}`,
             siteName: "Kerem Kuyucu",
             locale: "tr_TR",
             type: "website",
+            images: [
+                {
+                    url: mainImage,
+                    width: 1200,
+                    height: 630,
+                    alt: category.info.name,
+                },
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: `${category.info.name} - Kerem Kuyucu`,
+            description: category.info.description,
+            images: [mainImage],
         },
     };
 }

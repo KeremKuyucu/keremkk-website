@@ -1,35 +1,21 @@
-"use client";
-import React, { useEffect } from "react";
-import Navbar from "@/app/components/layout/Navbar";
-import FooterComponent from "@/app/components/layout/Footer";
-import HeroSection from "@/app/components/home/HeroSection";
-import TechStackSection from "@/app/components/home/TechStackSection";
+import type { Metadata } from "next";
+import HomePageClient from "@/app/components/home/HomePageClient";
+
+export const metadata: Metadata = {
+  title: "Kerem Kuyucu - Full-Stack & Mobil Geliştirici",
+  description:
+    "Merhaba, ben Kerem. Modern teknolojilerle açık kaynaklı projeler, mobil ve web uygulamaları geliştiriyorum.",
+  openGraph: {
+    title: "Kerem Kuyucu - Full-Stack & Mobil Geliştirici",
+    description:
+      "Merhaba, ben Kerem. Modern teknolojilerle açık kaynaklı projeler, mobil ve web uygulamaları geliştiriyorum.",
+    url: "https://keremkuyucu.com.tr/tr",
+    siteName: "Kerem Kuyucu",
+    locale: "tr_TR",
+    type: "website",
+  },
+};
 
 export default function TurkishHome() {
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    const scrollElements = document.querySelectorAll(".scroll-reveal");
-    scrollElements.forEach((el) => observer.observe(el));
-
-    return () => scrollElements.forEach((el) => observer.unobserve(el));
-  }, []);
-
-  return (
-    <main className="min-h-screen bg-gray-50 dark:bg-black transition-colors duration-300 overflow-x-hidden">
-      <Navbar />
-      <HeroSection lang="tr" />
-      <TechStackSection lang="tr" />
-      <FooterComponent />
-    </main>
-  );
+  return <HomePageClient lang="tr" />;
 }

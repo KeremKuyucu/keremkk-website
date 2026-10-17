@@ -176,7 +176,7 @@ export async function sendMonitorAlertEmail({
         }
 
         <div style="text-align: center; margin: 28px 0 20px 0;">
-            <a href="https://keremkk.com.tr/admin" style="display: inline-block; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: #ffffff; text-decoration: none; padding: 12px 30px; border-radius: 12px; font-weight: bold; font-size: 13px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
+            <a href="https://keremkuyucu.com.tr/admin" style="display: inline-block; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: #ffffff; text-decoration: none; padding: 12px 30px; border-radius: 12px; font-weight: bold; font-size: 13px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
                 🛠️ Yönetim Paneline Git
             </a>
         </div>
