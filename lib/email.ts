@@ -12,7 +12,7 @@ export interface SendEmailOptions {
 
 export interface MonitorAlertOptions {
     projectName: string;
-    projectType: 'supabase' | 'website';
+    projectType: 'supabase' | 'website' | 'tcp';
     targetUrl: string;
     status: 'error' | 'timeout' | 'ok';
     error?: string;
@@ -118,7 +118,7 @@ export async function sendMonitorAlertEmail({
 }: MonitorAlertOptions): Promise<{ success: boolean; error?: string }> {
     const formattedDate = timestamp || new Date().toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" });
     const isTimeout = status === "timeout";
-    const typeLabel = projectType === "website" ? "🌐 Web Sitesi" : "⚡ Supabase Projesi";
+    const typeLabel = projectType === "website" ? "🌐 Web Sitesi" : projectType === "tcp" ? "🔌 TCP / Sunucu Portu" : "⚡ Supabase Projesi";
     const statusLabel = isTimeout ? "⏱️ Zaman Aşımı (Timeout)" : "❌ Hata (Erişilemez)";
 
     const emailHtml = `

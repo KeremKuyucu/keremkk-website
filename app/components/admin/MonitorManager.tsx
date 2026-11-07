@@ -26,7 +26,7 @@ import {
     FaFilter,
 } from "react-icons/fa";
 
-export type MonitorTargetType = "supabase" | "website";
+export type MonitorTargetType = "supabase" | "website" | "tcp";
 
 export interface MonitorProject {
     id: string;
@@ -79,7 +79,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [searchQuery, setSearchQuery] = useState<string>("");
-    const [typeFilter, setTypeFilter] = useState<"all" | "website" | "supabase">("all");
+    const [typeFilter, setTypeFilter] = useState<"all" | "website" | "supabase" | "tcp">("all");
     const [notification, setNotification] = useState<{
         type: "success" | "error";
         message: string;
@@ -398,7 +398,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                         name: formData.name,
                         type: formData.type,
                         supabase_url: formData.supabase_url,
-                        supabase_key: formData.type === "website" ? null : formData.supabase_key,
+                        supabase_key: formData.type === "supabase" ? formData.supabase_key : null,
                         enabled: formData.enabled,
                     }),
                 });
@@ -422,7 +422,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                         name: formData.name,
                         type: formData.type,
                         supabase_url: formData.supabase_url,
-                        supabase_key: formData.type === "website" ? null : formData.supabase_key,
+                        supabase_key: formData.type === "supabase" ? formData.supabase_key : null,
                         enabled: formData.enabled,
                     }),
                 });
@@ -483,6 +483,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
             const matchesType =
                 typeFilter === "all" ||
                 (typeFilter === "website" && p.type === "website") ||
+                (typeFilter === "tcp" && p.type === "tcp") ||
                 (typeFilter === "supabase" && (p.type === "supabase" || !p.type));
 
             return matchesSearch && matchesType;
@@ -491,6 +492,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
 
     const activeCount = projects.filter((p) => p.enabled).length;
     const websiteCount = projects.filter((p) => p.type === "website").length;
+    const tcpCount = projects.filter((p) => p.type === "tcp").length;
     const supabaseCount = projects.filter((p) => p.type === "supabase" || !p.type).length;
 
     // Ping süresi ortalaması
@@ -533,7 +535,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                 {projects.length}
                             </span>
                             <span className="text-xs text-gray-400">
-                                ({websiteCount} Site, {supabaseCount} Supabase)
+                                ({websiteCount} Site, {tcpCount} TCP, {supabaseCount} Supabase)
                             </span>
                         </div>
                     </div>
@@ -628,6 +630,16 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                             <FaGlobe className="text-xs" /> Web ({websiteCount})
                         </button>
                         <button
+                            onClick={() => setTypeFilter("tcp")}
+                            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+                                typeFilter === "tcp"
+                                    ? "bg-white dark:bg-zinc-700 shadow-sm text-emerald-600 dark:text-emerald-400"
+                                    : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                            }`}
+                        >
+                            <FaServer className="text-xs" /> TCP ({tcpCount})
+                        </button>
+                        <button
                             onClick={() => setTypeFilter("supabase")}
                             className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
                                 typeFilter === "supabase"
@@ -705,6 +717,8 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                         const test = testResults[project.id];
                         const isRevealed = Boolean(revealedKeys[project.id]);
                         const isWebsite = project.type === "website";
+                        const isTcp = project.type === "tcp";
+                        const isSupabase = project.type === "supabase" || (!project.type && !isWebsite && !isTcp);
 
                         // Anlık veya DB'deki son durum
                         const currentStatus = test?.status !== undefined && test.status !== "idle"
@@ -737,11 +751,13 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                                 className={`text-xs px-2.5 py-1 rounded-lg font-bold inline-flex items-center gap-1.5 ${
                                                     isWebsite
                                                         ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
+                                                        : isTcp
+                                                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                                                         : "bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20"
                                                 }`}
                                             >
-                                                {isWebsite ? <FaGlobe className="text-xs" /> : <FaBolt className="text-xs" />}
-                                                {isWebsite ? "Web Sitesi" : "Supabase"}
+                                                {isWebsite ? <FaGlobe className="text-xs" /> : isTcp ? <FaServer className="text-xs" /> : <FaBolt className="text-xs" />}
+                                                {isWebsite ? "Web Sitesi" : isTcp ? "TCP / Port" : "Supabase"}
                                             </span>
 
                                             <h3 className="text-lg font-extrabold truncate text-gray-900 dark:text-white">
@@ -812,23 +828,29 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                     {/* URL */}
                                     <div className="flex items-center justify-between gap-2">
                                         <span className="text-gray-400 font-semibold w-12 flex-shrink-0">
-                                            URL:
+                                            {isTcp ? "Host:" : "URL:"}
                                         </span>
-                                        <a
-                                            href={project.supabase_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="font-mono text-gray-700 dark:text-zinc-300 truncate hover:text-violet-500 transition-colors flex-1"
-                                        >
-                                            {project.supabase_url}
-                                        </a>
+                                        {isTcp ? (
+                                            <span className="font-mono text-gray-700 dark:text-zinc-300 truncate flex-1">
+                                                {project.supabase_url}
+                                            </span>
+                                        ) : (
+                                            <a
+                                                href={project.supabase_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="font-mono text-gray-700 dark:text-zinc-300 truncate hover:text-violet-500 transition-colors flex-1"
+                                            >
+                                                {project.supabase_url}
+                                            </a>
+                                        )}
                                         <div className="flex items-center gap-1">
                                             <button
                                                 onClick={() =>
                                                     handleCopy(project.supabase_url, `url-${project.id}`)
                                                 }
                                                 className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-zinc-200 transition-colors"
-                                                title="URL Kopyala"
+                                                title="Kopyala"
                                             >
                                                 {copiedId === `url-${project.id}` ? (
                                                     <FaCheck className="text-emerald-500" />
@@ -836,20 +858,22 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                                     <FaCopy />
                                                 )}
                                             </button>
-                                            <a
-                                                href={project.supabase_url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-zinc-200 transition-colors"
-                                                title="Tarayıcıda Aç"
-                                            >
-                                                <FaExternalLinkAlt className="text-[10px]" />
-                                            </a>
+                                            {!isTcp && (
+                                                <a
+                                                    href={project.supabase_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-zinc-200 transition-colors"
+                                                    title="Tarayıcıda Aç"
+                                                >
+                                                    <FaExternalLinkAlt className="text-[10px]" />
+                                                </a>
+                                            )}
                                         </div>
                                     </div>
 
                                     {/* Key (Only for Supabase) */}
-                                    {!isWebsite && (
+                                    {isSupabase && (
                                         <div className="flex items-center justify-between gap-2 border-t border-gray-200/50 dark:border-zinc-800/50 pt-1.5">
                                             <span className="text-gray-400 font-semibold w-12 flex-shrink-0">
                                                 Key:
@@ -1009,12 +1033,12 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
 
                         {/* Modal Form */}
                         <form onSubmit={handleFormSubmit} className="flex flex-col gap-4">
-                            {/* Hedef Türü Seçimi (Web Sitesi vs Supabase) */}
+                            {/* Hedef Türü Seçimi (Web Sitesi vs TCP vs Supabase) */}
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500">
                                     Hedef Türü *
                                 </label>
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                     {/* Web Sitesi Seçeneği */}
                                     <button
                                         type="button"
@@ -1041,10 +1065,44 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                         </div>
                                         <div>
                                             <p className="text-sm font-bold text-gray-900 dark:text-white">
-                                                Web Sitesi / URL
+                                                Web Sitesi
                                             </p>
                                             <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">
-                                                HTTP durum kodu ve ping takibi
+                                                HTTP GET yanıtı ve ping takibi
+                                            </p>
+                                        </div>
+                                    </button>
+
+                                    {/* TCP / Port Seçeneği */}
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                type: "tcp",
+                                            }))
+                                        }
+                                        className={`p-3.5 rounded-xl border text-left flex items-start gap-3 transition-all ${
+                                            formData.type === "tcp"
+                                                ? "border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20 ring-2 ring-emerald-500/20"
+                                                : "border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50"
+                                        }`}
+                                    >
+                                        <div
+                                            className={`p-2 rounded-lg text-lg ${
+                                                formData.type === "tcp"
+                                                    ? "bg-emerald-500 text-white"
+                                                    : "bg-gray-100 dark:bg-zinc-800 text-gray-500"
+                                            }`}
+                                        >
+                                            <FaServer />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-gray-900 dark:text-white">
+                                                TCP / Port
+                                            </p>
+                                            <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">
+                                                SSH, Proxy, Oyun sunucusu pingi
                                             </p>
                                         </div>
                                     </button>
@@ -1075,7 +1133,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                         </div>
                                         <div>
                                             <p className="text-sm font-bold text-gray-900 dark:text-white">
-                                                Supabase Projesi
+                                                Supabase
                                             </p>
                                             <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">
                                                 RPC sağlık kontrolü ve uyandırma
@@ -1088,7 +1146,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                             {/* Hedef Adı */}
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500">
-                                    {formData.type === "website" ? "Site veya Servis Adı *" : "Proje Adı *"}
+                                    {formData.type === "website" ? "Site veya Servis Adı *" : formData.type === "tcp" ? "Sunucu / Port Adı *" : "Proje Adı *"}
                                 </label>
                                 <input
                                     type="text"
@@ -1096,6 +1154,8 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                     placeholder={
                                         formData.type === "website"
                                             ? "Örn: KeremKK Portföy veya API Sunucusu"
+                                            : formData.type === "tcp"
+                                            ? "Örn: Oracle VPS (SSH) veya Minecraft"
                                             : "Örn: Proje-1 veya Egl-Yıllık DB"
                                     }
                                     value={formData.name}
@@ -1106,17 +1166,19 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                 />
                             </div>
 
-                            {/* URL */}
+                            {/* URL / Host:Port */}
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500">
-                                    {formData.type === "website" ? "Web Sitesi URL *" : "Supabase URL *"}
+                                    {formData.type === "website" ? "Web Sitesi URL *" : formData.type === "tcp" ? "Sunucu IP / Host ve Port *" : "Supabase URL *"}
                                 </label>
                                 <input
-                                    type="url"
+                                    type={formData.type === "website" ? "url" : "text"}
                                     required
                                     placeholder={
                                         formData.type === "website"
                                             ? "https://keremkuyucu.com.tr"
+                                            : formData.type === "tcp"
+                                            ? "158.180.47.242:22 veya server.alanadin.com:443"
                                             : "https://xxxxxxxx.supabase.co"
                                     }
                                     value={formData.supabase_url}
@@ -1127,7 +1189,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                 />
                             </div>
 
-                            {/* Supabase Key (Sadece Supabase seçili ise) */}
+                            {/* Supabase Key / Bilgi Kutusu */}
                             {formData.type === "supabase" ? (
                                 <div className="space-y-1.5">
                                     <label className="text-xs font-bold uppercase tracking-wider text-gray-500">
@@ -1143,6 +1205,13 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                         }
                                         className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm font-mono transition-all"
                                     />
+                                </div>
+                            ) : formData.type === "tcp" ? (
+                                <div className="p-3 bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/40 rounded-xl text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+                                    <FaServer className="shrink-0 text-base" />
+                                    <span>
+                                        TCP soket pingi ile port erişilebilirliği ve gecikme süresi (ms) ölçülür (SSH 22, Proxy 443, Minecraft 25565 vb.). API anahtarı gerekmez.
+                                    </span>
                                 </div>
                             ) : (
                                 <div className="p-3 bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/50 dark:border-blue-900/40 rounded-xl text-xs text-blue-700 dark:text-blue-300 flex items-center gap-2">
