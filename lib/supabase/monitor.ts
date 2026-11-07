@@ -1,3 +1,4 @@
+import net from "net";
 import { createClient as createSupabaseClient, SupabaseClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -5,7 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // Types
 // -----------------------------------------------------------------------------
 
-export type MonitorTargetType = 'supabase' | 'website';
+export type MonitorTargetType = 'supabase' | 'website' | 'tcp';
 
 export interface MonitorProjectRow {
     id: string;
@@ -101,7 +102,7 @@ export async function getMonitorProjects(onlyEnabled = true): Promise<MonitorPro
         name: row.name,
         url: row.supabase_url,
         key: row.supabase_key || null,
-        type: (row.type === 'website' ? 'website' : 'supabase') as MonitorTargetType,
+        type: (row.type === 'website' ? 'website' : row.type === 'tcp' ? 'tcp' : 'supabase') as MonitorTargetType,
         enabled: Boolean(row.enabled),
         last_tested_at: row.last_tested_at || null,
         last_ping_ms: row.last_ping_ms !== undefined && row.last_ping_ms !== null ? Number(row.last_ping_ms) : null,
@@ -151,14 +152,89 @@ export async function checkMonitorTarget(target: {
 }): Promise<HealthResult> {
     const id = target.id || 'test';
     const name = target.name || 'Bilinmeyen Hedef';
-    const type: MonitorTargetType = target.type === 'website' ? 'website' : 'supabase';
+    const type: MonitorTargetType = target.type === 'website' ? 'website' : target.type === 'tcp' ? 'tcp' : 'supabase';
+
+    // A) TCP / SUNUCU PORTU KONTROLÜ (Socket Ping)
+    if (type === 'tcp') {
+        const rawTarget = String(target.url || '').trim();
+        // Temizle: http://, https://, tcp:// veya trailing slash kaldır
+        const cleaned = rawTarget.replace(/^[a-zA-Z]+:\/\//, '').replace(/\/+$/, '');
+
+        let host = cleaned;
+        let port = 80;
+
+        if (cleaned.includes(':')) {
+            const parts = cleaned.split(':');
+            host = parts[0].trim();
+            const parsedPort = parseInt(parts[1].trim(), 10);
+            if (!isNaN(parsedPort) && parsedPort > 0 && parsedPort <= 65535) {
+                port = parsedPort;
+            }
+        }
+
+        if (!host) {
+            return {
+                id,
+                name,
+                type,
+                status: 'error',
+                duration: 0,
+                error: 'Geçersiz sunucu adresi veya IP.',
+                server_time: new Date().toISOString(),
+            };
+        }
+
+        const start = Date.now();
+        const TCP_TIMEOUT_MS = 5000;
+
+        return new Promise<HealthResult>((resolve) => {
+            const socket = new net.Socket();
+            let isSettled = false;
+
+            const finish = (status: 'ok' | 'error' | 'timeout', errorMsg?: string) => {
+                if (isSettled) return;
+                isSettled = true;
+                socket.destroy();
+                resolve({
+                    id,
+                    name,
+                    type,
+                    status,
+                    duration: Date.now() - start,
+                    error: errorMsg,
+                    data: { host, port },
+                    server_time: new Date().toISOString(),
+                });
+            };
+
+            socket.setTimeout(TCP_TIMEOUT_MS);
+
+            socket.on('connect', () => {
+                finish('ok');
+            });
+
+            socket.on('timeout', () => {
+                finish('timeout', `Zaman aşımı (${TCP_TIMEOUT_MS / 1000}s yanıt alınamadı - ${host}:${port})`);
+            });
+
+            socket.on('error', (err) => {
+                finish('error', err.message || `TCP bağlantı hatası (${host}:${port})`);
+            });
+
+            try {
+                socket.connect(port, host);
+            } catch (err) {
+                finish('error', err instanceof Error ? err.message : 'Soket başlatılamadı');
+            }
+        });
+    }
 
     let formattedUrl = String(target.url || '').trim();
     if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
         formattedUrl = `https://${formattedUrl}`;
     }
 
-    // A) WEB SİTESİ KONTROLÜ (HTTP Ping / GET)
+    // B) WEB SİTESİ KONTROLÜ (HTTP Ping / GET)
     if (type === 'website') {
         const start = Date.now();
         try {

@@ -34,7 +34,7 @@ export async function GET(request: Request) {
         // Normalize type
         const normalized = (projects || []).map((p) => ({
             ...p,
-            type: (p.type === "website" ? "website" : "supabase") as MonitorTargetType,
+            type: (p.type === "website" ? "website" : p.type === "tcp" ? "tcp" : "supabase") as MonitorTargetType,
             last_ping_ms: p.last_ping_ms !== undefined && p.last_ping_ms !== null ? Number(p.last_ping_ms) : null,
         }));
 
@@ -72,7 +72,7 @@ export async function POST(request: Request) {
         } = body;
 
         const targetUrl = String(supabase_url || url || "").trim();
-        const targetType: MonitorTargetType = type === "website" ? "website" : "supabase";
+        const targetType: MonitorTargetType = type === "website" ? "website" : type === "tcp" ? "tcp" : "supabase";
 
         // Action: Live Health Check Test (Single Target)
         if (action === "test") {
@@ -92,7 +92,7 @@ export async function POST(request: Request) {
 
             const result = await checkMonitorTarget({
                 id: id || "preview-test",
-                name: name || (targetType === "website" ? "Web Sitesi" : "Supabase Projesi"),
+                name: name || (targetType === "website" ? "Web Sitesi" : targetType === "tcp" ? "TCP Sunucusu" : "Supabase Projesi"),
                 type: targetType,
                 url: targetUrl,
                 key: supabase_key,
@@ -198,7 +198,7 @@ export async function PUT(request: Request) {
         };
 
         if (name !== undefined) updateData.name = String(name).trim();
-        if (type !== undefined) updateData.type = type === "website" ? "website" : "supabase";
+        if (type !== undefined) updateData.type = type === "website" ? "website" : type === "tcp" ? "tcp" : "supabase";
         if (supabase_url !== undefined || url !== undefined) {
             const rawUrl = supabase_url !== undefined ? supabase_url : url;
             updateData.supabase_url = String(rawUrl).trim().replace(/\/+$/, "");
