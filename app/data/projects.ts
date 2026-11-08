@@ -24,7 +24,7 @@ export const categoryInfoEN: { [key: string]: CategoryInfo } = {
         slug: "copilot-button",
         icon: React.createElement(FaKeyboard, { className: "text-xl" }),
         gradient: "from-cyan-500 to-blue-600",
-        description: "Media & microphone controller for Windows Copilot key",
+        description: "C++20 Win32 media & microphone controller for Windows Copilot key",
     },
     DiscordStorage: {
         name: "DiscordStorage",
@@ -62,7 +62,7 @@ export const categoryInfoTR: { [key: string]: CategoryInfo } = {
         slug: "copilot-button",
         icon: React.createElement(FaKeyboard, { className: "text-xl" }),
         gradient: "from-cyan-500 to-blue-600",
-        description: "Windows Copilot tuşu için medya ve mikrofon kontrolörü",
+        description: "Windows Copilot tuşu için C++20 Win32 tabanlı medya ve mikrofon kontrolörü",
     },
     DiscordStorage: {
         name: "DiscordStorage",
@@ -104,6 +104,7 @@ export const projectsByCategoryEN: { [key: string]: Project[] } = {
             features: ["Live Table & Score Tracking", "Tile Calculator & Stats", "Dynamic Nickname Engine", "Open source"],
             techStack: ["Flutter", "Dart"],
             githubLink: "https://github.com/KeremKuyucu/OkeyDefteri",
+            viewLink: "https://okey.keremkuyucu.com.tr",
             isNew: true,
             isDeveloping: false
         }
@@ -112,11 +113,11 @@ export const projectsByCategoryEN: { [key: string]: Project[] } = {
         {
             imageUrl: "/imgs/projects/copilotbutton.png",
             altText: "Copilot Button Controller",
-            title: "Copilot Button - Windows Controller",
-            description: "AutoHotkey tool converting the Windows 11 Copilot key into a game-safe mic mute, media controller, and OSD overlay.",
-            longDescription: "Transforms the hardware Copilot key (Win + Shift + F23) on Windows 11 into a versatile microphone and media controller. Features an anti-modifier leak hook that prevents Shift/Win key locks in full-screen games. Supports 1-4 clicks and long-press gestures for mic muting, Spotify / YouTube Music playback, sleek on-screen OSD overlays, dark-themed GUI, and one-click GitHub updates.",
-            features: ["Anti-Modifier Key Shield", "Mic & Media OSD Control", "Customizable Gestures", "Open source"],
-            techStack: ["AutoHotkey", "Windows"],
+            title: "Copilot Button - Windows Native Controller",
+            description: "High-performance C++20 Win32 native tool converting the Windows 11 Copilot key into a game-safe mic mute, media controller, and OSD overlay.",
+            longDescription: "High-performance native Windows application written in modern C++20 utilizing Win32 APIs. Transforms the hardware Copilot key (Win + Shift + F23) on Windows 11 into a versatile microphone and media controller. Features a low-level anti-modifier leak hook that prevents Shift/Win key locks in full-screen games. Supports 1-4 clicks and long-press gestures for mic muting, Spotify / YouTube Music playback, sleek on-screen OSD overlays, dark-themed GUI, and automatic GitHub updates.",
+            features: ["C++20 & Win32 Native Architecture", "Anti-Modifier Key Shield", "Mic & Media OSD Control", "Open source"],
+            techStack: ["C++", "Win32 API", "Windows"],
             githubLink: "https://github.com/KeremKuyucu/copilot-button",
             isNew: true,
             isDeveloping: false
@@ -194,11 +195,11 @@ export const projectsByCategoryTR: { [key: string]: Project[] } = {
         {
             imageUrl: "/imgs/projects/copilotbutton.png",
             altText: "Copilot Button Controller",
-            title: "Copilot Button - Windows Kontrolörü",
-            description: "Windows 11 Copilot tuşunu oyun korumalı mikrofon susturma, medya kontrolü ve özelleştirilebilir OSD eylemlerine dönüştüren AutoHotkey aracı.",
-            longDescription: "Windows 11 klavyelerindeki donanımsal Copilot tuşunu (Win + Shift + F23) güçlü bir mikrofon ve medya kontrolcüsüne dönüştüren AutoHotkey v2 aracıdır. Anti-modifier leak hook mimarisi sayesinde oyunlarda ve tam ekran uygulamalarda Shift veya Win tuşlarının kilitlenmesini kesin olarak engeller. 1-4 tıklama ve basılı tutma hareketleriyle anında mikrofon susturma, Spotify / YouTube Music kontrolü, ekranda beliren şık OSD bildirimleri, koyu tema destekli ayarlar arayüzü ve GitHub üzerinden tek tıkla otomatik güncelleme sunar.",
-            features: ["Anti-Modifier Tuş Koruması", "Mikrofon & Medya OSD Kontrolü", "Özelleştirilebilir Tıklama Eylemleri", "Açık kaynak"],
-            techStack: ["AutoHotkey", "Windows"],
+            title: "Copilot Button - Windows Yerel Kontrolörü",
+            description: "Windows 11 Copilot tuşunu C++20 Win32 API ile oyun korumalı mikrofon susturma, medya kontrolü ve OSD eylemlerine dönüştüren yerel sistem aracı.",
+            longDescription: "Modern C++20 ve Win32 API ile sıfırdan geliştirilmiş yüksek performanslı yerel Windows aracıdır. Windows 11 klavyelerindeki donanımsal Copilot tuşunu (Win + Shift + F23) güçlü bir mikrofon ve medya kontrolcüsüne dönüştürür. Düşük seviyeli anti-modifier leak hook mimarisi sayesinde oyunlarda ve tam ekran uygulamalarda Shift veya Win tuşlarının kilitlenmesini kesin olarak engeller. 1-4 tıklama ve basılı tutma hareketleriyle anında mikrofon susturma, Spotify / YouTube Music kontrolü, ekranda beliren şık OSD bildirimleri, koyu tema destekli ayarlar arayüzü ve GitHub üzerinden tek tıkla otomatik güncelleme sunar.",
+            features: ["C++20 & Win32 Yerel Mimari", "Anti-Modifier Tuş Koruması", "Mikrofon & Medya OSD Kontrolü", "Açık kaynak"],
+            techStack: ["C++", "Win32 API", "Windows"],
             githubLink: "https://github.com/KeremKuyucu/copilot-button",
             isNew: true
         }
