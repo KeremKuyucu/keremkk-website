@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateSession } from "@/lib/server-utils";
+import { validateSession, extractAuthToken } from "@/lib/server-utils";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // GET: Tüm abonelikleri listele
 export async function GET(request: NextRequest) {
     try {
-        const authToken = request.headers.get("x-auth-token");
+        const authToken = extractAuthToken(request);
         const isValid = await validateSession(authToken);
         if (!isValid) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 // POST: Yeni abonelik ekle
 export async function POST(request: NextRequest) {
     try {
-        const authToken = request.headers.get("x-auth-token");
+        const authToken = extractAuthToken(request);
         const isValid = await validateSession(authToken);
         if (!isValid) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
 // PUT: Var olan aboneliği güncelle
 export async function PUT(request: NextRequest) {
     try {
-        const authToken = request.headers.get("x-auth-token");
+        const authToken = extractAuthToken(request);
         const isValid = await validateSession(authToken);
         if (!isValid) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -199,7 +199,7 @@ export async function PUT(request: NextRequest) {
 // DELETE: Aboneliği sil
 export async function DELETE(request: NextRequest) {
     try {
-        const authToken = request.headers.get("x-auth-token");
+        const authToken = extractAuthToken(request);
         const isValid = await validateSession(authToken);
         if (!isValid) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

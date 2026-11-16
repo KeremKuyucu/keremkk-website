@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { getAuthHeaders } from "@/lib/auth-headers";
 import {
     FaServer,
     FaGlobe,
@@ -128,7 +129,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
         setIsRefreshing(true);
         try {
             const res = await fetch("/api/admin/monitor", {
-                headers: { "x-auth-token": authToken },
+                headers: getAuthHeaders(authToken),
             });
             const data = await res.json();
             if (res.ok && data.success) {
@@ -170,10 +171,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
         try {
             const res = await fetch("/api/admin/monitor", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth-token": authToken,
-                },
+                headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                 body: JSON.stringify({
                     action: "test",
                     id: project.id,
@@ -262,10 +260,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
         try {
             const res = await fetch("/api/admin/monitor", {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth-token": authToken,
-                },
+                headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                 body: JSON.stringify({
                     id: project.id,
                     enabled: newStatus,
@@ -344,10 +339,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
         try {
             const res = await fetch("/api/admin/monitor", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth-token": authToken,
-                },
+                headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                 body: JSON.stringify({
                     action: "test",
                     type: formData.type,
@@ -389,10 +381,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                 // Update
                 const res = await fetch("/api/admin/monitor", {
                     method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "x-auth-token": authToken,
-                    },
+                    headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                     body: JSON.stringify({
                         id: editingProject.id,
                         name: formData.name,
@@ -414,10 +403,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                 // Create
                 const res = await fetch("/api/admin/monitor", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "x-auth-token": authToken,
-                    },
+                    headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                     body: JSON.stringify({
                         name: formData.name,
                         type: formData.type,
@@ -450,10 +436,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
         try {
             const res = await fetch("/api/admin/monitor", {
                 method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth-token": authToken,
-                },
+                headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                 body: JSON.stringify({ id: deletingProject.id }),
             });
             const data = await res.json();

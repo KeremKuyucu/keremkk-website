@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { getAuthHeaders } from "@/lib/auth-headers";
 import {
     FaCreditCard,
     FaPlus,
@@ -99,7 +100,7 @@ export default function SubscriptionManager({ authToken }: SubscriptionManagerPr
 
         try {
             const res = await fetch("/api/admin/subscriptions", {
-                headers: { "x-auth-token": authToken }
+                headers: getAuthHeaders(authToken)
             });
 
             const data = await res.json();
@@ -195,10 +196,7 @@ export default function SubscriptionManager({ authToken }: SubscriptionManagerPr
 
             const res = await fetch(endpoint, {
                 method,
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth-token": authToken
-                },
+                headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                 body: JSON.stringify(payload)
             });
 
@@ -222,10 +220,7 @@ export default function SubscriptionManager({ authToken }: SubscriptionManagerPr
         try {
             const res = await fetch("/api/admin/subscriptions", {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth-token": authToken
-                },
+                headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                 body: JSON.stringify({
                     id: sub.id,
                     renewal_date: sub.renewal_date,
@@ -255,10 +250,7 @@ export default function SubscriptionManager({ authToken }: SubscriptionManagerPr
         try {
             const res = await fetch("/api/admin/subscriptions", {
                 method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth-token": authToken
-                },
+                headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                 body: JSON.stringify({ id })
             });
 

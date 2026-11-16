@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateSession } from "@/lib/server-utils";
+import { validateSession, extractAuthToken } from "@/lib/server-utils";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // Slug format temizleme (küçük harf, türkçe karakter sadeleştirme, boşlukları tire yapma)
@@ -21,7 +21,7 @@ function sanitizeSlug(input: string): string {
 // GET: Tüm kısa linkleri getir
 export async function GET(request: NextRequest) {
     try {
-        const authToken = request.headers.get("x-auth-token");
+        const authToken = extractAuthToken(request);
         const isValid = await validateSession(authToken);
         if (!isValid) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
 // POST: Yeni kısa link ekle
 export async function POST(request: NextRequest) {
     try {
-        const authToken = request.headers.get("x-auth-token");
+        const authToken = extractAuthToken(request);
         const isValid = await validateSession(authToken);
         if (!isValid) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
 // PUT: Var olan kısa linki güncelle
 export async function PUT(request: NextRequest) {
     try {
-        const authToken = request.headers.get("x-auth-token");
+        const authToken = extractAuthToken(request);
         const isValid = await validateSession(authToken);
         if (!isValid) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -200,7 +200,7 @@ export async function PUT(request: NextRequest) {
 // DELETE: Linki sil
 export async function DELETE(request: NextRequest) {
     try {
-        const authToken = request.headers.get("x-auth-token");
+        const authToken = extractAuthToken(request);
         const isValid = await validateSession(authToken);
         if (!isValid) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

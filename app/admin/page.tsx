@@ -18,7 +18,8 @@ import {
     FaChevronRight,
     FaExternalLinkAlt,
     FaShieldAlt,
-    FaBug
+    FaBug,
+    FaKey
 } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { createClient } from "@/lib/supabase/client";
@@ -31,6 +32,7 @@ import ExpenseTracker from "@/app/components/admin/ExpenseTracker";
 import SubscriptionManager from "@/app/components/admin/SubscriptionManager";
 import LinkManager from "@/app/components/admin/LinkManager";
 import MonitorManager from "@/app/components/admin/MonitorManager";
+import WordlistManager from "@/app/components/admin/WordlistManager";
 
 // --- Admin Modules Configuration ---
 interface AdminModule {
@@ -88,6 +90,12 @@ const MODULES: AdminModule[] = [
         label: "Kısa Linkler",
         icon: FaLink,
         component: LinkManager
+    },
+    {
+        id: "wordlist",
+        label: "Şifre Üretici",
+        icon: FaKey,
+        component: WordlistManager
     },
     {
         id: "monitor",

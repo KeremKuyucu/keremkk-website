@@ -16,13 +16,12 @@ const RESPONSE_HEADERS: HeadersInit = {
 };
 
 export async function GET(req: NextRequest) {
-    // 1. Yetkilendirme kontrolü: Vercel Cron Secret veya Yönetici Oturumu
+    // 1. Yetkilendirme kontrolü: Vercel Cron Secret veya Yönetici Oturumu (JWT)
     const authHeader = req.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET;
     const isCronAuthorized = Boolean(cronSecret && authHeader === `Bearer ${cronSecret}`);
 
-    const authToken = req.headers.get('x-auth-token');
-    const isAdminAuthorized = authToken ? await validateSession(authToken) : false;
+    const isAdminAuthorized = await validateSession(req);
 
     if (!isCronAuthorized && !isAdminAuthorized) {
         return NextResponse.json(

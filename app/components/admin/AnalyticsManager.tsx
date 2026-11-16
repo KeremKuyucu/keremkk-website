@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { getAuthHeaders } from "@/lib/auth-headers";
 import {
     FaChartBar,
     FaUser,
@@ -88,7 +89,7 @@ export default function AnalyticsManager({ authToken, onNavigate }: AnalyticsMan
         setIsRefreshing(true);
         try {
             const res = await fetch(`/api/admin/analytics?limit=${logLimit}`, {
-                headers: { "x-auth-token": authToken }
+                headers: getAuthHeaders(authToken)
             });
             if (res.ok) {
                 const data = await res.json();
@@ -137,10 +138,7 @@ export default function AnalyticsManager({ authToken, onNavigate }: AnalyticsMan
         try {
             const res = await fetch("/api/admin/analytics", {
                 method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth-token": authToken
-                },
+                headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                 body: JSON.stringify({ id })
             });
 

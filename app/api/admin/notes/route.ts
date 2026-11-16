@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { validateSession } from "@/lib/server-utils";
+import { validateSession, extractAuthToken } from "@/lib/server-utils";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // GET: Notları getir
 export async function GET(request: Request) {
-    const token = request.headers.get("x-auth-token");
+    const token = extractAuthToken(request);
     if (!(await validateSession(token))) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -34,7 +34,7 @@ export async function GET(request: Request) {
 
 // POST: Yeni not ekle
 export async function POST(request: Request) {
-    const token = request.headers.get("x-auth-token");
+    const token = extractAuthToken(request);
     if (!(await validateSession(token))) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
 
 // PUT: Not güncelle
 export async function PUT(request: Request) {
-    const token = request.headers.get("x-auth-token");
+    const token = extractAuthToken(request);
     if (!(await validateSession(token))) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -118,7 +118,7 @@ export async function PUT(request: Request) {
 
 // DELETE: Not sil
 export async function DELETE(request: Request) {
-    const token = request.headers.get("x-auth-token");
+    const token = extractAuthToken(request);
     if (!(await validateSession(token))) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

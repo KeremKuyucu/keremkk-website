@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { getAuthHeaders } from "@/lib/auth-headers";
 import {
     FaBug,
     FaExclamationTriangle,
@@ -89,7 +90,7 @@ export default function ErrorLogsManager({ authToken, onNavigate }: ErrorLogsMan
             if (searchQuery.trim()) params.set("search", searchQuery.trim());
 
             const res = await fetch(`/api/admin/error-logs?${params.toString()}`, {
-                headers: { "x-auth-token": authToken },
+                headers: getAuthHeaders(authToken),
             });
 
             if (!res.ok) throw new Error("Hata logları yüklenemedi");
@@ -217,10 +218,7 @@ export default function ErrorLogsManager({ authToken, onNavigate }: ErrorLogsMan
         try {
             const res = await fetch("/api/admin/error-logs", {
                 method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth-token": authToken,
-                },
+                headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                 body: JSON.stringify({ id }),
             });
             if (res.ok) {
@@ -243,10 +241,7 @@ export default function ErrorLogsManager({ authToken, onNavigate }: ErrorLogsMan
         try {
             const res = await fetch("/api/admin/error-logs", {
                 method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth-token": authToken,
-                },
+                headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                 body: JSON.stringify({ ids: Array.from(selectedIds) }),
             });
             if (res.ok) {
@@ -269,10 +264,7 @@ export default function ErrorLogsManager({ authToken, onNavigate }: ErrorLogsMan
         try {
             const res = await fetch("/api/admin/error-logs", {
                 method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth-token": authToken,
-                },
+                headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                 body: JSON.stringify({ clear_all: true, app: selectedApp }),
             });
             if (res.ok) {

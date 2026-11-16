@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateSession } from "@/lib/server-utils";
+import { validateSession, extractAuthToken } from "@/lib/server-utils";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function GET(request: NextRequest) {
     try {
-        const authToken = request.headers.get("x-auth-token");
+        const authToken = extractAuthToken(request);
         const isValid = await validateSession(authToken);
 
         if (!isValid) {
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
     try {
-        const authToken = request.headers.get("x-auth-token");
+        const authToken = extractAuthToken(request);
         const isValid = await validateSession(authToken);
 
         if (!isValid) {
