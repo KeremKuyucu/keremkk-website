@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { getAuthHeaders } from "@/lib/auth-headers";
 import {
     FaStickyNote,
     FaPlus,
@@ -48,7 +49,7 @@ export default function NotesManager({ authToken }: NotesManagerProps) {
         if (!isSilent) setIsLoading(true);
         setIsRefreshing(true);
         try {
-            const res = await fetch("/api/admin/notes", { headers: { "x-auth-token": authToken } });
+            const res = await fetch("/api/admin/notes", { headers: getAuthHeaders(authToken) });
             if (res.ok) {
                 const data = await res.json();
                 const rawNotes = data.notes || [];
@@ -117,10 +118,7 @@ export default function NotesManager({ authToken }: NotesManagerProps) {
 
             const res = await fetch("/api/admin/notes", {
                 method,
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth-token": authToken
-                },
+                headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                 body
             });
 
@@ -154,10 +152,7 @@ export default function NotesManager({ authToken }: NotesManagerProps) {
         try {
             const res = await fetch("/api/admin/notes", {
                 method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth-token": authToken
-                },
+                headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                 body: JSON.stringify({ id })
             });
 

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { getAuthHeaders } from "@/lib/auth-headers";
 import {
     FaEnvelope,
     FaClock,
@@ -50,7 +51,7 @@ export default function MessagesManager({ authToken }: MessagesManagerProps) {
         setError("");
         try {
             const res = await fetch("/api/admin/messages", {
-                headers: { "x-auth-token": authToken }
+                headers: getAuthHeaders(authToken)
             });
 
             if (res.ok) {
@@ -84,10 +85,7 @@ export default function MessagesManager({ authToken }: MessagesManagerProps) {
         try {
             const res = await fetch("/api/admin/messages", {
                 method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth-token": authToken
-                },
+                headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                 body: JSON.stringify({ id })
             });
 

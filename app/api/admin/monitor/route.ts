@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { validateSession } from "@/lib/server-utils";
+import { validateSession, extractAuthToken } from "@/lib/server-utils";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
     checkMonitorTarget,
@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 // GET: Fetch all monitor projects (both enabled & disabled)
 // -----------------------------------------------------------------------------
 export async function GET(request: Request) {
-    const token = request.headers.get("x-auth-token");
+    const token = extractAuthToken(request);
     if (!(await validateSession(token))) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -52,7 +52,7 @@ export async function GET(request: Request) {
 // POST: Add new monitor project OR test connection
 // -----------------------------------------------------------------------------
 export async function POST(request: Request) {
-    const token = request.headers.get("x-auth-token");
+    const token = extractAuthToken(request);
     if (!(await validateSession(token))) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -180,7 +180,7 @@ export async function POST(request: Request) {
 // PUT: Update project (name, type, url, key, enabled)
 // -----------------------------------------------------------------------------
 export async function PUT(request: Request) {
-    const token = request.headers.get("x-auth-token");
+    const token = extractAuthToken(request);
     if (!(await validateSession(token))) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -234,7 +234,7 @@ export async function PUT(request: Request) {
 // DELETE: Remove project
 // -----------------------------------------------------------------------------
 export async function DELETE(request: Request) {
-    const token = request.headers.get("x-auth-token");
+    const token = extractAuthToken(request);
     if (!(await validateSession(token))) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

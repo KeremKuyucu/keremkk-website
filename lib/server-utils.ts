@@ -6,11 +6,46 @@ export interface SessionData {
     ua: string;
 }
 
-export async function validateSession(token?: string | null): Promise<boolean> {
+/**
+ * Extracts the JWT token strictly from the Authorization: Bearer <token> header.
+ */
+export function extractAuthToken(requestOrToken?: Request | string | null): string | null {
+    if (!requestOrToken) return null;
+
+    if (typeof requestOrToken === "string") {
+        let clean = requestOrToken.trim();
+        if (clean.toLowerCase().startsWith("bearer ")) {
+            clean = clean.slice(7).trim();
+        }
+        return clean || null;
+    }
+
+    // It is a Request / NextRequest object
+    const authHeader = requestOrToken.headers.get("authorization");
+    if (!authHeader) return null;
+
+    const parts = authHeader.split(" ");
+    if (parts.length === 2 && /^bearer$/i.test(parts[0])) {
+        return parts[1].trim() || null;
+    }
+    if (parts.length === 1 && parts[0]) {
+        return parts[0].trim() || null;
+    }
+
+    return null;
+}
+
+/**
+ * Validates admin user session from:
+ * - Authorization: Bearer <token> in the Request
+ * - Or SSR cookies
+ */
+export async function validateSession(requestOrToken?: Request | string | null): Promise<boolean> {
+    const token = extractAuthToken(requestOrToken);
     const adminSupabase = createAdminClient();
     let userId: string | null = null;
 
-    // 1. If a token was provided in header (Supabase JWT access_token or legacy token)
+    // 1. If a token was provided in Authorization Bearer header
     if (token) {
         try {
             const { data: { user }, error } = await adminSupabase.auth.getUser(token);
@@ -56,4 +91,3 @@ export async function validateSession(token?: string | null): Promise<boolean> {
 
     return false;
 }
-

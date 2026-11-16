@@ -7,6 +7,7 @@ import React, {
     useCallback,
     useRef,
 } from "react";
+import { getAuthHeaders } from "@/lib/auth-headers";
 
 import {
     FaWallet,
@@ -232,9 +233,7 @@ export default function ExpenseTracker({
 
             try {
                 const res = await fetch("/api/admin/expenses", {
-                    headers: {
-                        "x-auth-token": authToken,
-                    },
+                    headers: getAuthHeaders(authToken),
                 });
 
                 if (!res.ok) {
@@ -274,9 +273,7 @@ export default function ExpenseTracker({
                 "/api/admin/expenses/extract",
                 {
                     method: "POST",
-                    headers: {
-                        "x-auth-token": authToken,
-                    },
+                    headers: getAuthHeaders(authToken),
                     body: formData,
                 }
             );
@@ -454,10 +451,7 @@ export default function ExpenseTracker({
         try {
             const res = await fetch("/api/admin/expenses", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth-token": authToken,
-                },
+                headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                 body: JSON.stringify({
                     expenses: toSave,
                 }),
@@ -492,11 +486,7 @@ export default function ExpenseTracker({
                 "/api/admin/expenses",
                 {
                     method: "DELETE",
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-                        "x-auth-token": authToken,
-                    },
+                    headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                     body: JSON.stringify({
                         id,
                     }),
@@ -571,11 +561,7 @@ export default function ExpenseTracker({
                 "/api/admin/expenses",
                 {
                     method: "PATCH",
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-                        "x-auth-token": authToken,
-                    },
+                    headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                     body: JSON.stringify({
                         id: editingExpenseId,
                         description,

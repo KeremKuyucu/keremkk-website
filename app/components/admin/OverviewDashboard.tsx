@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { getAuthHeaders } from "@/lib/auth-headers";
 import {
     FaThLarge,
     FaWallet,
@@ -100,7 +101,7 @@ export default function OverviewDashboard({ authToken, onNavigate }: OverviewDas
         if (!isSilent) setIsLoading(true);
         setIsRefreshing(true);
 
-        const headers = { "x-auth-token": authToken };
+        const headers = getAuthHeaders(authToken);
 
         try {
             const [

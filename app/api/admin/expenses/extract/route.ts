@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateSession } from "@/lib/server-utils";
+import { validateSession, extractAuthToken } from "@/lib/server-utils";
 import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import * as XLSX from "xlsx";
 import {
@@ -857,10 +857,7 @@ export async function POST(
     try {
         // ---------- Auth ----------
 
-        const authToken =
-            request.headers.get(
-                "x-auth-token"
-            );
+        const authToken = extractAuthToken(request);
 
         const isValid =
             await validateSession(

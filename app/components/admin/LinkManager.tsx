@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { getAuthHeaders } from "@/lib/auth-headers";
 import {
     FaLink,
     FaPlus,
@@ -82,7 +83,7 @@ export default function LinkManager({ authToken }: LinkManagerProps) {
 
         try {
             const res = await fetch("/api/admin/links", {
-                headers: { "x-auth-token": authToken }
+                headers: getAuthHeaders(authToken)
             });
 
             const data = await res.json();
@@ -184,10 +185,7 @@ export default function LinkManager({ authToken }: LinkManagerProps) {
 
             const res = await fetch(endpoint, {
                 method,
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth-token": authToken
-                },
+                headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                 body: JSON.stringify(payload)
             });
 
@@ -213,10 +211,7 @@ export default function LinkManager({ authToken }: LinkManagerProps) {
 
             const res = await fetch("/api/admin/links", {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth-token": authToken
-                },
+                headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                 body: JSON.stringify({
                     id: link.id,
                     is_active: !link.is_active
@@ -240,10 +235,7 @@ export default function LinkManager({ authToken }: LinkManagerProps) {
         try {
             const res = await fetch("/api/admin/links", {
                 method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth-token": authToken
-                },
+                headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                 body: JSON.stringify({ id })
             });
 
