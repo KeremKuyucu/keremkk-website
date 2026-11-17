@@ -68,11 +68,34 @@ export async function POST(request: Request) {
       'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
-    // Collect extra metadata (app_version, is_debug, additionalData, metadata)
+    // Extract Geo headers provided by Vercel or Cloudflare
+    const geoCountry =
+      request.headers.get('x-vercel-ip-country') ||
+      request.headers.get('cf-ipcountry') ||
+      null;
+    const geoCityRaw =
+      request.headers.get('x-vercel-ip-city') ||
+      null;
+    const geoCity = geoCityRaw ? decodeURIComponent(geoCityRaw) : null;
+    const geoRegion =
+      request.headers.get('x-vercel-ip-country-region') ||
+      null;
+
+    // Collect extra metadata (app_version, is_debug, additionalData, metadata, geo)
     const extraMetadata: Record<string, any> = {};
 
     if (metadata && typeof metadata === 'object' && !Array.isArray(metadata)) {
       Object.assign(extraMetadata, metadata);
+    }
+
+    if (geoCountry && !extraMetadata.country) {
+      extraMetadata.country = geoCountry;
+    }
+    if (geoCity && !extraMetadata.city) {
+      extraMetadata.city = geoCity;
+    }
+    if (geoRegion && !extraMetadata.region) {
+      extraMetadata.region = geoRegion;
     }
 
     if (app_version !== undefined && app_version !== null) {

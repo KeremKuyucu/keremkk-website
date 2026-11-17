@@ -3,9 +3,23 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
-function getOrCreateVisitorId(): string {
-  if (typeof window === "undefined") return "unknown_web";
+function isLikelyBot(): boolean {
+  if (typeof window === "undefined" || typeof navigator === "undefined") return true;
 
+  if (navigator.webdriver) return true;
+
+  const botRegex =
+    /bot|crawl|spider|slurp|mediapartners|lighthouse|pagespeed|headless|phantom|selenium|puppeteer|playwright|wget|curl|python|axios|fetch|http|whatsapp|telegram|discord|twitterbot|facebookexternalhit|linkedinbot|embedly|quora|pinterest|slackbot|vkshare|w3c_validator|ahrefs|semrush|mj12bot|dotbot|petalbot|bytespider|gptbot|claudebot|applebot/i;
+
+  if (botRegex.test(navigator.userAgent)) return true;
+
+  if (window.outerWidth === 0 && window.outerHeight === 0) return true;
+  if (!navigator.languages || navigator.languages.length === 0) return true;
+
+  return false;
+}
+
+function getOrCreateVisitorId(): string {
   const STORAGE_KEY = "keremkk_visitor_id";
   try {
     let visitorId = localStorage.getItem(STORAGE_KEY);
@@ -18,7 +32,7 @@ function getOrCreateVisitorId(): string {
       localStorage.setItem(STORAGE_KEY, visitorId);
     }
     return visitorId;
-  } catch (e) {
+  } catch {
     return `web_anon_${Date.now()}`;
   }
 }
@@ -30,32 +44,48 @@ export default function WebsiteVisitorTracker() {
   useEffect(() => {
     if (typeof window === "undefined" || !pathname) return;
 
-    // Do not log admin pages or API routes
+    // Admin ve API sayfalarını loglama
     if (pathname.startsWith("/admin") || pathname.startsWith("/api")) {
       return;
     }
 
-    // Avoid duplicate logging of the same route in the same render
+    // Bot tespit edildiyse loglama
+    if (isLikelyBot()) {
+      return;
+    }
+
+    // Aynı route'u arka arkaya tekrar loglama
     if (lastLoggedPath.current === pathname) {
       return;
     }
-    lastLoggedPath.current = pathname;
+
+    let isTriggered = false;
 
     const trackVisit = async () => {
-      try {
-        const uid = getOrCreateVisitorId();
+      if (isTriggered) return;
+      isTriggered = true;
+      lastLoggedPath.current = pathname;
+      removeListeners();
 
-        const eventName = "page_view";
+      try {
+
+        const uid = getOrCreateVisitorId();
 
         const payload = {
           uid,
           timestamp: new Date().toISOString(),
-          event: eventName,
+          event: "page_view",
           platform: "web",
           app: "website",
+          metadata: {
+            path: pathname,
+            referrer: document.referrer || "direct",
+            title: document.title || "",
+            screen: `${window.innerWidth}x${window.innerHeight}`,
+            language: navigator.language || "",
+          },
         };
 
-        // Send telemetry (non-blocking)
         await fetch("/api/logs", {
           method: "POST",
           headers: {
@@ -64,14 +94,28 @@ export default function WebsiteVisitorTracker() {
           body: JSON.stringify(payload),
           keepalive: true,
         });
-      } catch (err) {
-        // Fail silently so user browsing is never interrupted
+      } catch {
+        // Sessizce başarısız ol
       }
     };
 
-    // Small delay to ensure browser is idle
-    const timeout = setTimeout(trackVisit, 600);
-    return () => clearTimeout(timeout);
+    const interactionEvents: (keyof WindowEventMap)[] = [
+      "pointermove",
+      "pointerdown",
+      "scroll",
+      "keydown",
+      "touchstart",
+    ];
+
+    const removeListeners = () => {
+      interactionEvents.forEach((ev) => window.removeEventListener(ev, trackVisit));
+    };
+
+    interactionEvents.forEach((ev) =>
+      window.addEventListener(ev, trackVisit, { once: true, passive: true })
+    );
+
+    return removeListeners;
   }, [pathname]);
 
   return null;
