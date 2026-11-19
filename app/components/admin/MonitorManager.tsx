@@ -25,9 +25,10 @@ import {
     FaWifi,
     FaBolt,
     FaFilter,
+    FaBroadcastTower,
 } from "react-icons/fa";
 
-export type MonitorTargetType = "supabase" | "website" | "tcp";
+export type MonitorTargetType = "supabase" | "website" | "tcp" | "udp";
 
 export interface MonitorProject {
     id: string;
@@ -80,7 +81,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [searchQuery, setSearchQuery] = useState<string>("");
-    const [typeFilter, setTypeFilter] = useState<"all" | "website" | "supabase" | "tcp">("all");
+    const [typeFilter, setTypeFilter] = useState<"all" | "website" | "supabase" | "tcp" | "udp">("all");
     const [notification, setNotification] = useState<{
         type: "success" | "error";
         message: string;
@@ -387,7 +388,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                         name: formData.name,
                         type: formData.type,
                         supabase_url: formData.supabase_url,
-                        supabase_key: formData.type === "supabase" ? formData.supabase_key : null,
+                        supabase_key: formData.type === "supabase" || (formData.type === "udp" && formData.supabase_key) ? formData.supabase_key : null,
                         enabled: formData.enabled,
                     }),
                 });
@@ -408,7 +409,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                         name: formData.name,
                         type: formData.type,
                         supabase_url: formData.supabase_url,
-                        supabase_key: formData.type === "supabase" ? formData.supabase_key : null,
+                        supabase_key: formData.type === "supabase" || (formData.type === "udp" && formData.supabase_key) ? formData.supabase_key : null,
                         enabled: formData.enabled,
                     }),
                 });
@@ -467,6 +468,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                 typeFilter === "all" ||
                 (typeFilter === "website" && p.type === "website") ||
                 (typeFilter === "tcp" && p.type === "tcp") ||
+                (typeFilter === "udp" && p.type === "udp") ||
                 (typeFilter === "supabase" && (p.type === "supabase" || !p.type));
 
             return matchesSearch && matchesType;
@@ -476,6 +478,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
     const activeCount = projects.filter((p) => p.enabled).length;
     const websiteCount = projects.filter((p) => p.type === "website").length;
     const tcpCount = projects.filter((p) => p.type === "tcp").length;
+    const udpCount = projects.filter((p) => p.type === "udp").length;
     const supabaseCount = projects.filter((p) => p.type === "supabase" || !p.type).length;
 
     // Ping süresi ortalaması
@@ -518,7 +521,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                 {projects.length}
                             </span>
                             <span className="text-xs text-gray-400">
-                                ({websiteCount} Site, {tcpCount} TCP, {supabaseCount} Supabase)
+                                ({websiteCount} Site, {tcpCount} TCP, {udpCount} UDP, {supabaseCount} Supabase)
                             </span>
                         </div>
                     </div>
@@ -623,6 +626,16 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                             <FaServer className="text-xs" /> TCP ({tcpCount})
                         </button>
                         <button
+                            onClick={() => setTypeFilter("udp")}
+                            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+                                typeFilter === "udp"
+                                    ? "bg-white dark:bg-zinc-700 shadow-sm text-amber-600 dark:text-amber-400"
+                                    : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                            }`}
+                        >
+                            <FaBroadcastTower className="text-xs" /> UDP ({udpCount})
+                        </button>
+                        <button
                             onClick={() => setTypeFilter("supabase")}
                             className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
                                 typeFilter === "supabase"
@@ -701,7 +714,8 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                         const isRevealed = Boolean(revealedKeys[project.id]);
                         const isWebsite = project.type === "website";
                         const isTcp = project.type === "tcp";
-                        const isSupabase = project.type === "supabase" || (!project.type && !isWebsite && !isTcp);
+                        const isUdp = project.type === "udp";
+                        const isSupabase = project.type === "supabase" || (!project.type && !isWebsite && !isTcp && !isUdp);
 
                         // Anlık veya DB'deki son durum
                         const currentStatus = test?.status !== undefined && test.status !== "idle"
@@ -736,11 +750,13 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                                         ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
                                                         : isTcp
                                                         ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                                                        : isUdp
+                                                        ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
                                                         : "bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20"
                                                 }`}
                                             >
-                                                {isWebsite ? <FaGlobe className="text-xs" /> : isTcp ? <FaServer className="text-xs" /> : <FaBolt className="text-xs" />}
-                                                {isWebsite ? "Web Sitesi" : isTcp ? "TCP / Port" : "Supabase"}
+                                                {isWebsite ? <FaGlobe className="text-xs" /> : isTcp ? <FaServer className="text-xs" /> : isUdp ? <FaBroadcastTower className="text-xs" /> : <FaBolt className="text-xs" />}
+                                                {isWebsite ? "Web Sitesi" : isTcp ? "TCP / Port" : isUdp ? "UDP / Port" : "Supabase"}
                                             </span>
 
                                             <h3 className="text-lg font-extrabold truncate text-gray-900 dark:text-white">
@@ -808,12 +824,12 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
 
                                 {/* URL & Supabase Key (if applicable) Details */}
                                 <div className="space-y-2 bg-gray-50/80 dark:bg-black/30 p-3 rounded-xl border border-gray-100 dark:border-zinc-800/60 text-xs">
-                                    {/* URL */}
+                                    {/* URL / Host */}
                                     <div className="flex items-center justify-between gap-2">
                                         <span className="text-gray-400 font-semibold w-12 flex-shrink-0">
-                                            {isTcp ? "Host:" : "URL:"}
+                                            {isTcp || isUdp ? "Host:" : "URL:"}
                                         </span>
-                                        {isTcp ? (
+                                        {isTcp || isUdp ? (
                                             <span className="font-mono text-gray-700 dark:text-zinc-300 truncate flex-1">
                                                 {project.supabase_url}
                                             </span>
@@ -841,7 +857,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                                     <FaCopy />
                                                 )}
                                             </button>
-                                            {!isTcp && (
+                                            {!isTcp && !isUdp && (
                                                 <a
                                                     href={project.supabase_url}
                                                     target="_blank"
@@ -854,6 +870,36 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                             )}
                                         </div>
                                     </div>
+
+                                    {/* Payload (Only for UDP if present) */}
+                                    {isUdp && project.supabase_key && (
+                                        <div className="flex items-center justify-between gap-2 border-t border-gray-200/50 dark:border-zinc-800/50 pt-1.5">
+                                            <span className="text-gray-400 font-semibold w-12 flex-shrink-0">
+                                                Payload:
+                                            </span>
+                                            <span className="font-mono text-gray-700 dark:text-zinc-300 truncate flex-1 select-all">
+                                                {project.supabase_key}
+                                            </span>
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    onClick={() =>
+                                                        handleCopy(
+                                                            project.supabase_key || "",
+                                                            `payload-${project.id}`,
+                                                        )
+                                                    }
+                                                    className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-zinc-200 transition-colors"
+                                                    title="Payload Kopyala"
+                                                >
+                                                    {copiedId === `payload-${project.id}` ? (
+                                                        <FaCheck className="text-emerald-500" />
+                                                    ) : (
+                                                        <FaCopy />
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {/* Key (Only for Supabase) */}
                                     {isSupabase && (
@@ -1002,7 +1048,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                         {editingProject ? "Hedefi Düzenle" : "Yeni İzleme Hedefi Ekle"}
                                     </h2>
                                     <p className="text-xs text-gray-500">
-                                        Web sitesi HTTP pingleme veya Supabase veritabanı kontrolü
+                                        Web sitesi, TCP/UDP soket veya Supabase kontrolü
                                     </p>
                                 </div>
                             </div>
@@ -1016,12 +1062,12 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
 
                         {/* Modal Form */}
                         <form onSubmit={handleFormSubmit} className="flex flex-col gap-4">
-                            {/* Hedef Türü Seçimi (Web Sitesi vs TCP vs Supabase) */}
+                            {/* Hedef Türü Seçimi (Web Sitesi vs TCP vs UDP vs Supabase) */}
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500">
                                     Hedef Türü *
                                 </label>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                                     {/* Web Sitesi Seçeneği */}
                                     <button
                                         type="button"
@@ -1090,6 +1136,40 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                         </div>
                                     </button>
 
+                                    {/* UDP / Port Seçeneği */}
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                type: "udp",
+                                            }))
+                                        }
+                                        className={`p-3.5 rounded-xl border text-left flex items-start gap-3 transition-all ${
+                                            formData.type === "udp"
+                                                ? "border-amber-500 bg-amber-50/20 dark:bg-amber-950/20 ring-2 ring-amber-500/20"
+                                                : "border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50"
+                                        }`}
+                                    >
+                                        <div
+                                            className={`p-2 rounded-lg text-lg ${
+                                                formData.type === "udp"
+                                                    ? "bg-amber-500 text-white"
+                                                    : "bg-gray-100 dark:bg-zinc-800 text-gray-500"
+                                            }`}
+                                        >
+                                            <FaBroadcastTower />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-gray-900 dark:text-white">
+                                                UDP / Port
+                                            </p>
+                                            <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">
+                                                DNS, NTP, Oyun ve soket pingi
+                                            </p>
+                                        </div>
+                                    </button>
+
                                     {/* Supabase Seçeneği */}
                                     <button
                                         type="button"
@@ -1129,7 +1209,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                             {/* Hedef Adı */}
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500">
-                                    {formData.type === "website" ? "Site veya Servis Adı *" : formData.type === "tcp" ? "Sunucu / Port Adı *" : "Proje Adı *"}
+                                    {formData.type === "website" ? "Site veya Servis Adı *" : formData.type === "tcp" ? "Sunucu / Port Adı *" : formData.type === "udp" ? "UDP Servis Adı *" : "Proje Adı *"}
                                 </label>
                                 <input
                                     type="text"
@@ -1139,6 +1219,8 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                             ? "Örn: KeremKK Portföy veya API Sunucusu"
                                             : formData.type === "tcp"
                                             ? "Örn: Oracle VPS (SSH) veya Minecraft"
+                                            : formData.type === "udp"
+                                            ? "Örn: Cloudflare DNS veya Rust Sunucusu"
                                             : "Örn: Proje-1 veya Egl-Yıllık DB"
                                     }
                                     value={formData.name}
@@ -1152,7 +1234,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                             {/* URL / Host:Port */}
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500">
-                                    {formData.type === "website" ? "Web Sitesi URL *" : formData.type === "tcp" ? "Sunucu IP / Host ve Port *" : "Supabase URL *"}
+                                    {formData.type === "website" ? "Web Sitesi URL *" : formData.type === "tcp" || formData.type === "udp" ? "Sunucu IP / Host ve Port *" : "Supabase URL *"}
                                 </label>
                                 <input
                                     type={formData.type === "website" ? "url" : "text"}
@@ -1162,6 +1244,8 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                             ? "https://keremkuyucu.com.tr"
                                             : formData.type === "tcp"
                                             ? "203.0.113.10:22 veya server.alanadin.com:443"
+                                            : formData.type === "udp"
+                                            ? "1.1.1.1:53 veya pool.ntp.org:123"
                                             : "https://xxxxxxxx.supabase.co"
                                     }
                                     value={formData.supabase_url}
@@ -1172,7 +1256,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                 />
                             </div>
 
-                            {/* Supabase Key / Bilgi Kutusu */}
+                            {/* Supabase Key / Bilgi Kutusu / UDP Payload */}
                             {formData.type === "supabase" ? (
                                 <div className="space-y-1.5">
                                     <label className="text-xs font-bold uppercase tracking-wider text-gray-500">
@@ -1188,6 +1272,30 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                         }
                                         className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm font-mono transition-all"
                                     />
+                                </div>
+                            ) : formData.type === "udp" ? (
+                                <div className="space-y-2">
+                                    <div className="p-3 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/40 rounded-xl text-xs text-amber-700 dark:text-amber-300 flex items-center gap-2">
+                                        <FaBroadcastTower className="shrink-0 text-base" />
+                                        <span>
+                                            UDP paket sorgusu ile yanıt süresi (ms) ölçülür. DNS (53), NTP (123), Source Engine oyun sunucuları (27015) ve Minecraft Bedrock (19132) otomatik algılanır.
+                                        </span>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-semibold text-gray-500 flex items-center justify-between">
+                                            <span>Özel Paket / Payload (İsteğe Bağlı)</span>
+                                            <span className="text-[10px] text-gray-400 font-normal">Metin veya Hex (0x...)</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="Boş bırakılırsa porta uygun standart paket gönderilir"
+                                            value={formData.supabase_key}
+                                            onChange={(e) =>
+                                                setFormData({ ...formData, supabase_key: e.target.value })
+                                            }
+                                            className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-violet-500 text-xs font-mono transition-all"
+                                        />
+                                    </div>
                                 </div>
                             ) : formData.type === "tcp" ? (
                                 <div className="p-3 bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/40 rounded-xl text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2">

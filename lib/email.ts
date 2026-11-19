@@ -12,7 +12,7 @@ export interface SendEmailOptions {
 
 export interface MonitorAlertOptions {
     projectName: string;
-    projectType: 'supabase' | 'website' | 'tcp';
+    projectType: 'supabase' | 'website' | 'tcp' | 'udp';
     targetUrl: string;
     status: 'error' | 'timeout' | 'ok';
     error?: string;
@@ -118,7 +118,7 @@ export async function sendMonitorAlertEmail({
 }: MonitorAlertOptions): Promise<{ success: boolean; error?: string }> {
     const formattedDate = timestamp || new Date().toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" });
     const isTimeout = status === "timeout";
-    const typeLabel = projectType === "website" ? "🌐 Web Sitesi" : projectType === "tcp" ? "🔌 TCP / Sunucu Portu" : "⚡ Supabase Projesi";
+    const typeLabel = projectType === "website" ? "🌐 Web Sitesi" : projectType === "tcp" ? "🔌 TCP / Sunucu Portu" : projectType === "udp" ? "📡 UDP Portu" : "⚡ Supabase Projesi";
     const statusLabel = isTimeout ? "⏱️ Zaman Aşımı (Timeout)" : "❌ Hata (Erişilemez)";
 
     const emailHtml = `
@@ -145,9 +145,11 @@ export async function sendMonitorAlertEmail({
                 <td style="padding: 10px 0; color: #374151; font-weight: 600; border-bottom: 1px solid #f3f4f6;">${typeLabel}</td>
             </tr>
             <tr>
-                <td style="padding: 10px 0; color: #6b7280; border-bottom: 1px solid #f3f4f6;"><strong>Hedef URL:</strong></td>
+                <td style="padding: 10px 0; color: #6b7280; border-bottom: 1px solid #f3f4f6;"><strong>${projectType === "tcp" || projectType === "udp" ? "Hedef Host / Port:" : "Hedef URL:"}</strong></td>
                 <td style="padding: 10px 0; font-family: monospace; border-bottom: 1px solid #f3f4f6;">
-                    <a href="${escapeHtml(targetUrl)}" target="_blank" style="color: #2563eb; text-decoration: none; word-break: break-all;">${escapeHtml(targetUrl)}</a>
+                    ${projectType === "tcp" || projectType === "udp"
+                        ? `<span style="color: #111827; word-break: break-all;">${escapeHtml(targetUrl)}</span>`
+                        : `<a href="${escapeHtml(targetUrl)}" target="_blank" style="color: #2563eb; text-decoration: none; word-break: break-all;">${escapeHtml(targetUrl)}</a>`}
                 </td>
             </tr>
             <tr>
@@ -188,7 +190,7 @@ export async function sendMonitorAlertEmail({
     `;
 
     return sendEmail({
-        subject: `🚨 [Erişim Hatası] ${projectName} (${projectType === "website" ? "🌐 Web Sitesi" : projectType === "tcp" ? "🔌 TCP / Sunucu Portu" : "⚡ Supabase Projesi"}) yanıt vermiyor!`,
+        subject: `🚨 [Erişim Hatası] ${projectName} (${projectType === "website" ? "🌐 Web Sitesi" : projectType === "tcp" ? "🔌 TCP / Sunucu Portu" : projectType === "udp" ? "📡 UDP Portu" : "⚡ Supabase Projesi"}) yanıt vermiyor!`,
         html: emailHtml,
     });
 }
