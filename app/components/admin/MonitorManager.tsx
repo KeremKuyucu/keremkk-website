@@ -25,7 +25,7 @@ import {
     FaWifi,
     FaBolt,
     FaFilter,
-    FaBroadcastTower,
+    FaNetworkWired,
 } from "react-icons/fa";
 
 export type MonitorTargetType = "supabase" | "website" | "tcp" | "udp";
@@ -633,7 +633,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                     : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
                             }`}
                         >
-                            <FaBroadcastTower className="text-xs" /> UDP ({udpCount})
+                            <FaNetworkWired className="text-xs" /> UDP ({udpCount})
                         </button>
                         <button
                             onClick={() => setTypeFilter("supabase")}
@@ -755,7 +755,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                                         : "bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20"
                                                 }`}
                                             >
-                                                {isWebsite ? <FaGlobe className="text-xs" /> : isTcp ? <FaServer className="text-xs" /> : isUdp ? <FaBroadcastTower className="text-xs" /> : <FaBolt className="text-xs" />}
+                                                {isWebsite ? <FaGlobe className="text-xs" /> : isTcp ? <FaServer className="text-xs" /> : isUdp ? <FaNetworkWired className="text-xs" /> : <FaBolt className="text-xs" />}
                                                 {isWebsite ? "Web Sitesi" : isTcp ? "TCP / Port" : isUdp ? "UDP / Port" : "Supabase"}
                                             </span>
 
@@ -1035,8 +1035,8 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
 
             {/* Add / Edit Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
-                    <div className="w-full max-w-lg bg-white dark:bg-zinc-900 rounded-3xl border border-white/20 shadow-2xl p-6 md:p-8 flex flex-col gap-5 relative max-h-[90vh] overflow-y-auto">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in">
+                    <div className="w-full max-w-xl bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-2xl p-6 md:p-7 flex flex-col gap-5 relative max-h-[92vh] overflow-y-auto [scrollbar-width:thin] [scrollbar-color:rgba(150,150,150,0.25)_transparent]">
                         {/* Modal Header */}
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -1062,12 +1062,12 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
 
                         {/* Modal Form */}
                         <form onSubmit={handleFormSubmit} className="flex flex-col gap-4">
-                            {/* Hedef Türü Seçimi (Web Sitesi vs TCP vs UDP vs Supabase) */}
+                            {/* Hedef Türü Seçimi (2x2 Grid) */}
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500">
                                     Hedef Türü *
                                 </label>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                <div className="grid grid-cols-2 gap-2.5">
                                     {/* Web Sitesi Seçeneği */}
                                     <button
                                         type="button"
@@ -1077,27 +1077,27 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                                 type: "website",
                                             }))
                                         }
-                                        className={`p-3.5 rounded-xl border text-left flex items-start gap-3 transition-all ${
+                                        className={`p-3 rounded-2xl border text-left flex items-center gap-3 transition-all ${
                                             formData.type === "website"
-                                                ? "border-blue-500 bg-blue-50/20 dark:bg-blue-950/20 ring-2 ring-blue-500/20"
-                                                : "border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50"
+                                                ? "border-blue-500 bg-blue-500/10 ring-2 ring-blue-500/20 shadow-sm"
+                                                : "border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 bg-white/40 dark:bg-zinc-850/40"
                                         }`}
                                     >
                                         <div
-                                            className={`p-2 rounded-lg text-lg ${
+                                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-base ${
                                                 formData.type === "website"
-                                                    ? "bg-blue-500 text-white"
+                                                    ? "bg-blue-500 text-white shadow-md shadow-blue-500/30"
                                                     : "bg-gray-100 dark:bg-zinc-800 text-gray-500"
                                             }`}
                                         >
                                             <FaGlobe />
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-gray-900 dark:text-white">
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
                                                 Web Sitesi
                                             </p>
-                                            <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">
-                                                HTTP GET yanıtı ve ping takibi
+                                            <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                                                HTTP GET yanıt & ping
                                             </p>
                                         </div>
                                     </button>
@@ -1111,27 +1111,27 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                                 type: "tcp",
                                             }))
                                         }
-                                        className={`p-3.5 rounded-xl border text-left flex items-start gap-3 transition-all ${
+                                        className={`p-3 rounded-2xl border text-left flex items-center gap-3 transition-all ${
                                             formData.type === "tcp"
-                                                ? "border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20 ring-2 ring-emerald-500/20"
-                                                : "border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50"
+                                                ? "border-emerald-500 bg-emerald-500/10 ring-2 ring-emerald-500/20 shadow-sm"
+                                                : "border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 bg-white/40 dark:bg-zinc-850/40"
                                         }`}
                                     >
                                         <div
-                                            className={`p-2 rounded-lg text-lg ${
+                                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-base ${
                                                 formData.type === "tcp"
-                                                    ? "bg-emerald-500 text-white"
+                                                    ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/30"
                                                     : "bg-gray-100 dark:bg-zinc-800 text-gray-500"
                                             }`}
                                         >
                                             <FaServer />
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-gray-900 dark:text-white">
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
                                                 TCP / Port
                                             </p>
-                                            <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">
-                                                SSH, Proxy, Oyun sunucusu pingi
+                                            <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                                                SSH, Port & Ping takibi
                                             </p>
                                         </div>
                                     </button>
@@ -1145,27 +1145,27 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                                 type: "udp",
                                             }))
                                         }
-                                        className={`p-3.5 rounded-xl border text-left flex items-start gap-3 transition-all ${
+                                        className={`p-3 rounded-2xl border text-left flex items-center gap-3 transition-all ${
                                             formData.type === "udp"
-                                                ? "border-amber-500 bg-amber-50/20 dark:bg-amber-950/20 ring-2 ring-amber-500/20"
-                                                : "border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50"
+                                                ? "border-amber-500 bg-amber-500/10 ring-2 ring-amber-500/20 shadow-sm"
+                                                : "border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 bg-white/40 dark:bg-zinc-850/40"
                                         }`}
                                     >
                                         <div
-                                            className={`p-2 rounded-lg text-lg ${
+                                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-base ${
                                                 formData.type === "udp"
-                                                    ? "bg-amber-500 text-white"
+                                                    ? "bg-amber-500 text-white shadow-md shadow-amber-500/30"
                                                     : "bg-gray-100 dark:bg-zinc-800 text-gray-500"
                                             }`}
                                         >
-                                            <FaBroadcastTower />
+                                            <FaNetworkWired />
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-gray-900 dark:text-white">
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
                                                 UDP / Port
                                             </p>
-                                            <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">
-                                                DNS, NTP, Oyun ve soket pingi
+                                            <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                                                DNS, NTP & Oyun pingi
                                             </p>
                                         </div>
                                     </button>
@@ -1179,27 +1179,27 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                                 type: "supabase",
                                             }))
                                         }
-                                        className={`p-3.5 rounded-xl border text-left flex items-start gap-3 transition-all ${
+                                        className={`p-3 rounded-2xl border text-left flex items-center gap-3 transition-all ${
                                             formData.type === "supabase"
-                                                ? "border-violet-500 bg-violet-50/20 dark:bg-violet-950/20 ring-2 ring-violet-500/20"
-                                                : "border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50"
+                                                ? "border-violet-500 bg-violet-500/10 ring-2 ring-violet-500/20 shadow-sm"
+                                                : "border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 bg-white/40 dark:bg-zinc-850/40"
                                         }`}
                                     >
                                         <div
-                                            className={`p-2 rounded-lg text-lg ${
+                                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-base ${
                                                 formData.type === "supabase"
-                                                    ? "bg-violet-500 text-white"
+                                                    ? "bg-violet-500 text-white shadow-md shadow-violet-500/30"
                                                     : "bg-gray-100 dark:bg-zinc-800 text-gray-500"
                                             }`}
                                         >
                                             <FaBolt />
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-gray-900 dark:text-white">
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
                                                 Supabase
                                             </p>
-                                            <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">
-                                                RPC sağlık kontrolü ve uyandırma
+                                            <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                                                RPC sağlık kontrolü
                                             </p>
                                         </div>
                                     </button>
@@ -1275,14 +1275,14 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                 </div>
                             ) : formData.type === "udp" ? (
                                 <div className="space-y-2">
-                                    <div className="p-3 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/40 rounded-xl text-xs text-amber-700 dark:text-amber-300 flex items-center gap-2">
-                                        <FaBroadcastTower className="shrink-0 text-base" />
+                                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-700 dark:text-amber-300 flex items-center gap-2.5">
+                                        <FaNetworkWired className="shrink-0 text-sm" />
                                         <span>
-                                            UDP paket sorgusu ile yanıt süresi (ms) ölçülür. DNS (53), NTP (123), Source Engine oyun sunucuları (27015) ve Minecraft Bedrock (19132) otomatik algılanır.
+                                            UDP paket sorgusu ile gecikme (ms) ölçülür. DNS (53), NTP (123) ve oyun sunucuları otomatik algılanır.
                                         </span>
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-semibold text-gray-500 flex items-center justify-between">
+                                        <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 flex items-center justify-between">
                                             <span>Özel Paket / Payload (İsteğe Bağlı)</span>
                                             <span className="text-[10px] text-gray-400 font-normal">Metin veya Hex (0x...)</span>
                                         </label>
@@ -1298,17 +1298,17 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                     </div>
                                 </div>
                             ) : formData.type === "tcp" ? (
-                                <div className="p-3 bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/40 rounded-xl text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
-                                    <FaServer className="shrink-0 text-base" />
+                                <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2.5">
+                                    <FaServer className="shrink-0 text-sm" />
                                     <span>
-                                        TCP soket pingi ile port erişilebilirliği ve gecikme süresi (ms) ölçülür (SSH 22, Proxy 443, Minecraft 25565 vb.). API anahtarı gerekmez.
+                                        TCP soket pingi ile port erişilebilirliği ve gecikme süresi (ms) ölçülür (SSH 22, Web 443, Minecraft 25565 vb.).
                                     </span>
                                 </div>
                             ) : (
-                                <div className="p-3 bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/50 dark:border-blue-900/40 rounded-xl text-xs text-blue-700 dark:text-blue-300 flex items-center gap-2">
-                                    <FaGlobe className="shrink-0 text-base" />
+                                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-xs text-blue-700 dark:text-blue-300 flex items-center gap-2.5">
+                                    <FaGlobe className="shrink-0 text-sm" />
                                     <span>
-                                        Web siteleri için HTTP GET isteği ile yanıt kodu ve ping ölçülür. API anahtarı gerekmez.
+                                        Web siteleri ve HTTP servisleri için GET isteği yanıt kodu ve ping ölçülür.
                                     </span>
                                 </div>
                             )}
