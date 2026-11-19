@@ -188,7 +188,7 @@ export async function sendMonitorAlertEmail({
     `;
 
     return sendEmail({
-        subject: `🚨 [Erişim Hatası] ${projectName} (${projectType === "website" ? "Web Sitesi" : "Supabase"}) yanıt vermiyor!`,
+        subject: `🚨 [Erişim Hatası] ${projectName} (${projectType === "website" ? "🌐 Web Sitesi" : projectType === "tcp" ? "🔌 TCP / Sunucu Portu" : "⚡ Supabase Projesi"}) yanıt vermiyor!`,
         html: emailHtml,
     });
 }
