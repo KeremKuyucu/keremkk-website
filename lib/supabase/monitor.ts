@@ -1,4 +1,5 @@
 import net from "net";
+import dgram from "dgram";
 import { createClient as createSupabaseClient, SupabaseClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -6,7 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // Types
 // -----------------------------------------------------------------------------
 
-export type MonitorTargetType = 'supabase' | 'website' | 'tcp';
+export type MonitorTargetType = 'supabase' | 'website' | 'tcp' | 'udp';
 
 export interface MonitorProjectRow {
     id: string;
@@ -102,7 +103,7 @@ export async function getMonitorProjects(onlyEnabled = true): Promise<MonitorPro
         name: row.name,
         url: row.supabase_url,
         key: row.supabase_key || null,
-        type: (row.type === 'website' ? 'website' : row.type === 'tcp' ? 'tcp' : 'supabase') as MonitorTargetType,
+        type: (row.type === 'website' ? 'website' : row.type === 'tcp' ? 'tcp' : row.type === 'udp' ? 'udp' : 'supabase') as MonitorTargetType,
         enabled: Boolean(row.enabled),
         last_tested_at: row.last_tested_at || null,
         last_ping_ms: row.last_ping_ms !== undefined && row.last_ping_ms !== null ? Number(row.last_ping_ms) : null,
@@ -152,7 +153,7 @@ export async function checkMonitorTarget(target: {
 }): Promise<HealthResult> {
     const id = target.id || 'test';
     const name = target.name || 'Bilinmeyen Hedef';
-    const type: MonitorTargetType = target.type === 'website' ? 'website' : target.type === 'tcp' ? 'tcp' : 'supabase';
+    const type: MonitorTargetType = target.type === 'website' ? 'website' : target.type === 'tcp' ? 'tcp' : target.type === 'udp' ? 'udp' : 'supabase';
 
     // A) TCP / SUNUCU PORTU KONTROLÜ (Socket Ping)
     if (type === 'tcp') {
@@ -163,7 +164,14 @@ export async function checkMonitorTarget(target: {
         let host = cleaned;
         let port = 80;
 
-        if (cleaned.includes(':')) {
+        if (cleaned.startsWith('[') && cleaned.includes(']:')) {
+            const endBracket = cleaned.indexOf(']:');
+            host = cleaned.substring(1, endBracket);
+            const parsedPort = parseInt(cleaned.substring(endBracket + 2), 10);
+            if (!isNaN(parsedPort) && parsedPort > 0 && parsedPort <= 65535) {
+                port = parsedPort;
+            }
+        } else if (cleaned.includes(':')) {
             const parts = cleaned.split(':');
             host = parts[0].trim();
             const parsedPort = parseInt(parts[1].trim(), 10);
@@ -225,6 +233,149 @@ export async function checkMonitorTarget(target: {
                 socket.connect(port, host);
             } catch (err) {
                 finish('error', err instanceof Error ? err.message : 'Soket başlatılamadı');
+            }
+        });
+    }
+
+    // B) UDP / SUNUCU PORTU KONTROLÜ (Datagram Ping)
+    if (type === 'udp') {
+        const rawTarget = String(target.url || '').trim();
+        // Temizle: http://, https://, udp:// veya trailing slash kaldır
+        const cleaned = rawTarget.replace(/^[a-zA-Z]+:\/\//, '').replace(/\/+$/, '');
+
+        let host = cleaned;
+        let port = 53; // Varsayılan DNS portu
+
+        if (cleaned.startsWith('[') && cleaned.includes(']:')) {
+            const endBracket = cleaned.indexOf(']:');
+            host = cleaned.substring(1, endBracket);
+            const parsedPort = parseInt(cleaned.substring(endBracket + 2), 10);
+            if (!isNaN(parsedPort) && parsedPort > 0 && parsedPort <= 65535) {
+                port = parsedPort;
+            }
+        } else if (cleaned.includes(':')) {
+            const parts = cleaned.split(':');
+            host = parts[0].trim();
+            const parsedPort = parseInt(parts[1].trim(), 10);
+            if (!isNaN(parsedPort) && parsedPort > 0 && parsedPort <= 65535) {
+                port = parsedPort;
+            }
+        }
+
+        if (!host) {
+            return {
+                id,
+                name,
+                type,
+                status: 'error',
+                duration: 0,
+                error: 'Geçersiz sunucu adresi veya IP.',
+                server_time: new Date().toISOString(),
+            };
+        }
+
+        // Akıllı veya Özel Paket (Payload) Hazırlığı
+        let payload: Buffer;
+        const customPayload = String(target.key || '').trim();
+
+        if (customPayload) {
+            if (/^(0x|[0-9a-fA-F]{2,})/i.test(customPayload) && !customPayload.includes(' ')) {
+                const hexClean = customPayload.replace(/^0x/i, '');
+                payload = Buffer.from(hexClean, 'hex');
+            } else {
+                payload = Buffer.from(customPayload);
+            }
+        } else if (port === 53) {
+            // Standart DNS sorgusu (google.com A kaydı)
+            payload = Buffer.from([
+                0x12, 0x34, // Transaction ID
+                0x01, 0x00, // Flags: Standart sorgu (Recursion Desired)
+                0x00, 0x01, // Questions: 1
+                0x00, 0x00, // Answer RRs: 0
+                0x00, 0x00, // Authority RRs: 0
+                0x00, 0x00, // Additional RRs: 0
+                0x06, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, // "google"
+                0x03, 0x63, 0x6f, 0x6d, // "com"
+                0x00,       // Sonlandırıcı
+                0x00, 0x01, // Type A
+                0x00, 0x01  // Class IN
+            ]);
+        } else if (port === 123) {
+            // Standart NTP zaman sorgusu (48 byte, Mode 3 Client)
+            payload = Buffer.alloc(48);
+            payload[0] = 0x1b; // LI=0, VN=3, Mode=3
+        } else if (port === 27015 || port === 27016 || port === 7777) {
+            // Steam / Source Engine oyun sunucusu sorgusu (A2S_INFO)
+            payload = Buffer.from([
+                0xff, 0xff, 0xff, 0xff, 0x54, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x20,
+                0x45, 0x6e, 0x67, 0x69, 0x6e, 0x65, 0x20, 0x51, 0x75, 0x65, 0x72, 0x79, 0x00,
+            ]);
+        } else if (port === 19132) {
+            // Minecraft Bedrock RakNet Unconnected Ping
+            payload = Buffer.from([
+                0x01,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0xff, 0xff, 0x00, 0xfe, 0xfe, 0xfe, 0xfe, 0xfd, 0xfd, 0xfd, 0xfd, 0x12, 0x34, 0x56, 0x78,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            ]);
+        } else {
+            // Genel UDP Ping paketi
+            payload = Buffer.from('PING\r\n');
+        }
+
+        const start = Date.now();
+        const UDP_TIMEOUT_MS = 5000;
+
+        return new Promise<HealthResult>((resolve) => {
+            const isIpv6 = net.isIPv6(host);
+            const socket = dgram.createSocket(isIpv6 ? 'udp6' : 'udp4');
+            let isSettled = false;
+
+            const finish = (status: 'ok' | 'error' | 'timeout', errorMsg?: string, extraData?: Record<string, unknown>) => {
+                if (isSettled) return;
+                isSettled = true;
+                clearTimeout(timeoutId);
+                try {
+                    socket.close();
+                } catch {
+                    // Yoksay
+                }
+                resolve({
+                    id,
+                    name,
+                    type,
+                    status,
+                    duration: Date.now() - start,
+                    error: errorMsg,
+                    data: { host, port, ...(extraData || {}) },
+                    server_time: new Date().toISOString(),
+                });
+            };
+
+            const timeoutId = setTimeout(() => {
+                finish('timeout', `Zaman aşımı (${UDP_TIMEOUT_MS / 1000}s yanıt alınamadı - ${host}:${port})`);
+            }, UDP_TIMEOUT_MS);
+
+            socket.on('message', (msg, rinfo) => {
+                finish('ok', undefined, {
+                    remoteAddress: rinfo.address,
+                    remotePort: rinfo.port,
+                    bytesReceived: msg.length,
+                });
+            });
+
+            socket.on('error', (err) => {
+                finish('error', err.message || `UDP soket hatası (${host}:${port})`);
+            });
+
+            try {
+                socket.send(payload, port, host, (err) => {
+                    if (err) {
+                        finish('error', err.message || `UDP paketi gönderilemedi (${host}:${port})`);
+                    }
+                });
+            } catch (err) {
+                finish('error', err instanceof Error ? err.message : 'UDP soket isteği başlatılamadı');
             }
         });
     }
