@@ -4,7 +4,6 @@ import { getAuthHeaders } from "@/lib/auth-headers";
 import {
     FaServer,
     FaGlobe,
-    FaDatabase,
     FaPlus,
     FaTrash,
     FaEdit,
@@ -24,7 +23,6 @@ import {
     FaBell,
     FaWifi,
     FaBolt,
-    FaFilter,
     FaNetworkWired,
 } from "react-icons/fa";
 
@@ -56,7 +54,6 @@ interface MonitorManagerProps {
     authToken: string;
 }
 
-// Tarih formatlayıcı helper
 function formatTestDate(dateStr?: string | null): string {
     if (!dateStr) return "Henüz test edilmedi";
     try {
@@ -81,7 +78,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [searchQuery, setSearchQuery] = useState<string>("");
-    const [typeFilter, setTypeFilter] = useState<"all" | "website" | "supabase" | "tcp" | "udp">("all");
+    const [typeFilter, setTypeFilter] = useState<"all" | MonitorTargetType>("all");
     const [notification, setNotification] = useState<{
         type: "success" | "error";
         message: string;
@@ -114,17 +111,15 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
     const [revealedKeys, setRevealedKeys] = useState<Record<string, boolean>>({});
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
-    // Health check results per project id (for live test status)
+    // Health check results per project id
     const [testResults, setTestResults] = useState<Record<string, TestResult>>({});
     const [isTestingAll, setIsTestingAll] = useState<boolean>(false);
 
-    // Show temporary notification
-    const showNotice = (type: "success" | "error", message: string) => {
+    const showNotice = useCallback((type: "success" | "error", message: string) => {
         setNotification({ type, message });
         setTimeout(() => setNotification(null), 5000);
-    };
+    }, []);
 
-    // Fetch projects from DB
     const fetchProjects = useCallback(async (isSilent = false) => {
         if (!isSilent) setIsLoading(true);
         setIsRefreshing(true);
@@ -144,26 +139,24 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
             setIsLoading(false);
             setIsRefreshing(false);
         }
-    }, [authToken]);
+    }, [authToken, showNotice]);
 
     useEffect(() => {
         fetchProjects();
     }, [fetchProjects]);
 
-    // Copy to clipboard helper
     const handleCopy = (text: string, id: string) => {
         navigator.clipboard.writeText(text);
         setCopiedId(id);
         setTimeout(() => setCopiedId(null), 2000);
     };
 
-    // Toggle key visibility
     const toggleRevealKey = (id: string) => {
         setRevealedKeys((prev) => ({ ...prev, [id]: !prev[id] }));
     };
 
-    // Test a single project health
-    const handleTestProject = async (project: MonitorProject) => {
+    // Tek bir hedefi sına (silentNotice toplu testte toast çakışmasını önler)
+    const handleTestProject = async (project: MonitorProject, silentNotice = false): Promise<boolean> => {
         setTestResults((prev) => ({
             ...prev,
             [project.id]: { status: "testing" },
@@ -180,7 +173,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                     type: project.type,
                     supabase_url: project.supabase_url,
                     supabase_key: project.supabase_key,
-                    send_alert: true, // Hata durumunda alarm e-postası tetiklenir
+                    send_alert: true,
                 }),
             });
             const data = await res.json();
@@ -199,27 +192,28 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                 },
             }));
 
-            // Veritabanı ve yerel state'i güncelle (Son test tarihi & Ping süresi)
             setProjects((prev) =>
                 prev.map((p) =>
                     p.id === project.id
                         ? {
-                              ...p,
-                              last_tested_at: data.last_tested_at || new Date().toISOString(),
-                              last_ping_ms: duration !== undefined ? duration : p.last_ping_ms,
-                              last_status: status,
-                              last_error: error || null,
-                          }
+                            ...p,
+                            last_tested_at: data.last_tested_at || new Date().toISOString(),
+                            last_ping_ms: duration !== undefined ? duration : p.last_ping_ms,
+                            last_status: status,
+                            last_error: error || null,
+                        }
                         : p,
                 ),
             );
 
-            if (!data.ok) {
+            if (!data.ok && !silentNotice) {
                 showNotice(
                     "error",
                     `"${project.name}" olumsuz yanıt verdi! Hata alarm e-postası gönderildi.`,
                 );
             }
+
+            return Boolean(data.ok);
         } catch {
             setTestResults((prev) => ({
                 ...prev,
@@ -229,11 +223,14 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                     timestamp: Date.now(),
                 },
             }));
-            showNotice("error", `"${project.name}" için ağ bağlantısı sağlanamadı.`);
+            if (!silentNotice) {
+                showNotice("error", `"${project.name}" için ağ bağlantısı sağlanamadı.`);
+            }
+            return false;
         }
     };
 
-    // Test all enabled projects
+    // Tüm aktif hedefleri PARALEL sına
     const handleTestAll = async () => {
         const activeProjects = projects.filter((p) => p.enabled);
         if (activeProjects.length === 0) {
@@ -242,18 +239,28 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
         }
 
         setIsTestingAll(true);
-        for (const project of activeProjects) {
-            await handleTestProject(project);
-        }
+        const results = await Promise.allSettled(
+            activeProjects.map((project) => handleTestProject(project, true)),
+        );
         setIsTestingAll(false);
-        showNotice("success", "Tüm aktif hedeflerin kontrolü tamamlandı ve kayıtlar güncellendi.");
+
+        const failedCount = results.filter(
+            (r) => r.status === "rejected" || (r.status === "fulfilled" && !r.value),
+        ).length;
+
+        if (failedCount > 0) {
+            showNotice(
+                "error",
+                `${activeProjects.length} hedeften ${failedCount} tanesi başarısız oldu (alarm gönderildi).`,
+            );
+        } else {
+            showNotice("success", `Tüm hedefler (${activeProjects.length}) sağlıklı yanıt verdi.`);
+        }
     };
 
-    // Toggle enabled / disabled
     const handleToggleEnabled = async (project: MonitorProject) => {
         const newStatus = !project.enabled;
 
-        // Optimistic UI update
         setProjects((prev) =>
             prev.map((p) => (p.id === project.id ? { ...p, enabled: newStatus } : p)),
         );
@@ -274,7 +281,6 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                     `"${project.name}" ${newStatus ? "aktif" : "pasif"} duruma getirildi.`,
                 );
             } else {
-                // Rollback
                 setProjects((prev) =>
                     prev.map((p) =>
                         p.id === project.id ? { ...p, enabled: project.enabled } : p,
@@ -283,7 +289,6 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                 showNotice("error", data.error || "Güncelleme başarısız.");
             }
         } catch {
-            // Rollback
             setProjects((prev) =>
                 prev.map((p) =>
                     p.id === project.id ? { ...p, enabled: project.enabled } : p,
@@ -293,7 +298,6 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
         }
     };
 
-    // Open Modal for Add or Edit
     const handleOpenModal = (project?: MonitorProject) => {
         setModalTestResult({ status: "idle" });
         if (project) {
@@ -309,7 +313,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
             setEditingProject(null);
             setFormData({
                 name: "",
-                type: "website", // Varsayılan olarak Web Sitesi
+                type: "website",
                 supabase_url: "",
                 supabase_key: "",
                 enabled: true,
@@ -318,12 +322,11 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
         setIsModalOpen(true);
     };
 
-    // Test credentials/URL inside Modal
     const handleModalTest = async () => {
         if (!formData.supabase_url) {
             setModalTestResult({
                 status: "error",
-                error: "URL adresini doldurun.",
+                error: "URL veya Host adresini doldurun.",
             });
             return;
         }
@@ -346,9 +349,19 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                     type: formData.type,
                     supabase_url: formData.supabase_url,
                     supabase_key: formData.supabase_key,
-                    send_alert: false, // Önizleme testinde e-posta atılmaz
+                    send_alert: false,
                 }),
             });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => null);
+                setModalTestResult({
+                    status: "error",
+                    error: errData?.error || `Sunucu hatası (HTTP ${res.status})`,
+                });
+                return;
+            }
+
             const data = await res.json();
             setModalTestResult({
                 status: data.ok ? "ok" : data.status === "timeout" ? "timeout" : "error",
@@ -363,7 +376,6 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
         }
     };
 
-    // Submit Add or Edit Form
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.name.trim() || !formData.supabase_url.trim()) {
@@ -377,18 +389,22 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
         }
 
         setIsSubmitting(true);
+        const normalizedKey =
+            formData.type === "supabase" || (formData.type === "udp" && formData.supabase_key.trim())
+                ? formData.supabase_key.trim()
+                : null;
+
         try {
             if (editingProject) {
-                // Update
                 const res = await fetch("/api/admin/monitor", {
                     method: "PUT",
                     headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                     body: JSON.stringify({
                         id: editingProject.id,
-                        name: formData.name,
+                        name: formData.name.trim(),
                         type: formData.type,
-                        supabase_url: formData.supabase_url,
-                        supabase_key: formData.type === "supabase" || (formData.type === "udp" && formData.supabase_key) ? formData.supabase_key : null,
+                        supabase_url: formData.supabase_url.trim(),
+                        supabase_key: normalizedKey,
                         enabled: formData.enabled,
                     }),
                 });
@@ -401,15 +417,14 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                     showNotice("error", data.error || "Güncelleme hatası.");
                 }
             } else {
-                // Create
                 const res = await fetch("/api/admin/monitor", {
                     method: "POST",
                     headers: getAuthHeaders(authToken, { "Content-Type": "application/json" }),
                     body: JSON.stringify({
-                        name: formData.name,
+                        name: formData.name.trim(),
                         type: formData.type,
-                        supabase_url: formData.supabase_url,
-                        supabase_key: formData.type === "supabase" || (formData.type === "udp" && formData.supabase_key) ? formData.supabase_key : null,
+                        supabase_url: formData.supabase_url.trim(),
+                        supabase_key: normalizedKey,
                         enabled: formData.enabled,
                     }),
                 });
@@ -429,7 +444,6 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
         }
     };
 
-    // Delete Project
     const handleDeleteProject = async () => {
         if (!deletingProject) return;
 
@@ -455,7 +469,6 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
         }
     };
 
-    // Filter projects
     const filteredProjects = useMemo(() => {
         return projects.filter((p) => {
             const matchesSearch =
@@ -481,7 +494,6 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
     const udpCount = projects.filter((p) => p.type === "udp").length;
     const supabaseCount = projects.filter((p) => p.type === "supabase" || !p.type).length;
 
-    // Ping süresi ortalaması
     const validPings = projects.filter((p) => typeof p.last_ping_ms === "number" && p.last_ping_ms! > 0);
     const avgPing =
         validPings.length > 0
@@ -493,11 +505,10 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
             {/* Notification Toast */}
             {notification && (
                 <div
-                    className={`fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-2xl shadow-2xl backdrop-blur-xl border flex items-center gap-3 transition-all animate-bounce ${
-                        notification.type === "success"
-                            ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
-                            : "bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400"
-                    }`}
+                    className={`fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-2xl shadow-2xl backdrop-blur-xl border flex items-center gap-3 transition-all ${notification.type === "success"
+                            ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                            : "bg-red-500/15 border-red-500/30 text-red-600 dark:text-red-400"
+                        }`}
                 >
                     {notification.type === "success" ? (
                         <FaCheckCircle className="text-xl shrink-0" />
@@ -510,7 +521,6 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
 
             {/* Top Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Total Targets Card */}
                 <div className="bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl p-5 rounded-2xl border border-white/20 shadow-sm flex items-center justify-between">
                     <div>
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -521,7 +531,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                 {projects.length}
                             </span>
                             <span className="text-xs text-gray-400">
-                                ({websiteCount} Site, {tcpCount} TCP, {udpCount} UDP, {supabaseCount} Supabase)
+                                ({websiteCount} Site, {tcpCount} TCP, {udpCount} UDP, {supabaseCount} DB)
                             </span>
                         </div>
                     </div>
@@ -530,7 +540,6 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                     </div>
                 </div>
 
-                {/* Active Card */}
                 <div className="bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl p-5 rounded-2xl border border-white/20 shadow-sm flex items-center justify-between">
                     <div>
                         <div className="flex items-center gap-2">
@@ -548,7 +557,6 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                     </div>
                 </div>
 
-                {/* Average Ping Card */}
                 <div className="bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl p-5 rounded-2xl border border-white/20 shadow-sm flex items-center justify-between">
                     <div>
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -563,7 +571,6 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                     </div>
                 </div>
 
-                {/* Resend Email Alerts Card */}
                 <div className="bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl p-5 rounded-2xl border border-white/20 shadow-sm flex items-center justify-between">
                     <div>
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -593,55 +600,49 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                         />
                     </div>
 
-                    {/* Filter Pills */}
                     <div className="hidden sm:flex items-center bg-gray-100 dark:bg-zinc-800/80 p-1 rounded-xl text-xs font-bold">
                         <button
                             onClick={() => setTypeFilter("all")}
-                            className={`px-3 py-1.5 rounded-lg transition-all ${
-                                typeFilter === "all"
+                            className={`px-3 py-1.5 rounded-lg transition-all ${typeFilter === "all"
                                     ? "bg-white dark:bg-zinc-700 shadow-sm text-gray-900 dark:text-white"
                                     : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                            }`}
+                                }`}
                         >
                             Tümü ({projects.length})
                         </button>
                         <button
                             onClick={() => setTypeFilter("website")}
-                            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
-                                typeFilter === "website"
+                            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${typeFilter === "website"
                                     ? "bg-white dark:bg-zinc-700 shadow-sm text-blue-600 dark:text-blue-400"
                                     : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                            }`}
+                                }`}
                         >
                             <FaGlobe className="text-xs" /> Web ({websiteCount})
                         </button>
                         <button
                             onClick={() => setTypeFilter("tcp")}
-                            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
-                                typeFilter === "tcp"
+                            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${typeFilter === "tcp"
                                     ? "bg-white dark:bg-zinc-700 shadow-sm text-emerald-600 dark:text-emerald-400"
                                     : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                            }`}
+                                }`}
                         >
                             <FaServer className="text-xs" /> TCP ({tcpCount})
                         </button>
                         <button
                             onClick={() => setTypeFilter("udp")}
-                            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
-                                typeFilter === "udp"
+                            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${typeFilter === "udp"
                                     ? "bg-white dark:bg-zinc-700 shadow-sm text-amber-600 dark:text-amber-400"
                                     : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                            }`}
+                                }`}
                         >
                             <FaNetworkWired className="text-xs" /> UDP ({udpCount})
                         </button>
                         <button
                             onClick={() => setTypeFilter("supabase")}
-                            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
-                                typeFilter === "supabase"
+                            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${typeFilter === "supabase"
                                     ? "bg-white dark:bg-zinc-700 shadow-sm text-violet-600 dark:text-violet-400"
                                     : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                            }`}
+                                }`}
                         >
                             <FaBolt className="text-xs" /> Supabase ({supabaseCount})
                         </button>
@@ -715,68 +716,77 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                         const isWebsite = project.type === "website";
                         const isTcp = project.type === "tcp";
                         const isUdp = project.type === "udp";
-                        const isSupabase = project.type === "supabase" || (!project.type && !isWebsite && !isTcp && !isUdp);
+                        const isSupabase =
+                            project.type === "supabase" || (!project.type && !isWebsite && !isTcp && !isUdp);
 
-                        // Anlık veya DB'deki son durum
-                        const currentStatus = test?.status !== undefined && test.status !== "idle"
-                            ? test.status
-                            : project.last_status;
-                        const currentDuration = test?.duration !== undefined
-                            ? test.duration
-                            : project.last_ping_ms;
-                        const currentError = test?.error !== undefined
-                            ? test.error
-                            : project.last_error;
+                        const currentStatus =
+                            test?.status !== undefined && test.status !== "idle"
+                                ? test.status
+                                : project.last_status;
+                        const currentDuration =
+                            test?.duration !== undefined ? test.duration : project.last_ping_ms;
+                        const currentError =
+                            test?.error !== undefined ? test.error : project.last_error;
 
                         return (
                             <div
                                 key={project.id}
-                                className={`bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl p-5 rounded-2xl border transition-all duration-200 shadow-sm flex flex-col justify-between gap-4 relative overflow-hidden ${
-                                    project.enabled
+                                className={`bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl p-5 rounded-2xl border transition-all duration-200 shadow-sm flex flex-col justify-between gap-4 relative overflow-hidden ${project.enabled
                                         ? currentStatus === "error"
                                             ? "border-red-500/40 bg-red-50/10"
-                                            : "border-white/20 hover:border-violet-500/40"
+                                            : currentStatus === "timeout"
+                                                ? "border-amber-500/40 bg-amber-50/10"
+                                                : "border-white/20 hover:border-violet-500/40"
                                         : "border-gray-200/50 dark:border-zinc-800/80 opacity-75 hover:opacity-100"
-                                }`}
+                                    }`}
                             >
-                                {/* Top row: Name, Type Badge, status toggle, actions */}
+                                {/* Top row */}
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 flex-wrap">
-                                            {/* Type Icon Badge */}
                                             <span
-                                                className={`text-xs px-2.5 py-1 rounded-lg font-bold inline-flex items-center gap-1.5 ${
-                                                    isWebsite
+                                                className={`text-xs px-2.5 py-1 rounded-lg font-bold inline-flex items-center gap-1.5 ${isWebsite
                                                         ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
                                                         : isTcp
-                                                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                                                        : isUdp
-                                                        ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
-                                                        : "bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20"
-                                                }`}
+                                                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                                                            : isUdp
+                                                                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                                                                : "bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20"
+                                                    }`}
                                             >
-                                                {isWebsite ? <FaGlobe className="text-xs" /> : isTcp ? <FaServer className="text-xs" /> : isUdp ? <FaNetworkWired className="text-xs" /> : <FaBolt className="text-xs" />}
-                                                {isWebsite ? "Web Sitesi" : isTcp ? "TCP / Port" : isUdp ? "UDP / Port" : "Supabase"}
+                                                {isWebsite ? (
+                                                    <FaGlobe className="text-xs" />
+                                                ) : isTcp ? (
+                                                    <FaServer className="text-xs" />
+                                                ) : isUdp ? (
+                                                    <FaNetworkWired className="text-xs" />
+                                                ) : (
+                                                    <FaBolt className="text-xs" />
+                                                )}
+                                                {isWebsite
+                                                    ? "Web Sitesi"
+                                                    : isTcp
+                                                        ? "TCP / Port"
+                                                        : isUdp
+                                                            ? "UDP / Port"
+                                                            : "Supabase"}
                                             </span>
 
                                             <h3 className="text-lg font-extrabold truncate text-gray-900 dark:text-white">
                                                 {project.name}
                                             </h3>
 
-                                            {/* Active / Passive Badge */}
                                             <span
-                                                className={`text-xs px-2.5 py-0.5 rounded-full font-bold inline-flex items-center gap-1.5 ${
-                                                    project.enabled
+                                                className={`text-xs px-2.5 py-0.5 rounded-full font-bold inline-flex items-center gap-1.5 ${project.enabled
                                                         ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                                                         : "bg-gray-200 dark:bg-zinc-800 text-gray-500 border border-transparent"
-                                                }`}
+                                                    }`}
                                             >
                                                 <span
-                                                    className={`w-1.5 h-1.5 rounded-full ${
-                                                        project.enabled
+                                                    className={`w-1.5 h-1.5 rounded-full ${project.enabled
                                                             ? "bg-emerald-500 animate-pulse"
                                                             : "bg-gray-400"
-                                                    }`}
+                                                        }`}
                                                 />
                                                 {project.enabled ? "Aktif" : "Pasif"}
                                             </span>
@@ -787,22 +797,18 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                         </p>
                                     </div>
 
-                                    {/* Action buttons */}
                                     <div className="flex items-center gap-1.5 shrink-0">
-                                        {/* Toggle Active Switch */}
                                         <button
                                             onClick={() => handleToggleEnabled(project)}
-                                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
-                                                project.enabled
+                                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${project.enabled
                                                     ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20"
                                                     : "bg-gray-100 dark:bg-zinc-800 border-transparent text-gray-500 hover:bg-gray-200 dark:hover:bg-zinc-700"
-                                            }`}
+                                                }`}
                                             title={project.enabled ? "Pasife Al" : "Aktif Et"}
                                         >
                                             {project.enabled ? "Aktif" : "Pasif"}
                                         </button>
 
-                                        {/* Edit Button */}
                                         <button
                                             onClick={() => handleOpenModal(project)}
                                             className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-xl text-sm transition-all"
@@ -811,7 +817,6 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                             <FaEdit />
                                         </button>
 
-                                        {/* Delete Button */}
                                         <button
                                             onClick={() => setDeletingProject(project)}
                                             className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl text-sm transition-all"
@@ -822,9 +827,8 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                     </div>
                                 </div>
 
-                                {/* URL & Supabase Key (if applicable) Details */}
+                                {/* URL & Payload / Key Details */}
                                 <div className="space-y-2 bg-gray-50/80 dark:bg-black/30 p-3 rounded-xl border border-gray-100 dark:border-zinc-800/60 text-xs">
-                                    {/* URL / Host */}
                                     <div className="flex items-center justify-between gap-2">
                                         <span className="text-gray-400 font-semibold w-12 flex-shrink-0">
                                             {isTcp || isUdp ? "Host:" : "URL:"}
@@ -871,7 +875,6 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                         </div>
                                     </div>
 
-                                    {/* Payload (Only for UDP if present) */}
                                     {isUdp && project.supabase_key && (
                                         <div className="flex items-center justify-between gap-2 border-t border-gray-200/50 dark:border-zinc-800/50 pt-1.5">
                                             <span className="text-gray-400 font-semibold w-12 flex-shrink-0">
@@ -901,7 +904,6 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                         </div>
                                     )}
 
-                                    {/* Key (Only for Supabase) */}
                                     {isSupabase && (
                                         <div className="flex items-center justify-between gap-2 border-t border-gray-200/50 dark:border-zinc-800/50 pt-1.5">
                                             <span className="text-gray-400 font-semibold w-12 flex-shrink-0">
@@ -941,7 +943,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                     )}
                                 </div>
 
-                                {/* Metrics Section: Son Test Tarihi & Ping Süresi */}
+                                {/* Metrics Section */}
                                 <div className="grid grid-cols-2 gap-2 text-xs bg-gray-50/50 dark:bg-zinc-800/30 p-2.5 rounded-xl border border-gray-100 dark:border-zinc-800/40">
                                     <div>
                                         <span className="text-gray-400 font-semibold block text-[11px]">
@@ -959,13 +961,12 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                         <span className="font-medium mt-0.5 inline-flex items-center gap-1.5">
                                             {currentDuration !== null && currentDuration !== undefined ? (
                                                 <span
-                                                    className={`px-2 py-0.5 rounded-md font-bold text-[11px] ${
-                                                        currentDuration < 300
+                                                    className={`px-2 py-0.5 rounded-md font-bold text-[11px] ${currentDuration < 300
                                                             ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                                                             : currentDuration < 800
-                                                            ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                                                            : "bg-red-500/10 text-red-600 dark:text-red-400"
-                                                    }`}
+                                                                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                                                                : "bg-red-500/10 text-red-600 dark:text-red-400"
+                                                        }`}
                                                 >
                                                     {currentDuration} ms
                                                 </span>
@@ -976,15 +977,17 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                     </div>
                                 </div>
 
-                                {/* Last Error Message Alert (if present) */}
+                                {/* Last Error Message Alert */}
                                 {currentError && (
                                     <div className="bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 p-2 rounded-xl text-xs flex items-center gap-2">
                                         <FaExclamationTriangle className="shrink-0 text-sm" />
-                                        <span className="truncate">{currentError}</span>
+                                        <span className="truncate" title={currentError}>
+                                            {currentError}
+                                        </span>
                                     </div>
                                 )}
 
-                                {/* Footer: Test Results & Test Button */}
+                                {/* Footer */}
                                 <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-zinc-800/80">
                                     <div className="flex items-center gap-2 text-xs">
                                         {test?.status === "testing" ? (
@@ -1000,7 +1003,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                         ) : currentStatus === "timeout" ? (
                                             <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold bg-amber-500/10 px-2.5 py-1 rounded-lg">
                                                 <FaClock />
-                                                Zaman Aşımı (10s)
+                                                Zaman Aşımı
                                             </span>
                                         ) : currentStatus === "error" ? (
                                             <span
@@ -1020,7 +1023,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
 
                                     <button
                                         onClick={() => handleTestProject(project)}
-                                        disabled={test?.status === "testing"}
+                                        disabled={test?.status === "testing" || isTestingAll}
                                         className="px-3.5 py-1.5 bg-gray-100 dark:bg-zinc-800 hover:bg-violet-600 hover:text-white dark:hover:bg-violet-600 text-gray-700 dark:text-gray-300 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 disabled:opacity-50"
                                     >
                                         <FaPlay className="text-[10px]" />
@@ -1037,7 +1040,6 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in">
                     <div className="w-full max-w-xl bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-2xl p-6 md:p-7 flex flex-col gap-5 relative max-h-[92vh] overflow-y-auto [scrollbar-width:thin] [scrollbar-color:rgba(150,150,150,0.25)_transparent]">
-                        {/* Modal Header */}
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center text-lg">
@@ -1060,15 +1062,12 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                             </button>
                         </div>
 
-                        {/* Modal Form */}
                         <form onSubmit={handleFormSubmit} className="flex flex-col gap-4">
-                            {/* Hedef Türü Seçimi (2x2 Grid) */}
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500">
                                     Hedef Türü *
                                 </label>
                                 <div className="grid grid-cols-2 gap-2.5">
-                                    {/* Web Sitesi Seçeneği */}
                                     <button
                                         type="button"
                                         onClick={() =>
@@ -1077,18 +1076,16 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                                 type: "website",
                                             }))
                                         }
-                                        className={`p-3 rounded-2xl border text-left flex items-center gap-3 transition-all ${
-                                            formData.type === "website"
+                                        className={`p-3 rounded-2xl border text-left flex items-center gap-3 transition-all ${formData.type === "website"
                                                 ? "border-blue-500 bg-blue-500/10 ring-2 ring-blue-500/20 shadow-sm"
-                                                : "border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 bg-white/40 dark:bg-zinc-850/40"
-                                        }`}
+                                                : "border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 bg-white/40 dark:bg-zinc-800/40"
+                                            }`}
                                     >
                                         <div
-                                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-base ${
-                                                formData.type === "website"
+                                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-base ${formData.type === "website"
                                                     ? "bg-blue-500 text-white shadow-md shadow-blue-500/30"
                                                     : "bg-gray-100 dark:bg-zinc-800 text-gray-500"
-                                            }`}
+                                                }`}
                                         >
                                             <FaGlobe />
                                         </div>
@@ -1097,12 +1094,11 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                                 Web Sitesi
                                             </p>
                                             <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-                                                HTTP GET yanıt & ping
+                                                HTTP yanıt & ping
                                             </p>
                                         </div>
                                     </button>
 
-                                    {/* TCP / Port Seçeneği */}
                                     <button
                                         type="button"
                                         onClick={() =>
@@ -1111,18 +1107,16 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                                 type: "tcp",
                                             }))
                                         }
-                                        className={`p-3 rounded-2xl border text-left flex items-center gap-3 transition-all ${
-                                            formData.type === "tcp"
+                                        className={`p-3 rounded-2xl border text-left flex items-center gap-3 transition-all ${formData.type === "tcp"
                                                 ? "border-emerald-500 bg-emerald-500/10 ring-2 ring-emerald-500/20 shadow-sm"
-                                                : "border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 bg-white/40 dark:bg-zinc-850/40"
-                                        }`}
+                                                : "border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 bg-white/40 dark:bg-zinc-800/40"
+                                            }`}
                                     >
                                         <div
-                                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-base ${
-                                                formData.type === "tcp"
+                                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-base ${formData.type === "tcp"
                                                     ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/30"
                                                     : "bg-gray-100 dark:bg-zinc-800 text-gray-500"
-                                            }`}
+                                                }`}
                                         >
                                             <FaServer />
                                         </div>
@@ -1136,7 +1130,6 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                         </div>
                                     </button>
 
-                                    {/* UDP / Port Seçeneği */}
                                     <button
                                         type="button"
                                         onClick={() =>
@@ -1145,18 +1138,16 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                                 type: "udp",
                                             }))
                                         }
-                                        className={`p-3 rounded-2xl border text-left flex items-center gap-3 transition-all ${
-                                            formData.type === "udp"
+                                        className={`p-3 rounded-2xl border text-left flex items-center gap-3 transition-all ${formData.type === "udp"
                                                 ? "border-amber-500 bg-amber-500/10 ring-2 ring-amber-500/20 shadow-sm"
-                                                : "border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 bg-white/40 dark:bg-zinc-850/40"
-                                        }`}
+                                                : "border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 bg-white/40 dark:bg-zinc-800/40"
+                                            }`}
                                     >
                                         <div
-                                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-base ${
-                                                formData.type === "udp"
+                                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-base ${formData.type === "udp"
                                                     ? "bg-amber-500 text-white shadow-md shadow-amber-500/30"
                                                     : "bg-gray-100 dark:bg-zinc-800 text-gray-500"
-                                            }`}
+                                                }`}
                                         >
                                             <FaNetworkWired />
                                         </div>
@@ -1165,12 +1156,11 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                                 UDP / Port
                                             </p>
                                             <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-                                                DNS, NTP & Oyun pingi
+                                                QUIC, DNS & Oyun pingi
                                             </p>
                                         </div>
                                     </button>
 
-                                    {/* Supabase Seçeneği */}
                                     <button
                                         type="button"
                                         onClick={() =>
@@ -1179,18 +1169,16 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                                 type: "supabase",
                                             }))
                                         }
-                                        className={`p-3 rounded-2xl border text-left flex items-center gap-3 transition-all ${
-                                            formData.type === "supabase"
+                                        className={`p-3 rounded-2xl border text-left flex items-center gap-3 transition-all ${formData.type === "supabase"
                                                 ? "border-violet-500 bg-violet-500/10 ring-2 ring-violet-500/20 shadow-sm"
-                                                : "border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 bg-white/40 dark:bg-zinc-850/40"
-                                        }`}
+                                                : "border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 bg-white/40 dark:bg-zinc-800/40"
+                                            }`}
                                     >
                                         <div
-                                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-base ${
-                                                formData.type === "supabase"
+                                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-base ${formData.type === "supabase"
                                                     ? "bg-violet-500 text-white shadow-md shadow-violet-500/30"
                                                     : "bg-gray-100 dark:bg-zinc-800 text-gray-500"
-                                            }`}
+                                                }`}
                                         >
                                             <FaBolt />
                                         </div>
@@ -1206,10 +1194,15 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                 </div>
                             </div>
 
-                            {/* Hedef Adı */}
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500">
-                                    {formData.type === "website" ? "Site veya Servis Adı *" : formData.type === "tcp" ? "Sunucu / Port Adı *" : formData.type === "udp" ? "UDP Servis Adı *" : "Proje Adı *"}
+                                    {formData.type === "website"
+                                        ? "Site veya Servis Adı *"
+                                        : formData.type === "tcp"
+                                            ? "Sunucu / Port Adı *"
+                                            : formData.type === "udp"
+                                                ? "UDP Servis Adı *"
+                                                : "Proje Adı *"}
                                 </label>
                                 <input
                                     type="text"
@@ -1218,10 +1211,10 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                         formData.type === "website"
                                             ? "Örn: KeremKK Portföy veya API Sunucusu"
                                             : formData.type === "tcp"
-                                            ? "Örn: Oracle VPS (SSH) veya Minecraft"
-                                            : formData.type === "udp"
-                                            ? "Örn: Cloudflare DNS veya Rust Sunucusu"
-                                            : "Örn: Proje-1 veya Egl-Yıllık DB"
+                                                ? "Örn: Oracle VPS (SSH) veya Minecraft"
+                                                : formData.type === "udp"
+                                                    ? "Örn: Hytale Sunucusu veya Cloudflare DNS"
+                                                    : "Örn: Proje-1 veya Egl-Yıllık DB"
                                     }
                                     value={formData.name}
                                     onChange={(e) =>
@@ -1231,10 +1224,13 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                 />
                             </div>
 
-                            {/* URL / Host:Port */}
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500">
-                                    {formData.type === "website" ? "Web Sitesi URL *" : formData.type === "tcp" || formData.type === "udp" ? "Sunucu IP / Host ve Port *" : "Supabase URL *"}
+                                    {formData.type === "website"
+                                        ? "Web Sitesi URL *"
+                                        : formData.type === "tcp" || formData.type === "udp"
+                                            ? "Sunucu IP / Host ve Port *"
+                                            : "Supabase URL *"}
                                 </label>
                                 <input
                                     type={formData.type === "website" ? "url" : "text"}
@@ -1243,10 +1239,10 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                         formData.type === "website"
                                             ? "https://keremkuyucu.com.tr"
                                             : formData.type === "tcp"
-                                            ? "158.180.47.242:22 veya server.alanadin.com:443"
-                                            : formData.type === "udp"
-                                            ? "1.1.1.1:53 veya pool.ntp.org:123"
-                                            : "https://xxxxxxxx.supabase.co"
+                                                ? "158.180.47.242:22 veya server.alanadin.com:443"
+                                                : formData.type === "udp"
+                                                    ? "server.keremkuyucu.com.tr:5520 veya 1.1.1.1:53"
+                                                    : "https://xxxxxxxx.supabase.co"
                                     }
                                     value={formData.supabase_url}
                                     onChange={(e) =>
@@ -1256,7 +1252,6 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                 />
                             </div>
 
-                            {/* Supabase Key / Bilgi Kutusu / UDP Payload */}
                             {formData.type === "supabase" ? (
                                 <div className="space-y-1.5">
                                     <label className="text-xs font-bold uppercase tracking-wider text-gray-500">
@@ -1278,13 +1273,15 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                     <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-700 dark:text-amber-300 flex items-center gap-2.5">
                                         <FaNetworkWired className="shrink-0 text-sm" />
                                         <span>
-                                            UDP paket sorgusu ile gecikme (ms) ölçülür. DNS (53), NTP (123) ve oyun sunucuları otomatik algılanır.
+                                            UDP paket sorgusu ile gecikme (ms) ölçülür. QUIC/Hytale (5520), DNS (53), NTP (123) ve Bedrock (19132) otomatik algılanır.
                                         </span>
                                     </div>
                                     <div className="space-y-1">
                                         <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 flex items-center justify-between">
                                             <span>Özel Paket / Payload (İsteğe Bağlı)</span>
-                                            <span className="text-[10px] text-gray-400 font-normal">Metin veya Hex (0x...)</span>
+                                            <span className="text-[10px] text-gray-400 font-normal">
+                                                Metin veya Hex (0x...)
+                                            </span>
                                         </label>
                                         <input
                                             type="text"
@@ -1308,7 +1305,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                 <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-xs text-blue-700 dark:text-blue-300 flex items-center gap-2.5">
                                     <FaGlobe className="shrink-0 text-sm" />
                                     <span>
-                                        Web siteleri ve HTTP servisleri için GET isteği yanıt kodu ve ping ölçülür.
+                                        Web siteleri ve HTTP servisleri için durum kodu ve yanıt süresi (ping) ölçülür.
                                     </span>
                                 </div>
                             )}
@@ -1328,14 +1325,12 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                     onClick={() =>
                                         setFormData({ ...formData, enabled: !formData.enabled })
                                     }
-                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                                        formData.enabled ? "bg-emerald-500" : "bg-gray-300 dark:bg-zinc-700"
-                                    }`}
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.enabled ? "bg-emerald-500" : "bg-gray-300 dark:bg-zinc-700"
+                                        }`}
                                 >
                                     <span
-                                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                            formData.enabled ? "translate-x-6" : "translate-x-1"
-                                        }`}
+                                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.enabled ? "translate-x-6" : "translate-x-1"
+                                            }`}
                                     />
                                 </button>
                             </div>
@@ -1375,7 +1370,7 @@ export default function MonitorManager({ authToken }: MonitorManagerProps) {
                                 )}
                                 {modalTestResult.status === "timeout" && (
                                     <span className="text-xs text-amber-500 font-bold flex items-center gap-1">
-                                        <FaClock /> Zaman aşımı (10s)
+                                        <FaClock /> Zaman aşımı
                                     </span>
                                 )}
                             </div>
