@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 import {
     FaLock,
     FaStickyNote,
@@ -23,23 +25,120 @@ import {
 } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { createClient } from "@/lib/supabase/client";
-import OverviewDashboard from "@/app/components/admin/OverviewDashboard";
-import NotesManager from "@/app/components/admin/NotesManager";
-import MessagesManager from "@/app/components/admin/MessagesManager";
-import AnalyticsManager from "@/app/components/admin/AnalyticsManager";
-import ErrorLogsManager from "@/app/components/admin/ErrorLogsManager";
-import ExpenseTracker from "@/app/components/admin/ExpenseTracker";
-import SubscriptionManager from "@/app/components/admin/SubscriptionManager";
-import LinkManager from "@/app/components/admin/LinkManager";
-import MonitorManager from "@/app/components/admin/MonitorManager";
-import WordlistManager from "@/app/components/admin/WordlistManager";
+
+// --- Props interface for all admin module components ---
+interface AdminModuleProps {
+    authToken: string;
+    onNavigate?: (moduleId: string) => void;
+}
+
+// --- Module Loading Skeleton Loader ---
+function ModuleLoadingSkeleton() {
+    return (
+        <div className="w-full space-y-6 animate-pulse">
+            {/* Header skeleton */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-gray-200/60 dark:border-zinc-800/60">
+                <div className="space-y-2">
+                    <div className="h-8 w-48 bg-gray-200/80 dark:bg-zinc-800/80 rounded-xl" />
+                    <div className="h-4 w-72 bg-gray-100 dark:bg-zinc-900 rounded-lg" />
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="h-10 w-24 bg-gray-200/80 dark:bg-zinc-800/80 rounded-xl" />
+                    <div className="h-10 w-32 bg-gray-200/80 dark:bg-zinc-800/80 rounded-xl" />
+                </div>
+            </div>
+
+            {/* Quick stats grid skeleton */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[1, 2, 3, 4].map((i) => (
+                    <div
+                        key={i}
+                        className="h-28 bg-white/70 dark:bg-zinc-900/70 border border-gray-200/60 dark:border-zinc-800/60 rounded-2xl p-5 flex flex-col justify-between"
+                    >
+                        <div className="flex justify-between items-center">
+                            <div className="h-4 w-20 bg-gray-200/80 dark:bg-zinc-800/80 rounded" />
+                            <div className="w-8 h-8 rounded-lg bg-gray-200/80 dark:bg-zinc-800/80" />
+                        </div>
+                        <div className="h-7 w-28 bg-gray-200/80 dark:bg-zinc-800/80 rounded-lg" />
+                    </div>
+                ))}
+            </div>
+
+            {/* Main content table/chart skeleton */}
+            <div className="h-96 bg-white/70 dark:bg-zinc-900/70 border border-gray-200/60 dark:border-zinc-800/60 rounded-3xl p-6 flex flex-col justify-between">
+                <div className="flex justify-between items-center">
+                    <div className="h-5 w-36 bg-gray-200/80 dark:bg-zinc-800/80 rounded-lg" />
+                    <div className="h-8 w-44 bg-gray-200/80 dark:bg-zinc-800/80 rounded-xl" />
+                </div>
+                <div className="space-y-3 my-auto">
+                    <div className="h-4 bg-gray-100 dark:bg-zinc-800/50 rounded-lg w-full" />
+                    <div className="h-4 bg-gray-100 dark:bg-zinc-800/50 rounded-lg w-5/6" />
+                    <div className="h-4 bg-gray-100 dark:bg-zinc-800/50 rounded-lg w-4/6" />
+                    <div className="h-4 bg-gray-100 dark:bg-zinc-800/50 rounded-lg w-3/6" />
+                </div>
+                <div className="h-4 w-32 bg-gray-100 dark:bg-zinc-900 rounded" />
+            </div>
+        </div>
+    );
+}
+
+// --- Lazy-Loaded Dynamic Module Components ---
+const OverviewDashboard = dynamic<AdminModuleProps>(
+    () => import("@/app/components/admin/OverviewDashboard"),
+    { loading: () => <ModuleLoadingSkeleton />, ssr: false }
+);
+
+const NotesManager = dynamic<AdminModuleProps>(
+    () => import("@/app/components/admin/NotesManager"),
+    { loading: () => <ModuleLoadingSkeleton />, ssr: false }
+);
+
+const MessagesManager = dynamic<AdminModuleProps>(
+    () => import("@/app/components/admin/MessagesManager"),
+    { loading: () => <ModuleLoadingSkeleton />, ssr: false }
+);
+
+const AnalyticsManager = dynamic<AdminModuleProps>(
+    () => import("@/app/components/admin/AnalyticsManager"),
+    { loading: () => <ModuleLoadingSkeleton />, ssr: false }
+);
+
+const ErrorLogsManager = dynamic<AdminModuleProps>(
+    () => import("@/app/components/admin/ErrorLogsManager"),
+    { loading: () => <ModuleLoadingSkeleton />, ssr: false }
+);
+
+const ExpenseTracker = dynamic<AdminModuleProps>(
+    () => import("@/app/components/admin/ExpenseTracker"),
+    { loading: () => <ModuleLoadingSkeleton />, ssr: false }
+);
+
+const SubscriptionManager = dynamic<AdminModuleProps>(
+    () => import("@/app/components/admin/SubscriptionManager"),
+    { loading: () => <ModuleLoadingSkeleton />, ssr: false }
+);
+
+const LinkManager = dynamic<AdminModuleProps>(
+    () => import("@/app/components/admin/LinkManager"),
+    { loading: () => <ModuleLoadingSkeleton />, ssr: false }
+);
+
+const WordlistManager = dynamic<AdminModuleProps>(
+    () => import("@/app/components/admin/WordlistManager"),
+    { loading: () => <ModuleLoadingSkeleton />, ssr: false }
+);
+
+const MonitorManager = dynamic<AdminModuleProps>(
+    () => import("@/app/components/admin/MonitorManager"),
+    { loading: () => <ModuleLoadingSkeleton />, ssr: false }
+);
 
 // --- Admin Modules Configuration ---
 interface AdminModule {
     id: string;
     label: string;
     icon: React.ElementType;
-    component: React.ComponentType<any>;
+    component: React.ComponentType<AdminModuleProps>;
 }
 
 const MODULES: AdminModule[] = [
@@ -105,7 +204,9 @@ const MODULES: AdminModule[] = [
     }
 ];
 
-export default function AdminPage() {
+function AdminDashboardContent() {
+    const searchParams = useSearchParams();
+
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [checkingAuth, setCheckingAuth] = useState(true);
     const [authToken, setAuthToken] = useState<string | null>(null);
@@ -113,12 +214,62 @@ export default function AdminPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
 
-    // Active Tab & Navigation
-    const [activeTab, setActiveTab] = useState<string>(MODULES[0].id);
+    // Active Tab & Navigation - initialized from URL query param if present
+    const [activeTab, setActiveTab] = useState<string>(() => {
+        if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            const tabParam = params.get("tab");
+            if (tabParam && MODULES.some((m) => m.id === tabParam)) {
+                return tabParam;
+            }
+        }
+        return MODULES[0].id;
+    });
 
     // Sidebar States
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    // Tab change handler that updates both React state and browser URL query param
+    const handleTabChange = useCallback((moduleId: string) => {
+        const targetModule = MODULES.find((m) => m.id === moduleId);
+        const validId = targetModule ? targetModule.id : MODULES[0].id;
+        setActiveTab(validId);
+
+        if (typeof window !== "undefined") {
+            const url = new URL(window.location.href);
+            if (validId === MODULES[0].id) {
+                url.searchParams.delete("tab");
+            } else {
+                url.searchParams.set("tab", validId);
+            }
+            window.history.pushState(null, "", url.toString());
+        }
+    }, []);
+
+    // Listen for browser forward/backward navigation (popstate)
+    useEffect(() => {
+        const handlePopState = () => {
+            const params = new URLSearchParams(window.location.search);
+            const tab = params.get("tab");
+            if (tab && MODULES.some((m) => m.id === tab)) {
+                setActiveTab(tab);
+            } else {
+                setActiveTab(MODULES[0].id);
+            }
+        };
+
+        window.addEventListener("popstate", handlePopState);
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, []);
+
+    // Also sync if searchParams change externally
+    useEffect(() => {
+        const tabFromUrl = searchParams.get("tab");
+        if (tabFromUrl && MODULES.some((m) => m.id === tabFromUrl)) {
+            setActiveTab(tabFromUrl);
+        }
+    }, [searchParams]);
 
     // Verify user authorization from admin_users table
     const verifyUser = async (supabase: ReturnType<typeof createClient>, uid: string): Promise<boolean> => {
@@ -226,7 +377,7 @@ export default function AdminPage() {
         setAuthToken(null);
         setUserEmail(null);
         setIsAuthenticated(false);
-        setActiveTab(MODULES[0].id);
+        handleTabChange(MODULES[0].id);
     };
 
     // --- Loading State ---
@@ -296,7 +447,7 @@ export default function AdminPage() {
         );
     }
 
-    const currentModule = MODULES.find(m => m.id === activeTab) || MODULES[0];
+    const currentModule = MODULES.find((m) => m.id === activeTab) || MODULES[0];
     const ActiveComponent = currentModule.component;
 
     // --- Render Modern Dashboard Layout with Sidebar ---
@@ -352,7 +503,7 @@ export default function AdminPage() {
                             return (
                                 <button
                                     key={module.id}
-                                    onClick={() => setActiveTab(module.id)}
+                                    onClick={() => handleTabChange(module.id)}
                                     title={isSidebarCollapsed ? module.label : undefined}
                                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all relative group cursor-pointer ${
                                         isActive
@@ -461,7 +612,7 @@ export default function AdminPage() {
                                         <button
                                             key={module.id}
                                             onClick={() => {
-                                                setActiveTab(module.id);
+                                                handleTabChange(module.id);
                                                 setIsMobileMenuOpen(false);
                                             }}
                                             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
@@ -527,11 +678,37 @@ export default function AdminPage() {
                     <div className="max-w-7xl mx-auto w-full">
                         <ActiveComponent
                             authToken={authToken!}
-                            onNavigate={(moduleId: string) => setActiveTab(moduleId)}
+                            onNavigate={handleTabChange}
                         />
                     </div>
                 </div>
             </main>
         </div>
+    );
+}
+
+// Global page loading fallback for Next.js Suspense boundary
+function AdminPageLoadingFallback() {
+    return (
+        <div className="min-h-screen flex items-center justify-center p-4 bg-[#fafafa] dark:bg-black relative overflow-hidden">
+            <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-violet-500/10 blur-[100px]" />
+            <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-fuchsia-500/10 blur-[100px]" />
+            <div className="flex flex-col items-center gap-4 relative z-10">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white shadow-xl shadow-violet-500/25 animate-pulse">
+                    <FaShieldAlt className="text-2xl" />
+                </div>
+                <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 animate-pulse">
+                    Yönetici paneli yükleniyor...
+                </p>
+            </div>
+        </div>
+    );
+}
+
+export default function AdminPage() {
+    return (
+        <Suspense fallback={<AdminPageLoadingFallback />}>
+            <AdminDashboardContent />
+        </Suspense>
     );
 }
