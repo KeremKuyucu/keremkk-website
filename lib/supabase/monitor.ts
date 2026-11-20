@@ -318,6 +318,20 @@ export async function checkMonitorTarget(target: {
                 0x00, 0xff, 0xff, 0x00, 0xfe, 0xfe, 0xfe, 0xfe, 0xfd, 0xfd, 0xfd, 0xfd, 0x12, 0x34, 0x56, 0x78,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             ]);
+        } else if (port === 5520) {
+            // Hytale Dedicated Server / QUIC Version Negotiation Probe (RFC 9000)
+            const dcid = Buffer.from([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]);
+            const scid = Buffer.from([0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18]);
+            const header = Buffer.concat([
+                Buffer.from([0xc0]),
+                Buffer.from([0x1a, 0x2a, 0x3a, 0x4a]),
+                Buffer.from([dcid.length]),
+                dcid,
+                Buffer.from([scid.length]),
+                scid,
+            ]);
+            payload = Buffer.alloc(1200);
+            header.copy(payload, 0);
         } else {
             // Genel UDP Ping paketi
             payload = Buffer.from('PING\r\n');
