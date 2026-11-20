@@ -49,8 +49,12 @@ export interface HealthResult {
 }
 
 // -----------------------------------------------------------------------------
-// Client Cache for Supabase Instances
+// Constants & Helpers
 // -----------------------------------------------------------------------------
+
+// Vercel 10s limitine takılmamak ve e-posta gönderimine pay bırakmak için 6s
+const HEALTHCHECK_TIMEOUT_MS = 6_000;
+const SOCKET_TIMEOUT_MS = 4_500;
 
 const clientCache = new Map<string, SupabaseClient>();
 
@@ -58,6 +62,11 @@ export function getMonitorClient(project: { url: string; key: string }): Supabas
     const cacheKey = `${project.url}:${project.key}`;
 
     if (!clientCache.has(cacheKey)) {
+        if (clientCache.size >= 50) {
+            const firstKey = clientCache.keys().next().value;
+            if (firstKey) clientCache.delete(firstKey);
+        }
+
         clientCache.set(
             cacheKey,
             createSupabaseClient(project.url, project.key, {
@@ -71,6 +80,54 @@ export function getMonitorClient(project: { url: string; key: string }): Supabas
     }
 
     return clientCache.get(cacheKey)!;
+}
+
+function normalizeTargetType(type?: string | null): MonitorTargetType {
+    if (type === 'website' || type === 'tcp' || type === 'udp') {
+        return type;
+    }
+    return 'supabase';
+}
+
+function parseHostAndPort(rawTarget: string, defaultPort: number): { host: string; port: number } | null {
+    const cleaned = rawTarget.trim().replace(/^[a-zA-Z]+:\/\//, '').replace(/\/+$/, '');
+    if (!cleaned) return null;
+
+    // Köşeli parantezli IPv6: [2001:db8::1]:5520 veya [2001:db8::1]
+    if (cleaned.startsWith('[')) {
+        const endBracket = cleaned.indexOf(']');
+        if (endBracket === -1) return null;
+        const host = cleaned.substring(1, endBracket).trim();
+        const rest = cleaned.substring(endBracket + 1);
+
+        if (!rest) return net.isIPv6(host) ? { host, port: defaultPort } : null;
+        if (rest.startsWith(':')) {
+            const parsedPort = parseInt(rest.substring(1), 10);
+            if (!isNaN(parsedPort) && parsedPort > 0 && parsedPort <= 65535 && net.isIPv6(host)) {
+                return { host, port: parsedPort };
+            }
+        }
+        return null;
+    }
+
+    // Parantezsiz saf IPv6
+    if (net.isIPv6(cleaned)) {
+        return { host: cleaned, port: defaultPort };
+    }
+
+    // IPv4 veya Domain
+    if (cleaned.includes(':')) {
+        const parts = cleaned.split(':');
+        if (parts.length !== 2) return null;
+        const host = parts[0].trim();
+        const parsedPort = parseInt(parts[1].trim(), 10);
+        if (!host || isNaN(parsedPort) || parsedPort <= 0 || parsedPort > 65535) {
+            return null;
+        }
+        return { host, port: parsedPort };
+    }
+
+    return { host: cleaned, port: defaultPort };
 }
 
 // -----------------------------------------------------------------------------
@@ -103,7 +160,7 @@ export async function getMonitorProjects(onlyEnabled = true): Promise<MonitorPro
         name: row.name,
         url: row.supabase_url,
         key: row.supabase_key || null,
-        type: (row.type === 'website' ? 'website' : row.type === 'tcp' ? 'tcp' : row.type === 'udp' ? 'udp' : 'supabase') as MonitorTargetType,
+        type: normalizeTargetType(row.type),
         enabled: Boolean(row.enabled),
         last_tested_at: row.last_tested_at || null,
         last_ping_ms: row.last_ping_ms !== undefined && row.last_ping_ms !== null ? Number(row.last_ping_ms) : null,
@@ -119,14 +176,15 @@ export async function getMonitorProjects(onlyEnabled = true): Promise<MonitorPro
 export async function recordMonitorResult(projectId: string, result: HealthResult): Promise<void> {
     try {
         const supabase = createAdminClient();
+        const now = new Date().toISOString();
         const { error } = await supabase
             .from('monitor_projects')
             .update({
-                last_tested_at: new Date().toISOString(),
+                last_tested_at: now,
                 last_ping_ms: result.duration,
                 last_status: result.status,
                 last_error: result.error || null,
-                updated_at: new Date().toISOString(),
+                updated_at: now,
             })
             .eq('id', projectId);
 
@@ -139,10 +197,8 @@ export async function recordMonitorResult(projectId: string, result: HealthResul
 }
 
 // -----------------------------------------------------------------------------
-// Unified Health Check (Supabase & Website)
+// Unified Health Check (TCP, UDP, Website, Supabase)
 // -----------------------------------------------------------------------------
-
-const HEALTHCHECK_TIMEOUT_MS = 10_000;
 
 export async function checkMonitorTarget(target: {
     id?: string;
@@ -153,47 +209,26 @@ export async function checkMonitorTarget(target: {
 }): Promise<HealthResult> {
     const id = target.id || 'test';
     const name = target.name || 'Bilinmeyen Hedef';
-    const type: MonitorTargetType = target.type === 'website' ? 'website' : target.type === 'tcp' ? 'tcp' : target.type === 'udp' ? 'udp' : 'supabase';
+    const type = normalizeTargetType(target.type);
 
     // A) TCP / SUNUCU PORTU KONTROLÜ (Socket Ping)
     if (type === 'tcp') {
-        const rawTarget = String(target.url || '').trim();
-        // Temizle: http://, https://, tcp:// veya trailing slash kaldır
-        const cleaned = rawTarget.replace(/^[a-zA-Z]+:\/\//, '').replace(/\/+$/, '');
+        const parsed = parseHostAndPort(String(target.url || ''), 80);
 
-        let host = cleaned;
-        let port = 80;
-
-        if (cleaned.startsWith('[') && cleaned.includes(']:')) {
-            const endBracket = cleaned.indexOf(']:');
-            host = cleaned.substring(1, endBracket);
-            const parsedPort = parseInt(cleaned.substring(endBracket + 2), 10);
-            if (!isNaN(parsedPort) && parsedPort > 0 && parsedPort <= 65535) {
-                port = parsedPort;
-            }
-        } else if (cleaned.includes(':')) {
-            const parts = cleaned.split(':');
-            host = parts[0].trim();
-            const parsedPort = parseInt(parts[1].trim(), 10);
-            if (!isNaN(parsedPort) && parsedPort > 0 && parsedPort <= 65535) {
-                port = parsedPort;
-            }
-        }
-
-        if (!host) {
+        if (!parsed) {
             return {
                 id,
                 name,
                 type,
                 status: 'error',
                 duration: 0,
-                error: 'Geçersiz sunucu adresi veya IP.',
+                error: 'Geçersiz sunucu adresi, IP veya port.',
                 server_time: new Date().toISOString(),
             };
         }
 
+        const { host, port } = parsed;
         const start = Date.now();
-        const TCP_TIMEOUT_MS = 5000;
 
         return new Promise<HealthResult>((resolve) => {
             const socket = new net.Socket();
@@ -215,19 +250,11 @@ export async function checkMonitorTarget(target: {
                 });
             };
 
-            socket.setTimeout(TCP_TIMEOUT_MS);
+            socket.setTimeout(SOCKET_TIMEOUT_MS);
 
-            socket.on('connect', () => {
-                finish('ok');
-            });
-
-            socket.on('timeout', () => {
-                finish('timeout', `Zaman aşımı (${TCP_TIMEOUT_MS / 1000}s yanıt alınamadı - ${host}:${port})`);
-            });
-
-            socket.on('error', (err) => {
-                finish('error', err.message || `TCP bağlantı hatası (${host}:${port})`);
-            });
+            socket.on('connect', () => finish('ok'));
+            socket.on('timeout', () => finish('timeout', `Zaman aşımı (${SOCKET_TIMEOUT_MS / 1000}s yanıt alınamadı - ${host}:${port})`));
+            socket.on('error', (err) => finish('error', err.message || `TCP bağlantı hatası (${host}:${port})`));
 
             try {
                 socket.connect(port, host);
@@ -239,71 +266,51 @@ export async function checkMonitorTarget(target: {
 
     // B) UDP / SUNUCU PORTU KONTROLÜ (Datagram Ping)
     if (type === 'udp') {
-        const rawTarget = String(target.url || '').trim();
-        // Temizle: http://, https://, udp:// veya trailing slash kaldır
-        const cleaned = rawTarget.replace(/^[a-zA-Z]+:\/\//, '').replace(/\/+$/, '');
+        const parsed = parseHostAndPort(String(target.url || ''), 53);
 
-        let host = cleaned;
-        let port = 53; // Varsayılan DNS portu
-
-        if (cleaned.startsWith('[') && cleaned.includes(']:')) {
-            const endBracket = cleaned.indexOf(']:');
-            host = cleaned.substring(1, endBracket);
-            const parsedPort = parseInt(cleaned.substring(endBracket + 2), 10);
-            if (!isNaN(parsedPort) && parsedPort > 0 && parsedPort <= 65535) {
-                port = parsedPort;
-            }
-        } else if (cleaned.includes(':')) {
-            const parts = cleaned.split(':');
-            host = parts[0].trim();
-            const parsedPort = parseInt(parts[1].trim(), 10);
-            if (!isNaN(parsedPort) && parsedPort > 0 && parsedPort <= 65535) {
-                port = parsedPort;
-            }
-        }
-
-        if (!host) {
+        if (!parsed) {
             return {
                 id,
                 name,
                 type,
                 status: 'error',
                 duration: 0,
-                error: 'Geçersiz sunucu adresi veya IP.',
+                error: 'Geçersiz sunucu adresi, IP veya port.',
                 server_time: new Date().toISOString(),
             };
         }
+
+        const { host, port } = parsed;
 
         // Akıllı veya Özel Paket (Payload) Hazırlığı
         let payload: Buffer;
         const customPayload = String(target.key || '').trim();
 
         if (customPayload) {
-            if (/^(0x|[0-9a-fA-F]{2,})/i.test(customPayload) && !customPayload.includes(' ')) {
-                const hexClean = customPayload.replace(/^0x/i, '');
-                payload = Buffer.from(hexClean, 'hex');
+            if (/^0x[0-9a-fA-F]+$/i.test(customPayload) && customPayload.length % 2 === 0) {
+                payload = Buffer.from(customPayload.slice(2), 'hex');
             } else {
                 payload = Buffer.from(customPayload);
             }
         } else if (port === 53) {
             // Standart DNS sorgusu (google.com A kaydı)
             payload = Buffer.from([
-                0x12, 0x34, // Transaction ID
-                0x01, 0x00, // Flags: Standart sorgu (Recursion Desired)
-                0x00, 0x01, // Questions: 1
-                0x00, 0x00, // Answer RRs: 0
-                0x00, 0x00, // Authority RRs: 0
-                0x00, 0x00, // Additional RRs: 0
-                0x06, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, // "google"
-                0x03, 0x63, 0x6f, 0x6d, // "com"
-                0x00,       // Sonlandırıcı
-                0x00, 0x01, // Type A
-                0x00, 0x01  // Class IN
+                0x12, 0x34,
+                0x01, 0x00,
+                0x00, 0x01,
+                0x00, 0x00,
+                0x00, 0x00,
+                0x00, 0x00,
+                0x06, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65,
+                0x03, 0x63, 0x6f, 0x6d,
+                0x00,
+                0x00, 0x01,
+                0x00, 0x01,
             ]);
         } else if (port === 123) {
             // Standart NTP zaman sorgusu (48 byte, Mode 3 Client)
             payload = Buffer.alloc(48);
-            payload[0] = 0x1b; // LI=0, VN=3, Mode=3
+            payload[0] = 0x1b;
         } else if (port === 27015 || port === 27016 || port === 7777) {
             // Steam / Source Engine oyun sunucusu sorgusu (A2S_INFO)
             payload = Buffer.from([
@@ -338,7 +345,6 @@ export async function checkMonitorTarget(target: {
         }
 
         const start = Date.now();
-        const UDP_TIMEOUT_MS = 5000;
 
         return new Promise<HealthResult>((resolve) => {
             const isIpv6 = net.isIPv6(host);
@@ -367,8 +373,8 @@ export async function checkMonitorTarget(target: {
             };
 
             const timeoutId = setTimeout(() => {
-                finish('timeout', `Zaman aşımı (${UDP_TIMEOUT_MS / 1000}s yanıt alınamadı - ${host}:${port})`);
-            }, UDP_TIMEOUT_MS);
+                finish('timeout', `Zaman aşımı (${SOCKET_TIMEOUT_MS / 1000}s yanıt alınamadı - ${host}:${port})`);
+            }, SOCKET_TIMEOUT_MS);
 
             socket.on('message', (msg, rinfo) => {
                 finish('ok', undefined, {
@@ -399,24 +405,35 @@ export async function checkMonitorTarget(target: {
         formattedUrl = `https://${formattedUrl}`;
     }
 
-    // B) WEB SİTESİ KONTROLÜ (HTTP Ping / GET)
+    // C) WEB SİTESİ KONTROLÜ (HTTP HEAD -> GET Fallback)
     if (type === 'website') {
         const start = Date.now();
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), HEALTHCHECK_TIMEOUT_MS);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), HEALTHCHECK_TIMEOUT_MS);
 
-            const res = await fetch(formattedUrl, {
-                method: 'GET',
+        try {
+            const headers = {
+                'User-Agent': 'Mozilla/5.0 (compatible; KeremKKMonitor/1.0; +https://keremkuyucu.com.tr)',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            };
+
+            let res = await fetch(formattedUrl, {
+                method: 'HEAD',
                 signal: controller.signal,
                 redirect: 'follow',
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (compatible; KeremKKMonitor/1.0; +https://keremkuyucu.com.tr)',
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                },
+                headers,
             });
 
-            clearTimeout(timeoutId);
+            if (res.status === 405 || res.status === 501) {
+                res = await fetch(formattedUrl, {
+                    method: 'GET',
+                    signal: controller.signal,
+                    redirect: 'follow',
+                    headers,
+                });
+            }
+
+            await res.body?.cancel();
             const duration = Date.now() - start;
 
             if (res.ok) {
@@ -444,7 +461,10 @@ export async function checkMonitorTarget(target: {
             const duration = Date.now() - start;
             const isTimeout =
                 err instanceof Error &&
-                (err.name === 'AbortError' || err.name === 'TimeoutError' || err.message.toLowerCase().includes('timeout') || err.message.toLowerCase().includes('aborted'));
+                (err.name === 'AbortError' ||
+                    err.name === 'TimeoutError' ||
+                    err.message.toLowerCase().includes('timeout') ||
+                    err.message.toLowerCase().includes('aborted'));
 
             return {
                 id,
@@ -452,13 +472,19 @@ export async function checkMonitorTarget(target: {
                 type,
                 status: isTimeout ? 'timeout' : 'error',
                 duration,
-                error: isTimeout ? 'Zaman aşımı (10 saniye yanıt alınamadı)' : (err instanceof Error ? err.message : 'Bağlantı sağlanamadı'),
+                error: isTimeout
+                    ? `Zaman aşımı (${HEALTHCHECK_TIMEOUT_MS / 1000} saniye yanıt alınamadı)`
+                    : err instanceof Error
+                        ? err.message
+                        : 'Bağlantı sağlanamadı',
                 server_time: new Date().toISOString(),
             };
+        } finally {
+            clearTimeout(timeoutId);
         }
     }
 
-    // B) SUPABASE PROJESİ KONTROLÜ (RPC Healthcheck)
+    // D) SUPABASE PROJESİ KONTROLÜ (RPC Healthcheck)
     const cleanKey = String(target.key || '').trim();
     if (!cleanKey) {
         return {
@@ -475,13 +501,14 @@ export async function checkMonitorTarget(target: {
     const cleanUrl = formattedUrl.replace(/\/+$/, '');
     const supabase = getMonitorClient({ url: cleanUrl, key: cleanKey });
     const start = Date.now();
+    let timeoutId: NodeJS.Timeout | undefined;
 
     try {
         const result = await Promise.race([
             supabase.rpc('healthcheck'),
-            new Promise<never>((_, reject) =>
-                setTimeout(() => reject(new Error('timeout')), HEALTHCHECK_TIMEOUT_MS),
-            ),
+            new Promise<never>((_, reject) => {
+                timeoutId = setTimeout(() => reject(new Error('timeout')), HEALTHCHECK_TIMEOUT_MS);
+            }),
         ]);
 
         const duration = Date.now() - start;
@@ -516,9 +543,15 @@ export async function checkMonitorTarget(target: {
             name,
             type,
             status: isTimeout ? 'timeout' : 'error',
-            error: isTimeout ? 'Zaman aşımı (10 saniye yanıt alınamadı)' : (err instanceof Error ? err.message : 'Bilinmeyen Supabase hatası'),
+            error: isTimeout
+                ? `Zaman aşımı (${HEALTHCHECK_TIMEOUT_MS / 1000} saniye yanıt alınamadı)`
+                : err instanceof Error
+                    ? err.message
+                    : 'Bilinmeyen Supabase hatası',
             duration,
             server_time: new Date().toISOString(),
         };
+    } finally {
+        if (timeoutId) clearTimeout(timeoutId);
     }
 }

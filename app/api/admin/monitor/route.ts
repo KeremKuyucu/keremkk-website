@@ -5,8 +5,8 @@ import {
     checkMonitorTarget,
     recordMonitorResult,
     MonitorTargetType,
-} from "@/lib/supabase/monitor";
-import { sendMonitorAlertEmail } from "@/lib/email";
+} from "@/lib/monitor/monitor";
+import { sendMonitorAlertEmail } from "@/lib/monitor/email";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

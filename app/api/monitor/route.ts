@@ -1,27 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { timingSafeEqual } from 'crypto';
 import {
     getMonitorProjects,
     checkMonitorTarget,
     recordMonitorResult,
     HealthResult,
-} from '@/lib/supabase/monitor';
-import { sendMonitorAlertEmail } from '@/lib/email';
+} from '@/lib/monitor/monitor';
+import { sendBatchMonitorAlertEmail } from '@/lib/monitor/email';
 import { validateSession } from '@/lib/server-utils';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+export const maxDuration = 10;
 
 const RESPONSE_HEADERS: HeadersInit = {
     'Cache-Control': 'no-store, max-age=0',
 };
 
-export async function GET(req: NextRequest) {
-    // 1. Yetkilendirme kontrolü: Vercel Cron Secret veya Yönetici Oturumu (JWT)
-    const authHeader = req.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET;
-    const isCronAuthorized = Boolean(cronSecret && authHeader === `Bearer ${cronSecret}`);
+function verifyCronSecret(authHeader: string | null, secret: string | undefined): boolean {
+    if (!authHeader || !secret) return false;
+    const expected = `Bearer ${secret.trim()}`;
+    if (authHeader.length !== expected.length) return false;
+    return timingSafeEqual(Buffer.from(authHeader), Buffer.from(expected));
+}
 
-    const isAdminAuthorized = await validateSession(req);
+export async function GET(req: NextRequest) {
+    const authHeader = req.headers.get('authorization');
+    const isCronAuthorized = verifyCronSecret(authHeader, process.env.CRON_SECRET);
+    const isAdminAuthorized = isCronAuthorized ? false : await validateSession(req);
 
     if (!isCronAuthorized && !isAdminAuthorized) {
         return NextResponse.json(
@@ -75,28 +81,41 @@ export async function GET(req: NextRequest) {
         );
     }
 
-    // Run health checks on all active targets (Supabase & Websites)
+    const settledChecks = await Promise.allSettled(
+        projects.map(async (project) => {
+            const result = await checkMonitorTarget({
+                id: project.id,
+                name: project.name,
+                type: project.type,
+                url: project.url,
+                key: project.key,
+            });
+
+            await recordMonitorResult(project.id, result);
+            return { project, result };
+        })
+    );
+
     const results: (HealthResult & { alert_sent?: boolean })[] = [];
+    const failedItems: { project: (typeof projects)[number]; result: HealthResult }[] = [];
 
-    for (const project of projects) {
-        const result = await checkMonitorTarget({
-            id: project.id,
-            name: project.name,
-            type: project.type,
-            url: project.url,
-            key: project.key,
-        });
+    for (const item of settledChecks) {
+        if (item.status === 'fulfilled') {
+            const { project, result } = item.value;
+            if (result.status !== 'ok') {
+                console.warn(
+                    `🚨 [monitor] Hedef başarısız: "${project.name}" (${project.type}) - Durum: ${result.status} - Hata: ${result.error}`,
+                );
+                failedItems.push({ project, result });
+            } else {
+                results.push({ ...result, alert_sent: false });
+            }
+        }
+    }
 
-        // 1. Veritabanında son test tarihi ve ping süresini kaydet
-        await recordMonitorResult(project.id, result);
-
-        // 2. Eğer hedef olumlu yanıt vermez ise alarm e-postası gönder
-        let alertSent = false;
-        if (result.status !== 'ok') {
-            console.warn(
-                `🚨 [monitor] Hedef başarısız: "${project.name}" (${project.type}) - Durum: ${result.status} - Hata: ${result.error}`,
-            );
-            const emailRes = await sendMonitorAlertEmail({
+    if (failedItems.length > 0) {
+        const emailRes = await sendBatchMonitorAlertEmail(
+            failedItems.map(({ project, result }) => ({
                 projectName: project.name,
                 projectType: project.type,
                 targetUrl: project.url,
@@ -104,11 +123,15 @@ export async function GET(req: NextRequest) {
                 error: result.error,
                 duration: result.duration,
                 timestamp: result.server_time,
-            });
-            alertSent = emailRes.success;
-        }
+            }))
+        );
 
-        results.push({ ...result, alert_sent: alertSent });
+        for (const { result } of failedItems) {
+            results.push({
+                ...result,
+                alert_sent: emailRes.success,
+            });
+        }
     }
 
     const failedCount = results.filter((r) => r.status !== 'ok').length;
