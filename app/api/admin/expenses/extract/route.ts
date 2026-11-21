@@ -2,10 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { validateSession, extractAuthToken } from "@/lib/server-utils";
 import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import * as XLSX from "xlsx";
+import { extractTextItems } from "unpdf";
 import {
     EXPENSE_CATEGORIES as CATEGORIES,
     isExpenseCategory,
 } from "@/lib/expense-categories";
+import {
+    extractSensitiveTermsFromLabeledText,
+    extractSensitiveTermsFromSpreadsheetRows,
+    mergeRedactionSummaries,
+    redactPiiText,
+    type RedactionSummary,
+} from "@/lib/pii-redactor";
 
 // ---------- Config ----------
 
@@ -44,15 +52,15 @@ interface ClassifiedExpense {
 
 // ---------- Gemini Instructions ----------
 
-const IMAGE_PDF_SYSTEM_INSTRUCTION = `
+const IMAGE_SYSTEM_INSTRUCTION = `
 Sen bir banka ve kredi kartı ekstresi ayrıştırma uzmanısın.
 
-Sana verilen görsel veya PDF içindeki işlem hareketlerini ayıkla.
+Sana verilen görsel içindeki işlem hareketlerini ayıkla.
+Görselde kişisel bilgileri gizlemek için karartılmış/sansürlenmiş alanlar olabilir; bu alanları yoksay ve sadece gerçek harcama işlemlerine odaklan.
 
 KURALLAR:
 
-- Dosyanın tamamını incele.
-- Sadece son ayı veya son sayfayı inceleme.
+- Görselin tamamını incele.
 - Birden fazla ay/yıl varsa TÜM aylardaki uygun harcamaları dahil et.
 - Sadece gerçek harcama ve para çekme işlemlerini dahil et.
 - Hesaba gelen para, FAST, EFT, havale, para yatırma ve benzeri para girişlerini dahil etme.
@@ -69,20 +77,55 @@ KURALLAR:
 - Valör tarihini işlem tarihi olarak kullanma.
 - Taksit bilgisi açıkça bulunuyorsa "2/6", "3/12" gibi formatta yaz.
 - Taksit bilgisi yoksa null döndür.
-- Açıklamayı mümkün olduğunca kaynak verideki haliyle koru.
+- Açıklamada kişisel bilgi (IBAN, kart no, TCKN, ad-soyad, telefon, e-posta, adres) varsa çıktıya dahil etme.
 - Her harcamayı aşağıdaki kategorilerden tam olarak biriyle sınıflandır:
 
 ${CATEGORIES.join(", ")}
 
 ÇOK ÖNEMLİ:
 Kaynak birden fazla ay içeriyorsa sadece belirli bir ayın işlemlerini seçme.
-Dosyanın BAŞINDAN SONUNA kadar bütün işlemleri değerlendir.
+Görselin BAŞINDAN SONUNA kadar bütün işlemleri değerlendir.
+`;
+
+const REDACTED_PDF_TEXT_SYSTEM_INSTRUCTION = `
+Sen bir banka ve kredi kartı ekstresi ayrıştırma uzmanısın.
+
+Sana bir PDF ekstresinden çıkarılmış ve kişisel bilgileri gizlilik amacıyla sansürlenmiş ([AD_SOYAD], [IBAN], [KART_NO], [TCKN], [ADRES], [HESAP_NO], [MUSTERI_NO], [TELEFON], [EPOSTA], [KISISEL_BILGI] vb.) düz metin verilecek.
+
+KURALLAR:
+
+- Metnin tamamını (tüm sayfaları) incele.
+- Sadece son ayı veya son sayfayı inceleme.
+- Birden fazla ay/yıl varsa TÜM aylardaki uygun harcamaları dahil et.
+- Sansür yer tutucularını ([KART_NO], [IBAN], [AD_SOYAD] vb.) kişisel bilgi olarak algıla ve çıktı açıklamalarına gereksiz yere taşıma; yalnızca işyeri/işlem adını anlaşılır biçimde koru.
+- Sadece gerçek harcama ve para çekme işlemlerini dahil et.
+- Hesaba gelen para, FAST, EFT, havale, para yatırma ve benzeri para girişlerini dahil etme.
+- Karta yapılan borç ödemelerini dahil etme.
+- İade işlemlerini dahil etme.
+- İptal işlemlerini dahil etme.
+- Blokaj işlemlerini dahil etme.
+- Blokaj kaldırma işlemlerini dahil etme.
+- 0 tutarlı işlemleri dahil etme.
+- Tutarları her zaman pozitif sayı olarak döndür.
+- Örneğin -440 -> 440.
+- Tarih formatı kesinlikle YYYY-MM-DD olsun.
+- İşlem tarihi olarak gerçek işlem tarihini kullan.
+- Valör tarihini işlem tarihi olarak kullanma.
+- Taksit bilgisi açıkça bulunuyorsa "2/6", "3/12" gibi formatta yaz.
+- Taksit bilgisi yoksa null döndür.
+- Her harcamayı aşağıdaki kategorilerden tam olarak biriyle sınıflandır:
+
+${CATEGORIES.join(", ")}
+
+ÇOK ÖNEMLİ:
+Kaynak birden fazla ay içeriyorsa sadece belirli bir ayın işlemlerini seçme.
+Metnin BAŞINDAN SONUNA kadar bütün işlemleri değerlendir.
 `;
 
 const SPREADSHEET_SYSTEM_INSTRUCTION = `
 Sen banka hesap hareketlerini sınıflandıran bir uzmansın.
 
-Sana kod tarafından zaten tespit edilmiş gerçek harcama işlemleri verilecek.
+Sana kod tarafından zaten tespit edilmiş ve kişisel bilgileri sansürlenmiş ([IBAN], [KART_NO], [TCKN], [AD_SOYAD], [TELEFON], [EPOSTA], [ABONE_NO], [KISISEL_BILGI] vb.) gerçek harcama işlemleri verilecek.
 
 GÖREV:
 Her işlem için kategori ve varsa taksit bilgisini belirle.
@@ -302,6 +345,7 @@ function parseSpreadsheet(
 ): {
     expenses: ParsedSpreadsheetExpense[];
     period: string;
+    headerSensitiveTerms: string[];
 } {
     const workbook = XLSX.read(
         new Uint8Array(arrayBuffer),
@@ -314,6 +358,7 @@ function parseSpreadsheet(
     const allExpenses: ParsedSpreadsheetExpense[] = [];
 
     const detectedPeriods = new Set<string>();
+    const headerSensitiveTerms = new Set<string>();
 
     for (const sheetName of workbook.SheetNames) {
         const sheet = workbook.Sheets[sheetName];
@@ -357,6 +402,17 @@ function parseSpreadsheet(
                 `Header bulunamadı: ${sheetName}`
             );
             continue;
+        }
+
+        // Tablo başlığından önceki üstbilgi satırlarındaki hesap sahibi / IBAN / kart no
+        // gibi kişisel bilgileri yerel olarak topla (AI'ya gönderilmez; açıklamalarda geçerse sansürlenir).
+        if (headerIndex > 0) {
+            const termsFromHeader = extractSensitiveTermsFromSpreadsheetRows(
+                rows.slice(0, headerIndex)
+            );
+            for (const term of termsFromHeader) {
+                headerSensitiveTerms.add(term);
+            }
         }
 
         const headers = rows[headerIndex].map(
@@ -547,8 +603,236 @@ function parseSpreadsheet(
     return {
         expenses: normalizedExpenses,
         period,
+        headerSensitiveTerms: Array.from(headerSensitiveTerms),
     };
 }
+
+// ---------- PDF Structured Text Extraction (Local) ----------
+
+async function extractPdfTextStructured(
+    arrayBuffer: ArrayBuffer
+): Promise<{ text: string; totalPages: number }> {
+    const { totalPages, items: pages } = await extractTextItems(
+        new Uint8Array(arrayBuffer)
+    );
+
+    const pageTexts: string[] = [];
+
+    for (let pageIdx = 0; pageIdx < pages.length; pageIdx++) {
+        const items = pages[pageIdx].filter(
+            (item) => item.str && item.str.trim().length > 0
+        );
+
+        if (items.length === 0) {
+            continue;
+        }
+
+        // Aynı görsel satırdaki öğeleri Y koordinatına göre grupla (PDF origin: sol alt)
+        const sorted = [...items].sort((a, b) => {
+            if (Math.abs(a.y - b.y) > 3) {
+                return b.y - a.y;
+            }
+            return a.x - b.x;
+        });
+
+        const lines: { y: number; items: typeof items }[] = [];
+
+        for (const item of sorted) {
+            const existingLine = lines.find(
+                (line) => Math.abs(line.y - item.y) <= 3
+            );
+            if (existingLine) {
+                existingLine.items.push(item);
+            } else {
+                lines.push({ y: item.y, items: [item] });
+            }
+        }
+
+        const formattedLines = lines.map((line) => {
+            line.items.sort((a, b) => a.x - b.x);
+            let lineText = "";
+            let prevEndX: number | null = null;
+
+            for (const item of line.items) {
+                if (prevEndX !== null) {
+                    const gap = item.x - prevEndX;
+                    // Sütun ayrımı varsa çift boşluk bırak (sansürleyicinin sütun sınırını tanıması için)
+                    if (gap > 14) {
+                        lineText += "   ";
+                    } else if (gap > 1.5 && !lineText.endsWith(" ")) {
+                        lineText += " ";
+                    }
+                }
+                lineText += item.str;
+                prevEndX = item.x + (item.width || 0);
+            }
+
+            return lineText.trim();
+        });
+
+        pageTexts.push(
+            `--- SAYFA ${pageIdx + 1} ---\n${formattedLines.filter(Boolean).join("\n")}`
+        );
+    }
+
+    return {
+        text: pageTexts.join("\n\n"),
+        totalPages,
+    };
+}
+
+// ---------- Image Metadata Stripper (EXIF / XMP / IPTC / PNG Text) ----------
+
+function stripPngMetadata(buffer: Buffer): Buffer {
+    const PNG_SIG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    if (buffer.length < 16 || !buffer.subarray(0, 8).equals(PNG_SIG)) {
+        return buffer;
+    }
+
+    const STRIP_CHUNKS = new Set(["tEXt", "zTXt", "iTXt", "eXIf", "tIME"]);
+    const parts: Buffer[] = [PNG_SIG];
+    let offset = 8;
+
+    try {
+        while (offset + 12 <= buffer.length) {
+            const length = buffer.readUInt32BE(offset);
+            const type = buffer.toString("ascii", offset + 4, offset + 8);
+            const totalChunkSize = 12 + length;
+
+            if (offset + totalChunkSize > buffer.length) {
+                return buffer;
+            }
+
+            if (!STRIP_CHUNKS.has(type)) {
+                parts.push(buffer.subarray(offset, offset + totalChunkSize));
+            }
+
+            offset += totalChunkSize;
+            if (type === "IEND") {
+                break;
+            }
+        }
+
+        return Buffer.concat(parts);
+    } catch {
+        return buffer;
+    }
+}
+
+function stripJpegMetadata(buffer: Buffer): Buffer {
+    if (buffer.length < 4 || buffer[0] !== 0xff || buffer[1] !== 0xd8) {
+        return buffer;
+    }
+
+    const parts: Buffer[] = [buffer.subarray(0, 2)];
+    let offset = 2;
+
+    try {
+        while (offset + 2 <= buffer.length) {
+            if (buffer[offset] !== 0xff) {
+                return buffer;
+            }
+
+            // Dolgu 0xFF baytlarını atla
+            while (offset < buffer.length && buffer[offset] === 0xff) {
+                offset++;
+            }
+            if (offset >= buffer.length) break;
+
+            const marker = buffer[offset];
+            offset++;
+
+            // Start of Scan (SOS) veya EOI: kalan tüm veriyi olduğu gibi ekle
+            if (marker === 0xda || marker === 0xd9) {
+                parts.push(Buffer.from([0xff, marker]), buffer.subarray(offset));
+                return Buffer.concat(parts);
+            }
+
+            // Uzunluk alanı olmayan standalone marker'lar (RST0-RST7, TEM)
+            if ((marker >= 0xd0 && marker <= 0xd7) || marker === 0x01) {
+                parts.push(Buffer.from([0xff, marker]));
+                continue;
+            }
+
+            if (offset + 2 > buffer.length) {
+                return buffer;
+            }
+
+            const segmentLength = buffer.readUInt16BE(offset);
+            if (segmentLength < 2 || offset + segmentLength > buffer.length) {
+                return buffer;
+            }
+
+            // APP1..APP15 (EXIF, XMP, IPTC, ICC vb.) ve COM (0xFE) segmentlerini atla
+            const isSensitiveMetadata =
+                (marker >= 0xe1 && marker <= 0xef) || marker === 0xfe;
+
+            if (!isSensitiveMetadata) {
+                parts.push(
+                    Buffer.from([0xff, marker]),
+                    buffer.subarray(offset, offset + segmentLength)
+                );
+            }
+
+            offset += segmentLength;
+        }
+
+        return Buffer.concat(parts);
+    } catch {
+        return buffer;
+    }
+}
+
+function stripImageMetadata(buffer: Buffer, mimeType: string): Buffer {
+    if (mimeType === "image/png") {
+        return stripPngMetadata(buffer);
+    }
+    if (mimeType === "image/jpeg") {
+        return stripJpegMetadata(buffer);
+    }
+    return buffer;
+}
+
+// ---------- Shared Gemini Response Schema ----------
+
+const EXTRACT_RESULT_SCHEMA = {
+    type: Type.OBJECT,
+    properties: {
+        period: {
+            type: Type.STRING,
+            description:
+                "Verinin kapsadığı genel dönem. YYYY-MM veya YYYY-MM → YYYY-MM.",
+        },
+        expenses: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    date: {
+                        type: Type.STRING,
+                        description: "İşlem tarihi, YYYY-MM-DD",
+                    },
+                    description: {
+                        type: Type.STRING,
+                    },
+                    amount: {
+                        type: Type.NUMBER,
+                    },
+                    category: {
+                        type: Type.STRING,
+                        enum: CATEGORIES,
+                    },
+                    installment: {
+                        type: Type.STRING,
+                        nullable: true,
+                    },
+                },
+                required: ["date", "description", "amount", "category"],
+            },
+        },
+    },
+    required: ["period", "expenses"],
+};
 
 // ---------- Gemini: Retry & Fallback Helper ----------
 
@@ -607,10 +891,17 @@ async function callGeminiWithRetry(
 
 async function classifySpreadsheetExpenses(
     ai: GoogleGenAI,
-    expenses: ParsedSpreadsheetExpense[]
-): Promise<ClassifiedExpense[]> {
+    expenses: ParsedSpreadsheetExpense[],
+    extraSensitiveTerms: string[]
+): Promise<{
+    classifications: ClassifiedExpense[];
+    redactionSummary: RedactionSummary;
+}> {
     if (expenses.length === 0) {
-        return [];
+        return {
+            classifications: [],
+            redactionSummary: { totalRedactions: 0, byCategory: {} },
+        };
     }
 
     const chunks: ParsedSpreadsheetExpense[][] = [];
@@ -628,22 +919,27 @@ async function classifySpreadsheetExpenses(
         );
     }
 
-    const results: ClassifiedExpense[] =
-        [];
+    const results: ClassifiedExpense[] = [];
+    const summaries: RedactionSummary[] = [];
 
     // Chunk'ları sırayla işliyoruz.
     // Böylece çok sayıda eşzamanlı Gemini isteği
     // ile rate limit'e girme ihtimali azalıyor.
     for (const chunk of chunks) {
-        const input = chunk.map(
-            (expense) => ({
+        const input = chunk.map((expense) => {
+            const { text: redactedDescription, summary } = redactPiiText(
+                expense.description,
+                { extraSensitiveTerms }
+            );
+            summaries.push(summary);
+
+            return {
                 sourceId: expense.sourceId,
                 date: expense.date,
-                description:
-                    expense.description,
+                description: redactedDescription,
                 amount: expense.amount,
-            })
-        );
+            };
+        });
 
         const response =
             await callGeminiWithRetry(ai, {
@@ -654,7 +950,7 @@ async function classifySpreadsheetExpenses(
                         parts: [
                             {
                                 text: `
-Aşağıdaki banka harcama listesindeki HER sourceId için kategori ve taksit bilgisini belirle.
+Aşağıdaki kişisel bilgileri sansürlenmiş banka harcama listesindeki HER sourceId için kategori ve taksit bilgisini belirle.
 
 Hiçbir sourceId'yi atlama.
 
@@ -730,20 +1026,73 @@ ${JSON.stringify(
         }
     }
 
-    return results;
+    return {
+        classifications: results,
+        redactionSummary: mergeRedactionSummaries(...summaries),
+    };
 }
 
-// ---------- Gemini: Image/PDF Extraction ----------
+// ---------- Gemini: Redacted PDF Text Extraction ----------
 
-async function extractFromImageOrPdf(
+async function extractFromRedactedPdfText(
     ai: GoogleGenAI,
-    file: File,
-    arrayBuffer: ArrayBuffer
+    redactedText: string
 ): Promise<ExtractResult> {
-    const base64Data =
-        Buffer.from(arrayBuffer).toString(
-            "base64"
-        );
+    const response = await callGeminiWithRetry(ai, {
+        model: GEMINI_MODEL,
+        contents: [
+            {
+                role: "user",
+                parts: [
+                    {
+                        text: `
+Aşağıdaki metin bir banka/kredi kartı PDF ekstresinden çıkarılmış ve kişisel bilgiler sansürlenmiştir.
+TÜM sayfalardaki gerçek harcama ve nakit çekim hareketlerini ayıkla.
+
+Özellikle:
+- İlk sayfalardaki işlemleri atlama.
+- Son sayfadaki işlemlerle sınırlı kalma.
+- Birden fazla ay varsa tüm ayları işle.
+- Tüm gerçek harcamaları expenses dizisine dahil et.
+
+EKSTRE METNİ (SANSÜRLENMİŞ):
+
+${redactedText}
+`,
+                    },
+                ],
+            },
+        ],
+        config: {
+            systemInstruction: REDACTED_PDF_TEXT_SYSTEM_INSTRUCTION,
+            temperature: 0,
+            maxOutputTokens: 65536,
+            thinkingConfig: {
+                thinkingLevel: ThinkingLevel.LOW,
+            },
+            responseMimeType: "application/json",
+            responseSchema: EXTRACT_RESULT_SCHEMA,
+        },
+    });
+
+    const text = response.text;
+
+    if (!text) {
+        throw new Error("No response from AI model");
+    }
+
+    return JSON.parse(text) as ExtractResult;
+}
+
+// ---------- Gemini: Image Extraction (EXIF-stripped & Client-Redacted) ----------
+
+async function extractFromImage(
+    ai: GoogleGenAI,
+    mimeType: string,
+    imageBuffer: Buffer
+): Promise<ExtractResult> {
+    const cleanedBuffer = stripImageMetadata(imageBuffer, mimeType);
+    const base64Data = cleanedBuffer.toString("base64");
 
     const response =
         await callGeminiWithRetry(ai, {
@@ -754,18 +1103,16 @@ async function extractFromImageOrPdf(
                     parts: [
                         {
                             inlineData: {
-                                mimeType:
-                                    file.type,
+                                mimeType,
                                 data: base64Data,
                             },
                         },
                         {
                             text: `
-Bu dosyadaki banka/kredi kartı hareketlerinin TAMAMINI incele.
+Bu görseldeki banka/kredi kartı hareketlerinin TAMAMINI incele.
 
 Özellikle:
-- İlk sayfalardaki işlemleri atlama.
-- Son sayfadaki işlemlerle sınırlı kalma.
+- Karartılmış/sansürlenmiş kişisel bilgi alanlarını yoksay.
 - Birden fazla ay varsa tüm ayları işle.
 - Tüm gerçek harcamaları expenses dizisine dahil et.
 
@@ -776,62 +1123,14 @@ Sadece gerçek harcama ve çekim işlemlerini çıkar.
                 },
             ],
             config: {
-                systemInstruction:
-                    IMAGE_PDF_SYSTEM_INSTRUCTION,
+                systemInstruction: IMAGE_SYSTEM_INSTRUCTION,
                 temperature: 0,
                 maxOutputTokens: 65536,
                 thinkingConfig: {
                     thinkingLevel: ThinkingLevel.LOW,
                 },
-                responseMimeType:
-                    "application/json",
-                responseSchema: {
-                    type: Type.OBJECT,
-                    properties: {
-                        period: {
-                            type: Type.STRING,
-                            description:
-                                "Verinin kapsadığı genel dönem. YYYY-MM veya YYYY-MM → YYYY-MM.",
-                        },
-                        expenses: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    date: {
-                                        type: Type.STRING,
-                                        description:
-                                            "İşlem tarihi, YYYY-MM-DD",
-                                    },
-                                    description: {
-                                        type: Type.STRING,
-                                    },
-                                    amount: {
-                                        type: Type.NUMBER,
-                                    },
-                                    category: {
-                                        type: Type.STRING,
-                                        enum: CATEGORIES,
-                                    },
-                                    installment: {
-                                        type: Type.STRING,
-                                        nullable: true,
-                                    },
-                                },
-                                required: [
-                                    "date",
-                                    "description",
-                                    "amount",
-                                    "category",
-                                ],
-                            },
-                        },
-                    },
-                    required: [
-                        "period",
-                        "expenses",
-                    ],
-                },
+                responseMimeType: "application/json",
+                responseSchema: EXTRACT_RESULT_SCHEMA,
             },
         });
 
@@ -847,6 +1146,17 @@ Sadece gerçek harcama ve çekim işlemlerini çıkar.
         JSON.parse(text) as ExtractResult;
 
     return parsed;
+}
+
+function parseCustomRedactTerms(raw: FormDataEntryValue | null): string[] {
+    if (typeof raw !== "string" || !raw.trim()) {
+        return [];
+    }
+
+    return raw
+        .split(/[,;\n]/)
+        .map((term) => term.trim())
+        .filter((term) => term.length >= 3);
 }
 
 // ---------- POST ----------
@@ -899,6 +1209,14 @@ export async function POST(
 
         const file =
             formData.get("file");
+
+        const customRedactTerms = parseCustomRedactTerms(
+            formData.get("customRedactTerms")
+        );
+
+        const clientRedactedRegions = Number(
+            formData.get("redactedRegionsCount") || 0
+        );
 
         if (!(file instanceof File)) {
             return NextResponse.json(
@@ -969,7 +1287,7 @@ export async function POST(
         const isPdf =
             pdfTypes.includes(
                 file.type
-            );
+            ) || fileName.endsWith(".pdf");
 
         if (
             !isSpreadsheet &&
@@ -998,23 +1316,20 @@ export async function POST(
             });
 
         // ==========================================================
-        // XLS / XLSX
+        // XLS / XLSX (Yerel parse + PII sansürleme sonrası AI sınıflandırma)
         // ==========================================================
 
         if (isSpreadsheet) {
-            console.log(
-                `[Expense Extract] Parsing spreadsheet: ${file.name}`
-            );
-
             const {
                 expenses: parsedExpenses,
                 period,
+                headerSensitiveTerms,
             } = parseSpreadsheet(
                 arrayBuffer
             );
 
             console.log(
-                `[Expense Extract] Found ${parsedExpenses.length} expense transactions`
+                `[Expense Extract] Parsed spreadsheet: ${parsedExpenses.length} expense transactions`
             );
 
             if (
@@ -1032,11 +1347,18 @@ export async function POST(
                 );
             }
 
-            // Gemini sadece kategori/taksit belirliyor.
-            const classifications =
+            const extraSensitiveTerms = [
+                ...customRedactTerms,
+                ...headerSensitiveTerms,
+            ];
+
+            // Gemini'ye sadece kişisel bilgileri sansürlenmiş açıklamalar gider;
+            // Gemini yalnızca kategori/taksit belirler.
+            const { classifications, redactionSummary } =
                 await classifySpreadsheetExpenses(
                     ai,
-                    parsedExpenses
+                    parsedExpenses,
+                    extraSensitiveTerms
                 );
 
             const classificationMap =
@@ -1097,28 +1419,94 @@ export async function POST(
                     expenses:
                         finalExpenses,
                 },
+                redaction: {
+                    applied: true,
+                    method: "spreadsheet_text_redaction",
+                    summary: redactionSummary,
+                },
             });
         }
 
         // ==========================================================
-        // IMAGE / PDF
+        // PDF (Yerel metin çıkarımı + PII sansürleme -> ham PDF AI'ya gitmez)
         // ==========================================================
 
-        if (isImage || isPdf) {
+        if (isPdf) {
+            const { text: rawPdfText, totalPages } =
+                await extractPdfTextStructured(arrayBuffer);
+
+            const meaningfulTextLength = rawPdfText
+                .replace(/--- SAYFA \d+ ---/g, "")
+                .replace(/\s+/g, "").length;
+
+            if (meaningfulTextLength < 30) {
+                return NextResponse.json(
+                    {
+                        error:
+                            "Bu PDF metin katmanı içermiyor (taranmış görsel). Kişisel bilgilerinizi korumak için ham PDF AI'ya gönderilmedi. Bankanızdan metin tabanlı PDF/Excel ekstresi indirin veya ekran görüntüsü alıp görsel sansürleme aracıyla yükleyin.",
+                    },
+                    {
+                        status: 422,
+                    }
+                );
+            }
+
+            const labeledTerms =
+                extractSensitiveTermsFromLabeledText(rawPdfText);
+            const extraSensitiveTerms = [
+                ...customRedactTerms,
+                ...labeledTerms,
+            ];
+
+            const { text: redactedPdfText, summary: redactionSummary } =
+                redactPiiText(rawPdfText, {
+                    extraSensitiveTerms,
+                });
+
             console.log(
-                `[Expense Extract] Sending ${file.name} to Gemini`
+                `[Expense Extract] Extracted & redacted PDF (${totalPages} pages, ${redactionSummary.totalRedactions} PII items redacted)`
             );
 
-            const result =
-                await extractFromImageOrPdf(
-                    ai,
-                    file,
-                    arrayBuffer
-                );
+            const result = await extractFromRedactedPdfText(
+                ai,
+                redactedPdfText
+            );
 
             return NextResponse.json({
                 success: true,
                 data: result,
+                redaction: {
+                    applied: true,
+                    method: "pdf_text_redaction",
+                    summary: redactionSummary,
+                },
+            });
+        }
+
+        // ==========================================================
+        // IMAGE (EXIF/Metadata temizliği + İstemci görsel sansürü)
+        // ==========================================================
+
+        if (isImage) {
+            console.log(
+                `[Expense Extract] Sending metadata-stripped image to Gemini (clientRedactedRegions=${clientRedactedRegions})`
+            );
+
+            const result = await extractFromImage(
+                ai,
+                file.type,
+                Buffer.from(arrayBuffer)
+            );
+
+            return NextResponse.json({
+                success: true,
+                data: result,
+                redaction: {
+                    applied: true,
+                    method: "image_visual_and_metadata_redaction",
+                    redactedRegionsCount: clientRedactedRegions,
+                    metadataStripped: true,
+                },
             });
         }
 

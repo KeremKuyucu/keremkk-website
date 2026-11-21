@@ -1,6 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateSession, extractAuthToken } from "@/lib/server-utils";
 import { GoogleGenAI } from "@google/genai";
+import { redactPiiObject } from "@/lib/pii-redactor";
+
+function toFiniteNumber(value: unknown): number {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : 0;
+}
+
+function toSafeString(value: unknown, maxLen = 160): string {
+    if (typeof value !== "string") return "";
+    return value.trim().slice(0, maxLen);
+}
+
+/**
+ * URL path içindeki query string değerlerini ve hassas segmentleri temizler.
+ * Örn: /reset?email=a@b.com&id=123 -> /reset?email=[GIZLI]&id=[GIZLI]
+ */
+function sanitizeAnalyticsPath(rawPath: string): string {
+    const trimmed = toSafeString(rawPath, 240);
+    if (!trimmed) return "/";
+
+    const [pathOnly, queryPart] = trimmed.split("?");
+    if (!queryPart) {
+        return pathOnly;
+    }
+
+    const sanitizedParams = queryPart
+        .split("&")
+        .filter(Boolean)
+        .map((pair) => {
+            const eqIdx = pair.indexOf("=");
+            if (eqIdx === -1) return "[GIZLI]";
+            const key = pair.slice(0, eqIdx).slice(0, 40);
+            return `${key}=[GIZLI]`;
+        })
+        .join("&");
+
+    return sanitizedParams ? `${pathOnly}?${sanitizedParams}` : pathOnly;
+}
 
 export async function POST(request: NextRequest) {
     const token = extractAuthToken(request);
@@ -18,26 +56,93 @@ export async function POST(request: NextRequest) {
 
     try {
         const body = await request.json();
-        const { appName, metrics, topEvents, topPlatforms, dailyTrend, topCountries, topPages } = body;
+
+        // Yalnızca toplu (aggregate) analitik alanlarını kabul et — ham kullanıcı/log/IP/e-posta alanlarını dışarıda bırak.
+        const rawWhitelistedPayload = {
+            appName: toSafeString(body?.appName || "all", 80),
+            metrics: {
+                totalLogs: toFiniteNumber(body?.metrics?.totalLogs),
+                uniqueUsersAll: toFiniteNumber(body?.metrics?.uniqueUsersAll),
+                uniqueUsersToday: toFiniteNumber(body?.metrics?.uniqueUsersToday),
+                uniqueIPs: toFiniteNumber(body?.metrics?.uniqueIPs),
+                totalAppOpensAll: toFiniteNumber(body?.metrics?.totalAppOpensAll),
+            },
+            topPlatforms: Array.isArray(body?.topPlatforms)
+                ? body.topPlatforms.slice(0, 10).map((item: Record<string, unknown>) => ({
+                      platform: toSafeString(item?.platform, 60),
+                      count: toFiniteNumber(item?.count),
+                      percentage: toFiniteNumber(item?.percentage),
+                  }))
+                : [],
+            topEvents: Array.isArray(body?.topEvents)
+                ? body.topEvents.slice(0, 15).map((item: Record<string, unknown>) => ({
+                      event: toSafeString(item?.event, 100),
+                      count: toFiniteNumber(item?.count),
+                      percentage: toFiniteNumber(item?.percentage),
+                  }))
+                : [],
+            dailyTrend: Array.isArray(body?.dailyTrend)
+                ? body.dailyTrend.slice(0, 31).map((item: Record<string, unknown>) => ({
+                      date: toSafeString(item?.date, 20),
+                      label: toSafeString(item?.label, 30),
+                      count: toFiniteNumber(item?.count),
+                      uniqueUsers: toFiniteNumber(item?.uniqueUsers),
+                      percentage: toFiniteNumber(item?.percentage),
+                  }))
+                : [],
+            topCountries: Array.isArray(body?.topCountries)
+                ? body.topCountries.slice(0, 15).map((item: Record<string, unknown>) => ({
+                      code: toSafeString(item?.code, 10),
+                      name: toSafeString(item?.name, 60),
+                      count: toFiniteNumber(item?.count),
+                  }))
+                : [],
+            topPages: Array.isArray(body?.topPages)
+                ? body.topPages.slice(0, 15).map((item: Record<string, unknown>) => ({
+                      path: sanitizeAnalyticsPath(String(item?.path || "")),
+                      count: toFiniteNumber(item?.count),
+                      percentage: toFiniteNumber(item?.percentage),
+                  }))
+                : [],
+        };
+
+        // Tüm string alanlardaki olası kişisel verileri (e-posta, IP, telefon, UUID, token, IBAN, TCKN vb.) sansürle.
+        const { data: sanitizedPayload, summary: redactionSummary } = redactPiiObject(
+            rawWhitelistedPayload,
+            {
+                redactUuids: true,
+                redactUrlQueryParams: true,
+            }
+        );
+
+        const {
+            appName,
+            metrics,
+            topEvents,
+            topPlatforms,
+            dailyTrend,
+            topCountries,
+            topPages,
+        } = sanitizedPayload;
 
         const ai = new GoogleGenAI({ apiKey });
 
         const prompt = `
 Sen üst düzey bir Ürün Yöneticisi ve Veri Analitiği Uzmanısın (Principal Product & Telemetry Analyst).
-Aşağıda Kerem'in çoklu uygulama ekosisteminden (Web siteleri, mobil uygulamalar, oyunlar ve backend servisleri) toplanan gerçek telemetri ve analitik verileri yer almaktadır.
+Aşağıda çoklu uygulama ekosisteminden (Web siteleri, mobil uygulamalar, oyunlar ve backend servisleri) toplanan anonimleştirilmiş ve kişisel verilerden arındırılmış toplu telemetri ve analitik verileri yer almaktadır.
 
 Analiz Edilen Kapsam: ${appName === "all" ? "TÜM UYGULAMALAR (Global Hub)" : `Uygulama: ${appName}`}
 
 Özet Metrikler:
-- Toplam Olay Sayısı: ${metrics?.totalLogs || 0}
-- Tekil Kullanıcı Sayısı (Total / Bugün): ${metrics?.uniqueUsersAll || 0} / ${metrics?.uniqueUsersToday || 0}
-- Tekil IP Sayısı: ${metrics?.uniqueIPs || 0}
-- Uygulama Açılış Sayısı: ${metrics?.totalAppOpensAll || 0}
-- Lider Platform: ${JSON.stringify(topPlatforms || [])}
-- En Çok Tetiklenen Olaylar: ${JSON.stringify(topEvents || [])}
-- Son Günlerin Aktivite Trendi: ${JSON.stringify(dailyTrend || [])}
-- Ziyaretçi Ülkeleri: ${JSON.stringify(topCountries || [])}
-${topPages && topPages.length > 0 ? `- En Çok Ziyaret Edilen Sayfalar: ${JSON.stringify(topPages)}` : ""}
+- Toplam Olay Sayısı: ${metrics.totalLogs}
+- Tekil Kullanıcı Sayısı (Total / Bugün): ${metrics.uniqueUsersAll} / ${metrics.uniqueUsersToday}
+- Tekil IP Sayısı: ${metrics.uniqueIPs}
+- Uygulama Açılış Sayısı: ${metrics.totalAppOpensAll}
+- Lider Platform: ${JSON.stringify(topPlatforms)}
+- En Çok Tetiklenen Olaylar: ${JSON.stringify(topEvents)}
+- Son Günlerin Aktivite Trendi: ${JSON.stringify(dailyTrend)}
+- Ziyaretçi Ülkeleri: ${JSON.stringify(topCountries)}
+${topPages.length > 0 ? `- En Çok Ziyaret Edilen Sayfalar: ${JSON.stringify(topPages)}` : ""}
 
 GÖREV:
 Bu verileri derinlemesine analiz et ve geliştirici/ürün sahibi için doğrudan aksiyona dökülebilir, Türkçe, son derece profesyonel, yapıcı ve stratejik bir içgörü raporu hazırla.
@@ -90,7 +195,11 @@ NOT: Çok uzun ve boğucu paragraflardan kaçın. Okunması kolay maddeler, kıs
         return NextResponse.json({
             success: true,
             insights: result.text,
-            generatedAt: new Date().toISOString()
+            generatedAt: new Date().toISOString(),
+            redaction: {
+                applied: true,
+                summary: redactionSummary,
+            },
         });
 
     } catch (error) {

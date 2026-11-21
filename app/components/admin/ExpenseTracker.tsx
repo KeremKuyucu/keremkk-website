@@ -21,7 +21,6 @@ import {
     FaChartPie,
     FaExchangeAlt,
     FaSpinner,
-    FaExclamationTriangle,
     FaEdit,
     FaSave,
     FaInfoCircle,
@@ -33,6 +32,7 @@ import {
     FaCalendarAlt,
     FaArrowDown,
     FaArrowUp,
+    FaShieldAlt,
 } from "react-icons/fa";
 
 import {
@@ -41,6 +41,11 @@ import {
     EXPENSE_CATEGORY_ICONS as CATEGORY_ICONS,
     isExpenseCategory,
 } from "@/lib/expense-categories";
+import {
+    formatRedactionSummaryTr,
+    type RedactionSummary,
+} from "@/lib/pii-redactor";
+import ImageRedactionModal from "./ImageRedactionModal";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -139,8 +144,29 @@ export default function ExpenseTracker({
     const [previewPeriod, setPreviewPeriod] = useState<string>("");
     const [isSaving, setIsSaving] = useState(false);
     const [skippedDuplicates, setSkippedDuplicates] = useState<number>(0);
+    const [pendingImageFile, setPendingImageFile] = useState<File | null>(null);
+    const [customRedactTerms, setCustomRedactTerms] = useState<string>("");
+    const [redactionNotice, setRedactionNotice] = useState<string | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem("expense_ai_custom_redact_terms");
+            if (saved) setCustomRedactTerms(saved);
+        } catch {
+            // ignore storage errors
+        }
+    }, []);
+
+    const handleCustomRedactTermsChange = (value: string) => {
+        setCustomRedactTerms(value);
+        try {
+            localStorage.setItem("expense_ai_custom_redact_terms", value);
+        } catch {
+            // ignore storage errors
+        }
+    };
 
     // ─── Table state ─────────────────────────────────────────────────────────
 
@@ -260,14 +286,29 @@ export default function ExpenseTracker({
 
     // ─── File Upload & AI Extraction ─────────────────────────────────────────
 
-    const handleFile = async (file: File) => {
+    const uploadAndExtractFile = async (
+        file: File,
+        redactedRegionsCount = 0
+    ) => {
         setExtractError(null);
+        setRedactionNotice(null);
         setIsExtracting(true);
         setPreviewRows([]);
 
         try {
             const formData = new FormData();
             formData.append("file", file);
+
+            if (customRedactTerms.trim()) {
+                formData.append("customRedactTerms", customRedactTerms.trim());
+            }
+
+            if (redactedRegionsCount > 0) {
+                formData.append(
+                    "redactedRegionsCount",
+                    String(redactedRegionsCount)
+                );
+            }
 
             const res = await fetch(
                 "/api/admin/expenses/extract",
@@ -288,6 +329,29 @@ export default function ExpenseTracker({
 
             const json = await res.json();
             const result = json.data as ExtractResult;
+
+            if (json.redaction?.applied) {
+                if (json.redaction.method === "image_visual_and_metadata_redaction") {
+                    const count = json.redaction.redactedRegionsCount || 0;
+                    setRedactionNotice(
+                        count > 0
+                            ? `Görseldeki ${count} alan kalıcı olarak karartıldı ve EXIF/konum bilgileri silinerek AI'ya gönderildi.`
+                            : "Görselin EXIF/konum bilgileri temizlenerek AI'ya gönderildi."
+                    );
+                } else if (json.redaction.summary) {
+                    const summary = json.redaction.summary as RedactionSummary;
+                    if (summary.totalRedactions > 0) {
+                        const details = formatRedactionSummaryTr(summary);
+                        setRedactionNotice(
+                            `AI'ya gönderilmeden önce ${summary.totalRedactions} kişisel bilgi otomatik sansürlendi (${details}).`
+                        );
+                    } else {
+                        setRedactionNotice(
+                            "Dosya AI'ya gönderilmeden önce kişisel bilgi taramasından geçirildi; hassas alan tespit edilmedi."
+                        );
+                    }
+                }
+            }
 
             setPreviewPeriod(result.period);
 
@@ -339,6 +403,24 @@ export default function ExpenseTracker({
         }
     };
 
+    const handleIncomingFile = (file: File) => {
+        const lowerName = file.name.toLowerCase();
+        const isImage =
+            file.type.startsWith("image/") ||
+            lowerName.endsWith(".png") ||
+            lowerName.endsWith(".jpg") ||
+            lowerName.endsWith(".jpeg") ||
+            lowerName.endsWith(".webp");
+
+        if (isImage) {
+            setExtractError(null);
+            setPendingImageFile(file);
+            return;
+        }
+
+        uploadAndExtractFile(file, 0);
+    };
+
     const onDrop = (e: React.DragEvent) => {
         e.preventDefault();
 
@@ -347,7 +429,7 @@ export default function ExpenseTracker({
         const file = e.dataTransfer.files[0];
 
         if (file) {
-            handleFile(file);
+            handleIncomingFile(file);
         }
     };
 
@@ -366,7 +448,7 @@ export default function ExpenseTracker({
         const file = e.target.files?.[0];
 
         if (file) {
-            handleFile(file);
+            handleIncomingFile(file);
         }
 
         e.target.value = "";
@@ -944,16 +1026,33 @@ export default function ExpenseTracker({
                     </h2>
                 </div>
 
-                <div className="flex items-start gap-2 mb-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-800/30">
+                <div className="mb-4 p-3.5 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800/40 space-y-2.5">
+                    <div className="flex items-start gap-2.5">
+                        <FaShieldAlt className="text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
+                        <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed">
+                            <strong>Otomatik Kişisel Bilgi Sansürleme Aktif:</strong>{" "}
+                            Excel ve PDF ekstrelerindeki IBAN, kart numarası, T.C. kimlik no, hesap/müşteri/abone no, e-posta, telefon, adres ve ad-soyad bilgileri AI&apos;ya gönderilmeden önce otomatik olarak sansürlenir. Görsellerde ise göndermeden önce karartma aracı açılır ve EXIF bilgileri silinir.
+                        </p>
+                    </div>
 
-                    <FaExclamationTriangle className="text-amber-500 mt-0.5 flex-shrink-0" />
-
-                    <p className="text-xs text-amber-700 dark:text-amber-400">
-                        Kişisel bilgilerinizi
-                        (Ad-Soyad, IBAN, kart
-                        numarası) kırparak
-                        yüklemeniz önerilir.
-                    </p>
+                    <div className="pt-1">
+                        <label
+                            htmlFor="custom-redact-terms"
+                            className="block text-[11px] font-medium text-emerald-800/80 dark:text-emerald-300/80 mb-1"
+                        >
+                            Ek sansürlenecek kelimeler (opsiyonel — virgülle ayırın, örn. Ad Soyad, şirket, adres):
+                        </label>
+                        <input
+                            id="custom-redact-terms"
+                            type="text"
+                            value={customRedactTerms}
+                            onChange={(e) =>
+                                handleCustomRedactTermsChange(e.target.value)
+                            }
+                            placeholder="Örn: Ad Soyad, Mahalle Adı..."
+                            className="w-full px-3 py-1.5 text-xs rounded-lg bg-white/90 dark:bg-zinc-900/80 border border-emerald-200 dark:border-emerald-800/50 text-gray-800 dark:text-gray-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+                        />
+                    </div>
                 </div>
 
                 <div
@@ -985,7 +1084,7 @@ export default function ExpenseTracker({
 
                             <div>
                                 <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                    AI ile ayrıştırılıyor...
+                                    Kişisel bilgiler sansürleniyor &amp; AI ile ayrıştırılıyor...
                                 </p>
 
                                 <p className="text-xs text-gray-400 mt-1">
@@ -1016,6 +1115,13 @@ export default function ExpenseTracker({
                         </div>
                     )}
                 </div>
+
+                {redactionNotice && (
+                    <div className="mt-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800/40 text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+                        <FaShieldAlt className="flex-shrink-0 text-emerald-500" />
+                        <span>{redactionNotice}</span>
+                    </div>
+                )}
 
                 {extractError && (
                     <div className="mt-4 p-3 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-200/50 dark:border-red-800/30 text-sm text-red-600 dark:text-red-400 flex items-center gap-2">
@@ -2015,6 +2121,17 @@ export default function ExpenseTracker({
                     </div>
                 )}
             </div>
+
+            {pendingImageFile && (
+                <ImageRedactionModal
+                    file={pendingImageFile}
+                    onCancel={() => setPendingImageFile(null)}
+                    onConfirm={(redactedFile, redactedRegionsCount) => {
+                        setPendingImageFile(null);
+                        uploadAndExtractFile(redactedFile, redactedRegionsCount);
+                    }}
+                />
+            )}
         </div>
     );
 }

@@ -183,6 +183,7 @@ export default function AnalyticsManager({ authToken, onNavigate }: AnalyticsMan
     // AI Insights State
     const [isAiLoading, setIsAiLoading] = useState<boolean>(false);
     const [aiInsights, setAiInsights] = useState<string | null>(null);
+    const [aiRedactionCount, setAiRedactionCount] = useState<number>(0);
     const [showAiModal, setShowAiModal] = useState<boolean>(false);
 
     // Fetch Logs
@@ -912,15 +913,40 @@ export default function AnalyticsManager({ authToken, onNavigate }: AnalyticsMan
     const handleGenerateAiInsights = async () => {
         setIsAiLoading(true);
         setShowAiModal(true);
+        setAiRedactionCount(0);
         try {
             const payload = {
                 appName: selectedApp,
-                metrics,
-                topEvents: eventsBreakdown.slice(0, 6),
-                topPlatforms: platformDistribution.slice(0, 4),
-                dailyTrend: dailyTrendData.items.slice(-7),
+                metrics: {
+                    totalLogs: metrics.totalLogs,
+                    uniqueUsersAll: metrics.uniqueUsersAll,
+                    uniqueUsersToday: metrics.uniqueUsersToday,
+                    uniqueIPs: metrics.uniqueIPs,
+                    totalAppOpensAll: metrics.totalAppOpensAll,
+                },
+                topEvents: eventsBreakdown.slice(0, 6).map(e => ({
+                    event: e.event,
+                    count: e.count,
+                    percentage: e.percentage,
+                })),
+                topPlatforms: platformDistribution.slice(0, 4).map(p => ({
+                    platform: p.platform,
+                    count: p.count,
+                    percentage: p.percentage,
+                })),
+                dailyTrend: dailyTrendData.items.slice(-7).map(d => ({
+                    date: d.date,
+                    label: d.label,
+                    count: d.count,
+                    uniqueUsers: d.uniqueUsers,
+                    percentage: d.percentage,
+                })),
                 topCountries: geoBreakdown.slice(0, 5).map(g => ({ code: g.code, name: g.name, count: g.count })),
-                topPages: webTrafficData.topPages.slice(0, 5)
+                topPages: webTrafficData.topPages.slice(0, 5).map(p => ({
+                    path: p.path,
+                    count: p.count,
+                    percentage: p.percentage,
+                })),
             };
 
             const res = await fetch("/api/admin/analytics/ai-insights", {
@@ -932,6 +958,7 @@ export default function AnalyticsManager({ authToken, onNavigate }: AnalyticsMan
             if (res.ok) {
                 const data = await res.json();
                 setAiInsights(data.insights);
+                setAiRedactionCount(data.redaction?.summary?.totalRedactions || 0);
             } else {
                 const errData = await res.json().catch(() => ({}));
                 alert(`AI analizi alınamadı: ${errData.error || "Sunucu hatası"}`);
@@ -2355,6 +2382,13 @@ export default function AnalyticsManager({ authToken, onNavigate }: AnalyticsMan
                                 </div>
                             ) : aiInsights ? (
                                 <div className="prose dark:prose-invert max-w-none text-xs space-y-3">
+                                    <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/70 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-300 text-[11px] font-medium">
+                                        <FaShieldAlt className="shrink-0 text-emerald-500" />
+                                        <span>
+                                            Veriler AI&apos;ya gönderilmeden önce kişisel bilgilerden arındırıldı
+                                            {aiRedactionCount > 0 ? ` (${aiRedactionCount} alan sansürlendi)` : " (yalnızca anonim toplu metrikler paylaşıldı)"}.
+                                        </span>
+                                    </div>
                                     <div className="whitespace-pre-wrap font-sans text-xs sm:text-sm leading-relaxed p-4 bg-gray-50/70 dark:bg-zinc-800/50 rounded-2xl border border-gray-100 dark:border-white/5">
                                         {aiInsights}
                                     </div>
