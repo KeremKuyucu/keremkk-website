@@ -5,9 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // İzin verilen güvenli alan adları
 const ALLOWED_HOSTS = new Set([
     "keremkuyucu.com.tr",
-    "www.keremkuyucu.com.tr",
-    "localhost:3000",
-    "127.0.0.1:3000"
+    "localhost:3000"
 ]);
 
 function getSafeOrigin(request: Request, requestUrl: URL): string {

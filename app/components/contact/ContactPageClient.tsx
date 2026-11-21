@@ -3,13 +3,15 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "@/app/components/layout/Navbar";
 import FooterComponent from "@/app/components/layout/Footer";
-import { FaPaperPlane, FaEnvelope, FaUser, FaTag, FaComment, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
+import { FaPaperPlane, FaEnvelope, FaUser, FaTag, FaComment, FaCheckCircle, FaExclamationTriangle, FaCopy, FaCheck, FaClock } from "react-icons/fa";
 import { socialLinks } from "@/app/components/layout/Footer";
 import { translations, Language } from "@/app/data/translations";
 
 interface ContactPageClientProps {
     lang?: Language;
 }
+
+const CONTACT_EMAIL = "contact@keremkuyucu.com.tr";
 
 const ContactPageClient: React.FC<ContactPageClientProps> = ({ lang = "en" }) => {
     const [formData, setFormData] = useState({
@@ -21,7 +23,29 @@ const ContactPageClient: React.FC<ContactPageClientProps> = ({ lang = "en" }) =>
     });
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
     const [errorMessage, setErrorMessage] = useState("");
+    const [copied, setCopied] = useState(false);
     const t = translations[lang].contact;
+    const isTr = lang === "tr";
+
+    const handleCopyEmail = async () => {
+        try {
+            await navigator.clipboard.writeText(CONTACT_EMAIL);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch {
+            // Fallback for older browsers
+            const textarea = document.createElement("textarea");
+            textarea.value = CONTACT_EMAIL;
+            textarea.style.position = "fixed";
+            textarea.style.opacity = "0";
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textarea);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }
+    };
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -260,27 +284,90 @@ const ContactPageClient: React.FC<ContactPageClientProps> = ({ lang = "en" }) =>
                                         {t.otherChannelsSubtitle}
                                     </p>
 
-                                    <div className="space-y-3">
-                                        {socialLinks.map((link) => (
-                                            <a
-                                                key={link.label}
-                                                href={link.href}
-                                                target={link.isMailto ? undefined : "_blank"}
-                                                rel={link.isMailto ? undefined : "noopener noreferrer"}
-                                                className="group flex items-center gap-4 p-3 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300"
-                                            >
+                                    <div className="space-y-2.5">
+                                        {socialLinks.map((link) => {
+                                            const displayHandle =
+                                                link.label === "Discord"
+                                                    ? isTr
+                                                        ? "Direkt mesaj"
+                                                        : "Direct message"
+                                                    : link.label === "Signal"
+                                                        ? isTr
+                                                            ? "Şifreli mesajlaşma"
+                                                            : "Encrypted messaging"
+                                                        : link.handle;
+
+                                            return (
                                                 <div
-                                                    className={`w-10 h-10 rounded-xl bg-gradient-to-br ${link.color} flex items-center justify-center text-white text-lg shrink-0 group-hover:scale-110 transition-transform duration-300`}
+                                                    key={link.label}
+                                                    className="flex items-center gap-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800/80 transition-all duration-300 pr-2"
                                                 >
-                                                    {link.icon}
+                                                    <a
+                                                        href={link.href}
+                                                        target={link.isMailto ? undefined : "_blank"}
+                                                        rel={link.isMailto ? undefined : "noopener noreferrer"}
+                                                        className="group flex-1 min-w-0 flex items-center gap-3.5 p-3 rounded-2xl"
+                                                    >
+                                                        <div
+                                                            className={`w-10 h-10 rounded-xl bg-gradient-to-br ${link.color} flex items-center justify-center text-white text-lg shrink-0 group-hover:scale-110 transition-transform duration-300`}
+                                                        >
+                                                            {link.icon}
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                                                                {link.label}
+                                                            </p>
+                                                            {displayHandle && (
+                                                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                                                    {displayHandle}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </a>
+                                                    {link.isMailto && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={handleCopyEmail}
+                                                            aria-label={isTr ? "E-postayı Kopyala" : "Copy Email"}
+                                                            className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all duration-200 ${
+                                                                copied
+                                                                    ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                                                                    : "bg-gray-100/80 dark:bg-gray-800 border-gray-200/80 dark:border-gray-700/80 text-gray-700 dark:text-gray-300 hover:border-violet-500/40 hover:text-violet-600 dark:hover:text-violet-400"
+                                                            }`}
+                                                        >
+                                                            {copied ? (
+                                                                <>
+                                                                    <FaCheck className="text-[11px]" />
+                                                                    <span>{isTr ? "Kopyalandı!" : "Copied!"}</span>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <FaCopy className="text-[11px]" />
+                                                                    <span>{isTr ? "Kopyala" : "Copy"}</span>
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                    )}
                                                 </div>
-                                                <div>
-                                                    <p className="font-semibold text-gray-900 dark:text-white text-sm">
-                                                        {link.label}
-                                                    </p>
-                                                </div>
-                                            </a>
-                                        ))}
+                                            );
+                                        })}
+                                    </div>
+
+                                    {/* Response time & timezone note */}
+                                    <div className="mt-6 pt-5 border-t border-gray-200/60 dark:border-gray-800/60 flex items-start gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center shrink-0 mt-0.5">
+                                            <FaClock className="text-sm" aria-hidden="true" />
+                                        </div>
+                                        <div className="text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+                                            <p className="font-semibold text-gray-900 dark:text-white">
+                                                {isTr ? "Yanıt Süresi · UTC+3 (İstanbul)" : "Response Time · UTC+3 (Istanbul)"}
+                                            </p>
+                                            <p className="mt-0.5">
+                                                {isTr
+                                                    ? "Mesajlara genellikle 24 saat içinde dönüş yapıyorum."
+                                                    : "I typically reply to messages within 24 hours."}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

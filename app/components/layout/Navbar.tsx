@@ -47,6 +47,7 @@ const Navbar: React.FC<NavbarProps> = ({ showLangSwitcher = true }) => {
         {/* Logo */}
         <Link
           href={isTr ? "/tr" : "/"}
+          aria-label={`Kerem Kuyucu — ${t.home}`}
           className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent hover:opacity-80 transition-opacity"
         >
           KK
@@ -69,13 +70,16 @@ const Navbar: React.FC<NavbarProps> = ({ showLangSwitcher = true }) => {
                 <Link
                   key={link.href}
                   href={link.href}
+                  aria-label={link.label}
+                  aria-current={isActive ? "page" : undefined}
+                  title={link.label}
                   className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
                     isActive
                       ? "bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20"
                       : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`}
                 >
-                  <link.icon className="text-sm" />
+                  <link.icon className="text-sm" aria-hidden="true" />
                   <span className="hidden sm:inline">{link.label}</span>
                 </Link>
               );
@@ -87,6 +91,7 @@ const Navbar: React.FC<NavbarProps> = ({ showLangSwitcher = true }) => {
             <div className="inline-flex p-1 bg-gray-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-semibold">
               <Link
                 href={enHref}
+                aria-label="Switch to English"
                 className={`px-2.5 py-1 rounded-lg transition-all ${
                   !isTr
                     ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
@@ -97,6 +102,7 @@ const Navbar: React.FC<NavbarProps> = ({ showLangSwitcher = true }) => {
               </Link>
               <Link
                 href={trHref}
+                aria-label="Türkçeye geç"
                 className={`px-2.5 py-1 rounded-lg transition-all ${
                   isTr
                     ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"

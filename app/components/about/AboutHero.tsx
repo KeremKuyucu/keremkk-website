@@ -5,6 +5,8 @@ import profilePic from "../../../public/imgs/logo.png";
 import { FaAward, FaCode } from "react-icons/fa";
 import { socialLinks } from "../layout/Footer";
 import { translations, Language } from "@/app/data/translations";
+import { getYearsOfExperience } from "@/app/data/projects";
+import DiscordStatusBadge from "@/app/components/DiscordStatusBadge";
 
 interface AboutHeroProps {
     lang?: Language;
@@ -12,11 +14,14 @@ interface AboutHeroProps {
 
 const AboutHero: React.FC<AboutHeroProps> = ({ lang = "en" }) => {
     const t = translations[lang].about;
+    const yearsExperience = getYearsOfExperience();
+    const dynamicExperienceValue =
+        lang === "tr" ? `${yearsExperience}+ Yıl Kodlama` : `${yearsExperience}+ Years Coding`;
 
     return (
         <section className="relative pt-32 pb-20 px-6">
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
-                <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-[100px]" />
+                <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-fuchsia-500/20 rounded-full blur-[100px]" />
                 <div className="absolute bottom-[10%] left-[-10%] w-[400px] h-[400px] bg-violet-500/20 rounded-full blur-[100px]" />
             </div>
 
@@ -25,20 +30,22 @@ const AboutHero: React.FC<AboutHeroProps> = ({ lang = "en" }) => {
                     {/* Profile Image with Ring */}
                     <div className="flex flex-col items-center gap-6 relative group shrink-0 scroll-reveal">
                         <div className="relative">
-                            <div className="absolute -inset-1 bg-gradient-to-br from-blue-500 to-violet-600 rounded-full opacity-75 blur transition duration-500 group-hover:opacity-100" />
+                            <div className="absolute -inset-1 bg-gradient-to-br from-violet-600 via-fuchsia-500 to-pink-500 rounded-full opacity-75 blur transition duration-500 group-hover:opacity-100" />
                             <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden border-4 border-white dark:border-gray-900 shadow-2xl">
                                 <Image
                                     src={profilePic}
                                     alt="Kerem Kuyucu"
-                                    layout="fill"
-                                    objectFit="cover"
+                                    fill
+                                    sizes="(max-width: 768px) 256px, 320px"
                                     priority
-                                    className="transition-transform duration-500 group-hover:scale-110"
+                                    className="object-cover transition-transform duration-500 group-hover:scale-110"
                                 />
                             </div>
-                            <div className="absolute bottom-4 right-4 bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg text-2xl animate-bounce">
-                                👋
-                            </div>
+                            <DiscordStatusBadge
+                                lang={lang}
+                                variant="avatar"
+                                className="absolute bottom-3 right-3"
+                            />
                         </div>
 
                         {/* Social Links under Profile Pic */}
@@ -68,11 +75,11 @@ const AboutHero: React.FC<AboutHeroProps> = ({ lang = "en" }) => {
                     {/* Intro Text */}
                     <div className="text-center md:text-left space-y-6 scroll-reveal" style={{ transitionDelay: "0.2s" }}>
                         <div>
-                            <h2 className="text-sm font-bold tracking-wider text-blue-600 dark:text-blue-400 uppercase mb-2">
+                            <h2 className="text-sm font-bold tracking-wider text-violet-600 dark:text-fuchsia-400 uppercase mb-2">
                                 {t.badge}
                             </h2>
                             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-                                {t.greetingPrefix} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-violet-600">{t.greetingName}</span>
+                                {t.greetingPrefix} <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500">{t.greetingName}</span>
                             </h1>
                         </div>
 
@@ -87,18 +94,18 @@ const AboutHero: React.FC<AboutHeroProps> = ({ lang = "en" }) => {
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center md:justify-start">
-                                <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800">
-                                    <FaAward className="text-2xl text-blue-600" />
+                                <div className="flex items-center gap-3 p-4 bg-fuchsia-50 dark:bg-fuchsia-900/20 rounded-2xl border border-fuchsia-100 dark:border-fuchsia-800/60">
+                                    <FaAward className="text-2xl text-fuchsia-600 dark:text-fuchsia-400" />
                                     <div className="text-left">
                                         <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{t.achievementLabel}</p>
-                                        <p className="text-sm font-bold text-blue-700 dark:text-blue-300">{t.achievementValue}</p>
+                                        <p className="text-sm font-bold text-fuchsia-700 dark:text-fuchsia-300">{t.achievementValue}</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-3 p-4 bg-violet-50 dark:bg-violet-900/20 rounded-2xl border border-violet-100 dark:border-violet-800">
-                                    <FaCode className="text-2xl text-violet-600" />
+                                <div className="flex items-center gap-3 p-4 bg-violet-50 dark:bg-violet-900/20 rounded-2xl border border-violet-100 dark:border-violet-800/60">
+                                    <FaCode className="text-2xl text-violet-600 dark:text-violet-400" />
                                     <div className="text-left">
                                         <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{t.experienceLabel}</p>
-                                        <p className="text-sm font-bold text-violet-700 dark:text-violet-300">{t.experienceValue}</p>
+                                        <p className="text-sm font-bold text-violet-700 dark:text-violet-300">{dynamicExperienceValue}</p>
                                     </div>
                                 </div>
                             </div>

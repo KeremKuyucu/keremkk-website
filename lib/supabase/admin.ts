@@ -1,6 +1,6 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 
-// Service Role Key ile admin client oluşturur
+// Secret Key ile admin client oluşturur
 // DİKKAT: Bu client sadece sunucu tarafında kullanılmalıdır!
 export function createAdminClient() {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
@@ -9,13 +9,13 @@ export function createAdminClient() {
         throw new Error("NEXT_PUBLIC_SUPABASE_URL or SUPABASE_URL environment variable is not set")
     }
 
-    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+    const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY!
 
-    if (!supabaseServiceRoleKey) {
-        throw new Error("SUPABASE_SERVICE_ROLE_KEY environment variable is not set")
+    if (!supabaseSecretKey) {
+        throw new Error("SUPABASE_SECRET_KEY environment variable is not set")
     }
 
-    return createSupabaseClient(supabaseUrl, supabaseServiceRoleKey, {
+    return createSupabaseClient(supabaseUrl, supabaseSecretKey, {
         auth: {
             autoRefreshToken: false,
             persistSession: false

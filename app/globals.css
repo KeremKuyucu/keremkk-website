@@ -49,18 +49,6 @@ main {
   animation: fadeIn 0.8s ease-out forwards;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .stagger-reveal>* {
   opacity: 0;
   transform: translateY(15px);
@@ -102,17 +90,6 @@ main {
 a,
 button {
   transition: all 0.3s ease-out;
-}
-
-.scroll-reveal {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-}
-
-.scroll-reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 .img-zoom {

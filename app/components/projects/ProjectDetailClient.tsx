@@ -14,6 +14,8 @@ import {
     FaCodeBranch,
     FaEye,
     FaWindows,
+    FaSearchPlus,
+    FaTimes,
 } from "react-icons/fa";
 import {
     SiFlutter,
@@ -33,14 +35,14 @@ import { translations, Language } from "@/app/data/translations";
 const getTechIcon = (tech: string) => {
     const iconMap: { [key: string]: React.ReactNode } = {
         Flutter: <SiFlutter className="text-[#02569B]" />,
-        "Next.js": <SiNextdotjs className="dark:text-white" />,
+        "Next.js": <SiNextdotjs className="text-gray-900 dark:text-white" />,
         "C++": <SiCplusplus className="text-[#00599C]" />,
         Dart: <SiDart className="text-[#0175C2]" />,
         Supabase: <SiSupabase className="text-[#3ECF8E]" />,
         Firebase: <SiFirebase className="text-[#FFCA28]" />,
         TypeScript: <SiTypescript className="text-[#3178C6]" />,
         "Tailwind CSS": <SiTailwindcss className="text-[#06B6D4]" />,
-        Resend: <SiResend className="text-white" />,
+        Resend: <SiResend className="text-gray-900 dark:text-white" />,
         AutoHotkey: <SiAutohotkey className="text-[#339933]" />,
         Windows: <FaWindows className="text-[#0078D4]" />,
     };
@@ -68,6 +70,12 @@ interface GithubData {
     };
 }
 
+interface LightboxImage {
+    src: string;
+    alt: string;
+    title: string;
+}
+
 const extractRepoName = (githubLink: string): string | null => {
     const match = githubLink.match(/github\.com\/([^\/]+\/[^\/]+)/);
     return match ? match[1] : null;
@@ -81,6 +89,7 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
 }) => {
     const [githubData, setGithubData] = useState<GithubData>({});
     const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>({});
+    const [lightbox, setLightbox] = useState<LightboxImage | null>(null);
     const t = translations[lang].projects;
 
     useEffect(() => {
@@ -97,6 +106,21 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
         document.querySelectorAll(".scroll-reveal").forEach((el) => observer.observe(el));
         return () => observer.disconnect();
     }, []);
+
+    // Close lightbox on Escape key and lock body scroll while open
+    useEffect(() => {
+        if (!lightbox) return;
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") setLightbox(null);
+        };
+        const prevOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        window.addEventListener("keydown", onKeyDown);
+        return () => {
+            document.body.style.overflow = prevOverflow;
+            window.removeEventListener("keydown", onKeyDown);
+        };
+    }, [lightbox]);
 
     useEffect(() => {
         const fetchGithubData = async () => {
@@ -124,6 +148,8 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
     };
 
     const backHref = lang === "tr" ? "/tr/projects" : "/projects";
+    const zoomLabel = lang === "tr" ? "Büyüt" : "Zoom";
+    const closeLabel = lang === "tr" ? "Kapat" : "Close";
 
     return (
         <main className="min-h-screen bg-transparent overflow-x-hidden relative">
@@ -142,7 +168,7 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
             <Navbar />
 
             {/* Hero Section */}
-            <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+            <section className="relative pt-32 pb-16 px-6 overflow-hidden">
                 <div className="container mx-auto max-w-6xl relative z-10">
                     {/* Back Button */}
                     <Link
@@ -155,9 +181,9 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
 
                     {/* Category Title */}
                     <div className="scroll-reveal">
-                        <div className="inline-flex items-center gap-3 mb-6">
+                        <div className="inline-flex items-center gap-4 mb-6">
                             <div
-                                className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${info.gradient} flex items-center justify-center text-white text-2xl shadow-lg`}
+                                className={`w-14 h-14 shrink-0 rounded-2xl bg-gradient-to-br ${info.gradient} flex items-center justify-center text-white text-2xl shadow-lg`}
                             >
                                 {info.icon}
                             </div>
@@ -195,72 +221,105 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
             </section>
 
             {/* Projects Section */}
-            <section className="py-12 px-6">
+            <section className="py-10 px-6">
                 <div className="container mx-auto max-w-6xl">
                     <div className="space-y-12">
                         {projects.map((project, index) => {
                             const ghData = getGhData(project.githubLink);
+                            const isPrivate = ghData?.isPrivate ?? project.isPrivate;
+                            const resolvedSrc = imageErrors[index] ? fallbackImage : project.imageUrl;
+
                             return (
                                 <div
                                     key={`${categoryKey}-${project.title}`}
                                     className="scroll-reveal"
-                                    style={{ transitionDelay: `${index * 0.15}s` }}
+                                    style={{ transitionDelay: `${index * 0.12}s` }}
                                 >
-                                    <div className="group relative bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl rounded-3xl overflow-hidden border border-gray-200/50 dark:border-gray-800/50 transition-all duration-500 hover:shadow-2xl hover:shadow-violet-500/10">
+                                    <div className="group relative bg-white/75 dark:bg-gray-900/70 backdrop-blur-xl rounded-3xl overflow-hidden border border-gray-200/70 dark:border-gray-800/80 transition-all duration-500 hover:shadow-2xl hover:shadow-violet-500/10">
                                         <div className="grid md:grid-cols-2 gap-0">
-                                            {/* Image */}
-                                            <div className="relative aspect-video md:aspect-auto overflow-hidden">
-                                                <img
-                                                    src={imageErrors[index] ? fallbackImage : project.imageUrl}
-                                                    alt={project.altText}
-                                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                                    onError={() =>
-                                                        setImageErrors((prev) => ({ ...prev, [index]: true }))
-                                                    }
+                                            {/* Studio-Framed Uncropped Showcase Image Column */}
+                                            <div className="relative flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 overflow-hidden bg-gradient-to-br from-gray-100 via-gray-50 to-gray-200/70 dark:from-[#0f1320] dark:via-[#121626] dark:to-[#0a0d16] border-b md:border-b-0 md:border-r border-gray-200/70 dark:border-white/[0.06]">
+                                                {/* Subtle Category Tint & Studio Radial Highlight */}
+                                                <div
+                                                    className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${info.gradient} opacity-[0.09] dark:opacity-[0.14]`}
                                                 />
-                                                {/* Gradient overlay */}
-                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/20 dark:to-black/20 md:block hidden" />
+                                                <div
+                                                    className="pointer-events-none absolute inset-0"
+                                                    style={{
+                                                        background:
+                                                            "radial-gradient(ellipse 75% 60% at 50% 0%, rgba(139,92,246,0.14), transparent 72%)",
+                                                    }}
+                                                />
 
-                                                {/* Badges */}
-                                                <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-                                                    {ghData?.isPrivate && (
-                                                        <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-yellow-500 to-amber-600 text-white shadow-lg flex items-center gap-1.5">
-                                                            <FaLock className="text-[10px]" />
-                                                            {t.badges.private}
-                                                        </span>
-                                                    )}
-                                                    {project.isNew && (
-                                                        <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-lg animate-pulse">
-                                                            {t.badges.new}
-                                                        </span>
-                                                    )}
-                                                    {project.isDeveloping && (
-                                                        <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-blue-400 to-cyan-500 text-white shadow-lg">
-                                                            {t.badges.developing}
-                                                        </span>
-                                                    )}
-                                                    {ghData?.isArchived && (
-                                                        <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-gray-500 to-gray-600 text-white shadow-lg">
-                                                            {t.badges.archived}
-                                                        </span>
-                                                    )}
-                                                </div>
+                                                {/* Top Badges */}
+                                                {(isPrivate || project.isNew || project.isDeveloping || ghData?.isArchived) && (
+                                                    <div className="relative z-10 w-full flex flex-wrap justify-end gap-1.5 mb-3">
+                                                        {project.isNew && (
+                                                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md">
+                                                                {t.badges.new}
+                                                            </span>
+                                                        )}
+                                                        {project.isDeveloping && (
+                                                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gray-900/80 dark:bg-white/15 text-white border border-white/15 backdrop-blur-md">
+                                                                {t.badges.developing}
+                                                            </span>
+                                                        )}
+                                                        {isPrivate && (
+                                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/90 text-white shadow-sm">
+                                                                <FaLock className="text-[9px]" />
+                                                                {t.badges.private}
+                                                            </span>
+                                                        )}
+                                                        {ghData?.isArchived && (
+                                                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gray-700/85 text-gray-100">
+                                                                {t.badges.archived}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {/* Clickable Uncropped Screenshot Frame */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setLightbox({
+                                                            src: resolvedSrc,
+                                                            alt: project.altText,
+                                                            title: project.title,
+                                                        })
+                                                    }
+                                                    aria-label={`${project.title} — ${zoomLabel}`}
+                                                    className="group/img relative z-10 w-full cursor-zoom-in rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                                                >
+                                                    <img
+                                                        src={resolvedSrc}
+                                                        alt={project.altText}
+                                                        className="w-full h-auto max-h-[420px] object-contain rounded-xl border border-gray-200/80 dark:border-white/10 shadow-2xl shadow-black/15 dark:shadow-black/50 bg-gray-950/90 transition-transform duration-300 ease-out group-hover/img:scale-[1.015]"
+                                                        onError={() =>
+                                                            setImageErrors((prev) => ({ ...prev, [index]: true }))
+                                                        }
+                                                    />
+
+                                                    {/* Subtle Zoom Hint Pill */}
+                                                    <span className="pointer-events-none absolute bottom-3 right-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/70 text-white text-xs font-medium backdrop-blur-md border border-white/15 opacity-75 sm:opacity-0 sm:group-hover/img:opacity-100 transition-opacity duration-200">
+                                                        <FaSearchPlus className="text-[11px]" />
+                                                        <span>{zoomLabel}</span>
+                                                    </span>
+                                                </button>
                                             </div>
 
-                                            {/* Content */}
-                                            <div className="p-8 flex flex-col justify-center">
-                                                <h2
-                                                    className={`text-2xl md:text-3xl font-bold mb-3 bg-gradient-to-r ${info.gradient} bg-clip-text text-transparent`}
-                                                >
+                                            {/* Content Column */}
+                                            <div className="p-6 sm:p-8 flex flex-col justify-center">
+                                                <h2 className="text-2xl md:text-3xl font-bold mb-3 text-gray-900 dark:text-white">
                                                     {project.title}
                                                 </h2>
 
-                                                <p className="text-gray-600 dark:text-gray-400 mb-2 leading-relaxed">
+                                                <p className="text-gray-700 dark:text-gray-300 mb-2 leading-relaxed">
                                                     {project.description}
                                                 </p>
 
                                                 {project.longDescription && (
-                                                    <p className="text-gray-500 dark:text-gray-500 text-sm mb-5 leading-relaxed">
+                                                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-5 leading-relaxed">
                                                         {project.longDescription}
                                                     </p>
                                                 )}
@@ -271,7 +330,7 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
                                                         {project.techStack.map((tech, idx) => (
                                                             <span
                                                                 key={idx}
-                                                                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200/50 dark:border-gray-700/50"
+                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-medium rounded-xl bg-gray-100/90 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 border border-gray-200/70 dark:border-gray-700/60"
                                                             >
                                                                 {getTechIcon(tech)}
                                                                 {tech}
@@ -282,7 +341,7 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
 
                                                 {/* GitHub Stats */}
                                                 {ghData && (ghData.stars > 0 || ghData.forks > 0 || ghData.language) && (
-                                                    <div className="flex flex-wrap items-center gap-3 mb-5 text-sm">
+                                                    <div className="flex flex-wrap items-center gap-2.5 mb-5 text-xs sm:text-sm">
                                                         {ghData.stars > 0 && (
                                                             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
                                                                 <FaStar className="text-xs" />
@@ -315,7 +374,7 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
                                                     {project.features.map((feature, idx) => (
                                                         <span
                                                             key={idx}
-                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
                                                         >
                                                             <FaCheckCircle className="text-emerald-500 text-[10px]" />
                                                             {feature}
@@ -339,7 +398,9 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
                                                                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                                                             />
                                                         </svg>
-                                                        <span>{t.lastCommit} {ghData.lastCommit}</span>
+                                                        <span>
+                                                            {t.lastCommit} {ghData.lastCommit}
+                                                        </span>
                                                     </div>
                                                 )}
 
@@ -350,25 +411,25 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
                                                             href={project.viewLink}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className={`inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold text-white bg-gradient-to-r ${info.gradient} hover:shadow-lg hover:scale-[1.02] transition-all duration-300`}
+                                                            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:shadow-lg hover:shadow-violet-500/25 hover:scale-[1.02] transition-all duration-300"
                                                         >
                                                             <FaExternalLinkAlt className="text-xs" />
                                                             {t.viewProject}
                                                         </a>
                                                     )}
-                                                    {project.githubLink && !ghData?.isPrivate && (
+                                                    {project.githubLink && !isPrivate && (
                                                         <a
                                                             href={project.githubLink}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300 hover:scale-[1.02]"
+                                                            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 border border-gray-200/70 dark:border-gray-700/70 hover:border-violet-500/40 hover:text-violet-600 dark:hover:text-violet-300 transition-all duration-300 hover:scale-[1.02]"
                                                         >
                                                             <FaGithub />
                                                             {t.github}
                                                         </a>
                                                     )}
-                                                    {ghData?.isPrivate && (
-                                                        <div className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold text-gray-500 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-60">
+                                                    {isPrivate && (
+                                                        <div className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-70">
                                                             <FaLock className="text-xs" />
                                                             {t.privateRepo}
                                                         </div>
@@ -383,6 +444,44 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
                     </div>
                 </div>
             </section>
+
+            {/* Click-to-Zoom Lightbox Modal */}
+            {lightbox && (
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={lightbox.title}
+                    onClick={() => setLightbox(null)}
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 bg-black/85 backdrop-blur-md animate-fadeIn cursor-zoom-out"
+                >
+                    <button
+                        type="button"
+                        onClick={() => setLightbox(null)}
+                        aria-label={closeLabel}
+                        className="fixed top-5 right-5 z-50 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/15 backdrop-blur-md transition-colors cursor-pointer"
+                    >
+                        <FaTimes className="text-base" />
+                    </button>
+
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative max-w-6xl w-full flex flex-col items-center cursor-default"
+                    >
+                        <img
+                            src={lightbox.src}
+                            alt={lightbox.alt}
+                            className="max-h-[82vh] w-auto max-w-full object-contain rounded-2xl border border-white/15 shadow-2xl bg-gray-950"
+                        />
+                        <div className="mt-4 flex items-center gap-3 text-xs sm:text-sm text-gray-300">
+                            <span className="font-semibold text-white">{lightbox.title}</span>
+                            <span className="text-white/30">•</span>
+                            <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-white/10 text-gray-300">
+                                ESC
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <FooterComponent />
         </main>

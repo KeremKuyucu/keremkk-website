@@ -14,8 +14,6 @@ import {
   FaRocket,
   FaHome,
   FaUser,
-  FaProjectDiagram,
-  FaPaperPlane,
 } from "react-icons/fa";
 import { FaSignalMessenger } from "react-icons/fa6";
 import { translations, Language } from "@/app/data/translations";
@@ -24,6 +22,7 @@ export const socialLinks = [
   {
     href: "mailto:contact@keremkuyucu.com.tr",
     label: "Email",
+    handle: "contact@keremkuyucu.com.tr",
     icon: <FaEnvelope />,
     color: "from-blue-500 to-cyan-500",
     shadow: "shadow-blue-500/20",
@@ -32,6 +31,7 @@ export const socialLinks = [
   {
     href: "https://github.com/KeremKuyucu",
     label: "GitHub",
+    handle: "@KeremKuyucu",
     icon: <FaGithub />,
     color: "from-gray-700 to-black dark:from-gray-600 dark:to-gray-900",
     shadow: "shadow-gray-500/20",
@@ -39,6 +39,7 @@ export const socialLinks = [
   {
     href: "https://discord.com/users/483678328646270996",
     label: "Discord",
+    handle: "discord.com/users/483678328646270996",
     icon: <FaDiscord />,
     color: "from-indigo-500 to-violet-500",
     shadow: "shadow-indigo-500/20",
@@ -46,6 +47,7 @@ export const socialLinks = [
   {
     href: "https://www.linkedin.com/in/kerem-kuyucu/",
     label: "LinkedIn",
+    handle: "in/kerem-kuyucu",
     icon: <FaLinkedin />,
     color: "from-blue-600 to-indigo-600",
     shadow: "shadow-blue-600/20",
@@ -53,6 +55,7 @@ export const socialLinks = [
   {
     href: "https://signal.me/#eu/ARcpLe2E-_qPXnH6-I26hgbYj_Qco2bpvsoBu7Be67wvl5fAzPxLWIMrJulQBptb",
     label: "Signal",
+    handle: "signal.me",
     icon: <FaSignalMessenger />,
     color: "from-sky-500 to-blue-500",
     shadow: "shadow-sky-500/20",
@@ -65,9 +68,11 @@ const SocialButton = ({
   icon,
   color,
   shadow,
+  isMailto,
 }: {
   href: string;
   label: string;
+  handle?: string;
   icon: React.ReactNode;
   color: string;
   shadow?: string;
@@ -75,8 +80,8 @@ const SocialButton = ({
 }) => (
   <a
     href={href}
-    target="_blank"
-    rel="noopener noreferrer"
+    target={isMailto ? undefined : "_blank"}
+    rel={isMailto ? undefined : "noopener noreferrer"}
     className={`group relative flex items-center justify-center w-11 h-11 rounded-xl bg-white/80 dark:bg-gray-900/80 border border-gray-200/50 dark:border-gray-800/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${shadow ? `hover:${shadow}` : ""}`}
     aria-label={label}
   >
@@ -106,8 +111,8 @@ const FooterComponent: React.FC = () => {
   const navLinks = [
     { href: isTr ? "/tr" : "/", label: t.nav.home, icon: FaHome },
     { href: `${basePath}/about`, label: t.nav.about, icon: FaUser },
-    { href: `${basePath}/projects`, label: t.nav.projects, icon: FaProjectDiagram },
-    { href: `${basePath}/contact`, label: t.nav.contact, icon: FaPaperPlane },
+    { href: `${basePath}/projects`, label: t.nav.projects, icon: FaCode },
+    { href: `${basePath}/contact`, label: t.nav.contact, icon: FaEnvelope },
   ];
 
   const scrollToTop = () => {

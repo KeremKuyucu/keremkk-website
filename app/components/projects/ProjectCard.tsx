@@ -1,8 +1,29 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { FaGithub, FaExternalLinkAlt, FaCode, FaCheckCircle, FaLock, FaStar, FaCodeBranch, FaEye, FaArrowRight, FaWindows } from "react-icons/fa";
-import { SiFlutter, SiNextdotjs, SiCplusplus, SiDart, SiSupabase, SiFirebase, SiTypescript, SiTailwindcss, SiResend, SiAutohotkey } from "react-icons/si";
+import {
+  FaGithub,
+  FaExternalLinkAlt,
+  FaCode,
+  FaLock,
+  FaStar,
+  FaCodeBranch,
+  FaArrowRight,
+  FaWindows,
+  FaLayerGroup,
+} from "react-icons/fa";
+import {
+  SiFlutter,
+  SiNextdotjs,
+  SiCplusplus,
+  SiDart,
+  SiSupabase,
+  SiFirebase,
+  SiTypescript,
+  SiTailwindcss,
+  SiResend,
+  SiAutohotkey,
+} from "react-icons/si";
 import { getProjectsByCategory, getCategoryInfo } from "@/app/data/projects";
 import { Project } from "@/app/types";
 import { translations, Language } from "@/app/data/translations";
@@ -11,17 +32,17 @@ const fallbackImage = "/imgs/errorimage.webp";
 
 const getTechIcon = (tech: string) => {
   const iconMap: { [key: string]: React.ReactNode } = {
-    "Flutter": <SiFlutter className="text-[#02569B]" />,
-    "Next.js": <SiNextdotjs className="dark:text-white" />,
+    Flutter: <SiFlutter className="text-[#02569B]" />,
+    "Next.js": <SiNextdotjs className="text-gray-900 dark:text-white" />,
     "C++": <SiCplusplus className="text-[#00599C]" />,
-    "Dart": <SiDart className="text-[#0175C2]" />,
-    "Supabase": <SiSupabase className="text-[#3ECF8E]" />,
-    "Firebase": <SiFirebase className="text-[#FFCA28]" />,
-    "TypeScript": <SiTypescript className="text-[#3178C6]" />,
+    Dart: <SiDart className="text-[#0175C2]" />,
+    Supabase: <SiSupabase className="text-[#3ECF8E]" />,
+    Firebase: <SiFirebase className="text-[#FFCA28]" />,
+    TypeScript: <SiTypescript className="text-[#3178C6]" />,
     "Tailwind CSS": <SiTailwindcss className="text-[#06B6D4]" />,
-    "Resend": <SiResend className="text-white" />,
-    "AutoHotkey": <SiAutohotkey className="text-[#339933]" />,
-    "Windows": <FaWindows className="text-[#0078D4]" />,
+    Resend: <SiResend className="text-gray-900 dark:text-white" />,
+    AutoHotkey: <SiAutohotkey className="text-[#339933]" />,
+    Windows: <FaWindows className="text-[#0078D4]" />,
   };
   return iconMap[tech] || <FaCode className="text-gray-500" />;
 };
@@ -50,11 +71,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   lastCommit,
   stars,
   forks,
-  language,
-  watchers,
   title,
   description,
-  features,
   techStack,
   viewLink,
   githubLink,
@@ -64,178 +82,195 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   lang = "en",
 }) => {
   const [imageError, setImageError] = useState(false);
-  const [, setIsHovered] = useState(false);
   const t = translations[lang].projects;
 
-  const detailHref = lang === "tr" ? `/tr/projects/${categorySlug}` : `/projects/${categorySlug}`;
+  const detailHref = categorySlug
+    ? lang === "tr"
+      ? `/tr/projects/${categorySlug}`
+      : `/projects/${categorySlug}`
+    : undefined;
 
-  return (
-    <div
-      className="group relative bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl rounded-3xl overflow-hidden border border-gray-200/50 dark:border-gray-800/50 transition-all duration-500 hover:shadow-2xl hover:shadow-violet-500/10 hover:-translate-y-2"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{ animationDelay: `${index * 0.1}s` }}
-    >
-      {/* Image Container */}
-      <div className="relative aspect-video overflow-hidden">
+  const hasMeta =
+    (stars !== undefined && stars > 0) ||
+    (forks !== undefined && forks > 0) ||
+    Boolean(lastCommit);
+
+  const imageFrame = (
+    <div className="relative aspect-[16/10] p-3.5 overflow-hidden bg-gradient-to-br from-gray-100 via-gray-50 to-gray-200/70 dark:from-[#0f1320] dark:via-[#121626] dark:to-[#0a0d16] border-b border-gray-200/60 dark:border-white/[0.06]">
+      {/* Subtle Category Tint & Radial Studio Glow */}
+      <div
+        className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${categoryGradient} opacity-[0.09] dark:opacity-[0.14]`}
+      />
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 70% 55% at 50% 0%, rgba(139,92,246,0.14), transparent 72%)",
+        }}
+      />
+
+      {/* Framed Mockup Viewport */}
+      <div className="relative w-full h-full rounded-xl overflow-hidden border border-black/10 dark:border-white/10 shadow-lg shadow-black/15 dark:shadow-black/50 bg-gray-900">
         <img
           src={imageError ? fallbackImage : imageUrl}
           alt={altText}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          className="w-full h-full object-cover object-top transition-transform duration-500 ease-out group-hover:scale-[1.03]"
           onError={() => setImageError(true)}
         />
+      </div>
 
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-        {/* Badges */}
-        <div className="absolute top-4 left-4 flex flex-wrap gap-2 max-w-[calc(100%-2rem)]">
-          {isPrivate && (
-            <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-yellow-500 to-amber-600 text-white shadow-lg flex items-center gap-1.5">
-              <FaLock className="text-[10px]" />
-              {t.badges.private}
-            </span>
-          )}
+      {/* Tasteful Top-Right Status Badges */}
+      {(isNew || isPrivate || isDeveloping || isArchived) && (
+        <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5">
           {isNew && (
-            <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-lg animate-pulse">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-900/30 backdrop-blur-md">
               {t.badges.new}
             </span>
           )}
           {isDeveloping && (
-            <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-blue-400 to-cyan-500 text-white shadow-lg">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gray-900/80 dark:bg-white/15 text-white border border-white/15 backdrop-blur-md">
               {t.badges.developing}
             </span>
           )}
+          {isPrivate && (
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/90 text-white shadow-sm backdrop-blur-md">
+              <FaLock className="text-[9px]" />
+              {t.badges.private}
+            </span>
+          )}
           {isArchived && (
-            <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-gray-500 to-gray-600 text-white shadow-lg">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gray-700/85 text-gray-100 backdrop-blur-md">
               {t.badges.archived}
             </span>
           )}
         </div>
-      </div>
+      )}
+    </div>
+  );
 
-      {/* Content */}
-      <div className="p-6">
-        <h3 className={`text-xl font-bold mb-2 bg-gradient-to-r ${categoryGradient} bg-clip-text text-transparent`}>
-          {title}
-        </h3>
+  return (
+    <article
+      className="group relative flex flex-col h-full bg-white/80 dark:bg-gray-900/70 backdrop-blur-xl rounded-3xl overflow-hidden border border-gray-200/70 dark:border-gray-800/80 hover:border-violet-500/45 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-violet-500/10"
+      style={{ animationDelay: `${index * 0.08}s` }}
+    >
+      {/* Framed Showcase Image */}
+      {detailHref ? (
+        <Link href={detailHref} className="block shrink-0">
+          {imageFrame}
+        </Link>
+      ) : (
+        <div className="shrink-0">{imageFrame}</div>
+      )}
+
+      {/* Decluttered Equal-Height Card Body */}
+      <div className="p-5 sm:p-6 flex-1 flex flex-col">
+        {detailHref ? (
+          <Link href={detailHref} className="block mb-2">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white line-clamp-1 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+              {title}
+            </h3>
+          </Link>
+        ) : (
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white line-clamp-1 mb-2">
+            {title}
+          </h3>
+        )}
 
         {description && (
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed mb-4">
             {description}
           </p>
         )}
 
-        {/* Tech Stack with Icons */}
+        {/* Compact Single-Row Tech Stack Pills */}
         {techStack && techStack.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {techStack.map((tech, idx) => (
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {techStack.slice(0, 4).map((tech, idx) => (
               <span
                 key={idx}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200/50 dark:border-gray-700/50"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg bg-gray-100/90 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 border border-gray-200/70 dark:border-gray-700/60"
               >
                 {getTechIcon(tech)}
-                {tech}
+                <span>{tech}</span>
               </span>
             ))}
           </div>
         )}
 
-        {/* GitHub Stats */}
-        {(stars !== undefined || forks !== undefined || language) && (
-          <div className="flex flex-wrap items-center gap-3 mb-4 text-sm">
+        {/* Subtle GitHub Metadata Row */}
+        {hasMeta && (
+          <div className="flex flex-wrap items-center gap-3 mb-4 text-xs text-gray-500 dark:text-gray-400">
             {stars !== undefined && stars > 0 && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
-                <FaStar className="text-xs" />
+              <span className="inline-flex items-center gap-1">
+                <FaStar className="text-amber-500 text-[11px]" />
                 <span className="font-medium">{stars}</span>
-              </div>
+              </span>
             )}
             {forks !== undefined && forks > 0 && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
-                <FaCodeBranch className="text-xs" />
+              <span className="inline-flex items-center gap-1">
+                <FaCodeBranch className="text-violet-500 text-[11px]" />
                 <span className="font-medium">{forks}</span>
-              </div>
+              </span>
             )}
-            {watchers !== undefined && watchers > 0 && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400">
-                <FaEye className="text-xs" />
-                <span className="font-medium">{watchers}</span>
-              </div>
-            )}
-            {language && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
-                <FaCode className="text-xs" />
-                <span className="font-medium">{language}</span>
-              </div>
+            {lastCommit && (
+              <span className="truncate">
+                {t.lastCommit} {lastCommit}
+              </span>
             )}
           </div>
         )}
 
-        {/* Features */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {features.slice(0, 3).map((feature, idx) => (
-            <span
-              key={idx}
-              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
-            >
-              <FaCheckCircle className="text-emerald-500 text-[10px]" />
-              {feature}
-            </span>
-          ))}
-        </div>
-
-        {/* Last Commit */}
-        {lastCommit && (
-          <div className="flex items-center gap-2 mb-4 text-xs text-gray-500 dark:text-gray-400">
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>{t.lastCommit} {lastCommit}</span>
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="flex gap-3 pt-2 border-t border-gray-200 dark:border-gray-800">
-          {categorySlug && (
+        {/* Unified Bottom Action Row */}
+        <div className="mt-auto pt-4 border-t border-gray-200/70 dark:border-gray-800/80 flex items-center justify-between gap-2">
+          {detailHref ? (
             <Link
               href={detailHref}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r ${categoryGradient} hover:shadow-lg transition-all duration-300 hover:scale-[1.02]`}
+              className="group/cta inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:shadow-lg hover:shadow-violet-500/25 transition-all duration-300"
             >
-              <FaArrowRight className="text-xs" />
-              {t.allDetails}
+              <span>{t.allDetails}</span>
+              <FaArrowRight className="text-[11px] group-hover/cta:translate-x-0.5 transition-transform" />
             </Link>
+          ) : (
+            <span />
           )}
-          {githubLink && !isPrivate && (
-            <a
-              href={githubLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300 hover:scale-[1.02]"
-            >
-              <FaGithub />
-              {t.github}
-            </a>
-          )}
-          {viewLink && (
-            <a
-              href={viewLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 hover:scale-[1.02]"
-            >
-              <FaExternalLinkAlt className="text-xs" />
-              {t.preview}
-            </a>
-          )}
-          {isPrivate && (
-            <div className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-60">
-              <FaLock className="text-xs" />
-              {t.privateRepo}
-            </div>
-          )}
+
+          <div className="flex items-center gap-1.5">
+            {githubLink && !isPrivate && (
+              <a
+                href={githubLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={t.github}
+                aria-label={`${title} ${t.github}`}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100/90 dark:bg-gray-800/80 border border-gray-200/70 dark:border-gray-700/70 hover:border-violet-500/40 hover:text-violet-600 dark:hover:text-violet-300 transition-colors"
+              >
+                <FaGithub className="text-sm" />
+                <span className="hidden sm:inline">{t.github}</span>
+              </a>
+            )}
+            {viewLink && (
+              <a
+                href={viewLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={t.preview}
+                aria-label={`${title} ${t.preview}`}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100/90 dark:bg-gray-800/80 border border-gray-200/70 dark:border-gray-700/70 hover:border-violet-500/40 hover:text-violet-600 dark:hover:text-violet-300 transition-colors"
+              >
+                <FaExternalLinkAlt className="text-[11px]" />
+                <span className="hidden sm:inline">{t.preview}</span>
+              </a>
+            )}
+            {isPrivate && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800/60 cursor-not-allowed">
+                <FaLock className="text-[10px]" />
+                <span>{t.privateRepo}</span>
+              </span>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 
@@ -244,28 +279,36 @@ interface ProjelerSectionProps {
 }
 
 const ProjelerSection: React.FC<ProjelerSectionProps> = ({ lang = "en" }) => {
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [githubData, setGithubData] = useState<{ [key: string]: { lastCommit: string; isArchived: boolean; stars: number; forks: number; language: string | null; isPrivate: boolean; watchers: number; } }>({});
+  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [githubData, setGithubData] = useState<{
+    [key: string]: {
+      lastCommit: string;
+      isArchived: boolean;
+      stars: number;
+      forks: number;
+      language: string | null;
+      isPrivate: boolean;
+      watchers: number;
+    };
+  }>({});
   const [, setIsLoadingGithub] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
   const t = translations[lang].projects;
-  const projectsByCategory = getProjectsByCategory(lang);
-  const categoryInfo = getCategoryInfo(lang);
+  const projectsByCategory = useMemo(() => getProjectsByCategory(lang), [lang]);
+  const categoryInfo = useMemo(() => getCategoryInfo(lang), [lang]);
 
-  // Extract repo names from GitHub links
   const extractRepoName = (githubLink: string): string | null => {
     const match = githubLink.match(/github\.com\/([^\/]+\/[^\/]+)/);
     return match ? match[1] : null;
   };
 
-  // Fetch GitHub data when component mounts
   useEffect(() => {
     const fetchGithubData = async () => {
       setIsLoadingGithub(true);
       const allProjects = Object.values(projectsByCategory).flat();
       const repoNames = allProjects
-        .map((p) => p.githubLink ? extractRepoName(p.githubLink) : null)
+        .map((p) => (p.githubLink ? extractRepoName(p.githubLink) : null))
         .filter((name): name is string => name !== null);
 
       if (repoNames.length === 0) {
@@ -274,13 +317,13 @@ const ProjelerSection: React.FC<ProjelerSectionProps> = ({ lang = "en" }) => {
       }
 
       try {
-        const response = await fetch(`/api/github?repos=${repoNames.join(',')}`);
+        const response = await fetch(`/api/github?repos=${repoNames.join(",")}`);
         if (response.ok) {
           const data = await response.json();
           setGithubData(data);
         }
       } catch (error) {
-        console.error('Error fetching GitHub data:', error);
+        console.error("Error fetching GitHub data:", error);
       } finally {
         setIsLoadingGithub(false);
       }
@@ -308,35 +351,58 @@ const ProjelerSection: React.FC<ProjelerSectionProps> = ({ lang = "en" }) => {
   }, [activeCategory]);
 
   const categories = Object.keys(projectsByCategory);
+  const totalProjectCount = Object.values(projectsByCategory).flat().length;
+  const displayedProjects =
+    activeCategory === "all"
+      ? categories.flatMap((category) =>
+          projectsByCategory[category].map((project) => ({ project, category }))
+        )
+      : (projectsByCategory[activeCategory] || []).map((project) => ({
+          project,
+          category: activeCategory,
+        }));
 
-  // Helper to get GitHub data for a project
   const getGithubDataForProject = (githubLink?: string) => {
-    if (!githubLink) return { lastCommit: undefined, isArchived: undefined, stars: undefined, forks: undefined, language: undefined, isPrivate: undefined, watchers: undefined };
+    if (!githubLink)
+      return {
+        lastCommit: undefined,
+        isArchived: undefined,
+        stars: undefined,
+        forks: undefined,
+        language: undefined,
+        isPrivate: undefined,
+        watchers: undefined,
+      };
     const repoName = extractRepoName(githubLink);
 
     if (repoName && githubData[repoName]) {
       return githubData[repoName];
     }
 
-    return { lastCommit: undefined, isArchived: undefined, stars: undefined, forks: undefined, language: undefined, isPrivate: undefined, watchers: undefined };
+    return {
+      lastCommit: undefined,
+      isArchived: undefined,
+      stars: undefined,
+      forks: undefined,
+      language: undefined,
+      isPrivate: undefined,
+      watchers: undefined,
+    };
   };
 
   return (
-    <section
-      ref={sectionRef}
-      className="py-20 px-6"
-    >
+    <section ref={sectionRef} className="py-20 px-6">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <section className="relative pt-32 pb-8 px-6">
           <div className="container mx-auto max-w-6xl relative z-10 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4 text-white">
+            <h1 className="text-4xl md:text-6xl font-bold mb-4 text-gray-900 dark:text-white">
               {t.titlePrefix}{" "}
               <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent">
                 {t.titleHighlight}
               </span>
             </h1>
-            <p className="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
               {t.subtitle}
             </p>
           </div>
@@ -344,30 +410,66 @@ const ProjelerSection: React.FC<ProjelerSectionProps> = ({ lang = "en" }) => {
 
         {/* Category Pills */}
         <div className="flex flex-wrap justify-center gap-3 mb-12 scroll-reveal">
+          <button
+            onClick={() => setActiveCategory("all")}
+            className={`group relative px-5 py-2.5 rounded-2xl font-semibold text-sm md:text-base transition-all duration-300 overflow-hidden cursor-pointer ${
+              activeCategory === "all"
+                ? "bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 text-white shadow-lg shadow-violet-500/25 scale-105"
+                : "bg-white/80 dark:bg-gray-900/80 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800"
+            }`}
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              <FaLayerGroup className="text-sm" />
+              {lang === "tr" ? "Tümü" : "All"}
+              <span
+                className={`ml-1 px-2 py-0.5 text-xs rounded-full ${
+                  activeCategory === "all"
+                    ? "bg-white/20"
+                    : "bg-gray-200/80 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                }`}
+              >
+                {totalProjectCount}
+              </span>
+            </span>
+            {activeCategory !== "all" && (
+              <div className="absolute inset-0 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+            )}
+          </button>
+
           {categories.map((category) => {
-            const info = categoryInfo[category] || { gradient: "from-gray-500 to-gray-600" };
+            const info = categoryInfo[category] || {
+              gradient: "from-violet-600 to-fuchsia-600",
+            };
             const isActive = activeCategory === category;
 
             return (
               <button
                 key={category}
-                onClick={() => setActiveCategory(isActive ? null : category)}
-                className={`group relative px-6 py-3 rounded-2xl font-semibold text-sm md:text-base transition-all duration-300 overflow-hidden ${isActive
-                  ? `bg-gradient-to-r ${info.gradient} text-white shadow-lg shadow-violet-500/25 scale-105`
-                  : "bg-white/80 dark:bg-gray-900/80 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800"
-                  }`}
+                onClick={() => setActiveCategory(isActive ? "all" : category)}
+                className={`group relative px-5 py-2.5 rounded-2xl font-semibold text-sm md:text-base transition-all duration-300 overflow-hidden cursor-pointer ${
+                  isActive
+                    ? `bg-gradient-to-r ${info.gradient} text-white shadow-lg shadow-violet-500/25 scale-105`
+                    : "bg-white/80 dark:bg-gray-900/80 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800"
+                }`}
               >
                 <span className="relative z-10 flex items-center gap-2">
                   {info.icon}
                   {category}
-                  <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-white/20 dark:bg-black/20">
+                  <span
+                    className={`ml-1 px-2 py-0.5 text-xs rounded-full ${
+                      isActive
+                        ? "bg-white/20"
+                        : "bg-gray-200/80 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                    }`}
+                  >
                     {projectsByCategory[category].length}
                   </span>
                 </span>
 
-                {/* Hover Effect */}
                 {!isActive && (
-                  <div className={`absolute inset-0 bg-gradient-to-r ${info.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-r ${info.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
+                  />
                 )}
               </button>
             );
@@ -375,76 +477,50 @@ const ProjelerSection: React.FC<ProjelerSectionProps> = ({ lang = "en" }) => {
         </div>
 
         {/* Category Description */}
-        {activeCategory && categoryInfo[activeCategory] && (
-          <div className="text-center mb-12 animate-fadeIn">
-            <div className={`inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-gradient-to-r ${categoryInfo[activeCategory].gradient} text-white shadow-lg`}>
+        {activeCategory !== "all" && categoryInfo[activeCategory] && (
+          <div className="text-center mb-10 animate-fadeIn">
+            <div
+              className={`inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-gradient-to-r ${categoryInfo[activeCategory].gradient} text-white shadow-lg`}
+            >
               {categoryInfo[activeCategory].icon}
-              <span className="font-medium">{categoryInfo[activeCategory].description}</span>
+              <span className="font-medium">
+                {categoryInfo[activeCategory].description}
+              </span>
             </div>
           </div>
         )}
 
-        {/* Projects Grid */}
-        {activeCategory && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
-            {projectsByCategory[activeCategory].map((project, index) => {
-              const ghData = getGithubDataForProject(project.githubLink);
-              return (
-                <div
-                  key={`${activeCategory}-${project.title}`}
-                  className="scroll-reveal"
-                  style={{ transitionDelay: `${index * 0.1}s` }}
-                >
-                  <ProjectCard
-                    {...project}
-                    lastCommit={ghData.lastCommit}
-                    isArchived={ghData.isArchived}
-                    isPrivate={ghData.isPrivate ?? project.isPrivate}
-                    stars={ghData.stars}
-                    forks={ghData.forks}
-                    language={ghData.language}
-                    watchers={ghData.watchers}
-                    index={index}
-                    categoryGradient={categoryInfo[activeCategory]?.gradient || "from-gray-500 to-gray-600"}
-                    categorySlug={categoryInfo[activeCategory]?.slug}
-                    lang={lang}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!activeCategory && (
-          <div className="text-center py-16 scroll-reveal">
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 mb-6">
-              <FaCode className="text-4xl text-violet-500" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              {t.selectCategory}
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-              {t.selectCategoryHint}
-            </p>
-
-            {/* Quick Stats */}
-            <div className="flex justify-center gap-8 mt-8">
-              <div className="text-center">
-                <p className="text-3xl font-bold bg-gradient-to-r from-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
-                  {Object.values(projectsByCategory).flat().length}
-                </p>
-                <p className="text-sm text-gray-500">{t.totalProjects}</p>
+        {/* Projects Grid (Equal-Height Cards) */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn items-stretch">
+          {displayedProjects.map(({ project, category }, index) => {
+            const ghData = getGithubDataForProject(project.githubLink);
+            return (
+              <div
+                key={`${category}-${project.title}`}
+                className="scroll-reveal h-full"
+                style={{ transitionDelay: `${index * 0.08}s` }}
+              >
+                <ProjectCard
+                  {...project}
+                  lastCommit={ghData.lastCommit}
+                  isArchived={ghData.isArchived}
+                  isPrivate={ghData.isPrivate ?? project.isPrivate}
+                  stars={ghData.stars}
+                  forks={ghData.forks}
+                  language={ghData.language}
+                  watchers={ghData.watchers}
+                  index={index}
+                  categoryGradient={
+                    categoryInfo[category]?.gradient ||
+                    "from-violet-600 to-fuchsia-600"
+                  }
+                  categorySlug={categoryInfo[category]?.slug}
+                  lang={lang}
+                />
               </div>
-              <div className="text-center">
-                <p className="text-3xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
-                  {categories.length}
-                </p>
-                <p className="text-sm text-gray-500">{t.categoriesCount}</p>
-              </div>
-            </div>
-          </div>
-        )}
+            );
+          })}
+        </div>
       </div>
     </section>
   );

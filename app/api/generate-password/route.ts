@@ -1,14 +1,49 @@
 import { NextResponse } from "next/server";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limiter";
-import { extractToken, verifyJwtToken } from "@/lib/jwt";
 import { generateWordlistPassword, getWordlistStats, GeneratePasswordOptions } from "@/lib/wordlist";
 
 // Standard CORS headers
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Headers": "Content-Type",
 };
+
+function applyRateLimit(request: Request): {
+    headers: Record<string, string>;
+    limitedResponse?: NextResponse;
+} {
+    const clientIp = getClientIp(request);
+    const rateResult = checkRateLimit(`wordlist_api_${clientIp}`, 60, 60_000);
+
+    const headers: Record<string, string> = {
+        ...corsHeaders,
+        "X-RateLimit-Limit": "60",
+        "X-RateLimit-Remaining": rateResult.remaining.toString(),
+        "X-RateLimit-Reset": rateResult.resetAt.toString(),
+    };
+
+    if (!rateResult.allowed) {
+        return {
+            headers,
+            limitedResponse: NextResponse.json(
+                {
+                    error: "İstek limiti aşıldı. Dakikada maksimum 60 istek gönderebilirsiniz.",
+                    retryAfter: rateResult.retryAfter,
+                },
+                {
+                    status: 429,
+                    headers: {
+                        ...headers,
+                        "Retry-After": rateResult.retryAfter.toString(),
+                    },
+                }
+            ),
+        };
+    }
+
+    return { headers };
+}
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -21,47 +56,8 @@ export async function OPTIONS() {
  * GET: API Documentation, usage guide, dictionary statistics, and rate-limit info.
  */
 export async function GET(request: Request) {
-    const token = extractToken(request);
-    let isUnlimited = false;
-
-    if (token) {
-        const authResult = await verifyJwtToken(token);
-        if (authResult.valid) {
-            isUnlimited = true;
-        }
-    }
-
-    let rateLimitHeaders: Record<string, string> = {
-        ...corsHeaders,
-        "X-RateLimit-Limit": isUnlimited ? "unlimited" : "60",
-    };
-
-    if (!isUnlimited) {
-        const clientIp = getClientIp(request);
-        const rateResult = checkRateLimit(`wordlist_api_${clientIp}`, 60, 60_000);
-
-        rateLimitHeaders["X-RateLimit-Remaining"] = rateResult.remaining.toString();
-        rateLimitHeaders["X-RateLimit-Reset"] = rateResult.resetAt.toString();
-
-        if (!rateResult.allowed) {
-            return NextResponse.json(
-                {
-                    error: "İstek limiti aşıldı. Dakikada maksimum 60 istek gönderebilirsiniz.",
-                    message: "Sınırsız erişim için isteğinize geçerli bir JWT token ekleyebilirsiniz.",
-                    retryAfter: rateResult.retryAfter,
-                },
-                {
-                    status: 429,
-                    headers: {
-                        ...rateLimitHeaders,
-                        "Retry-After": rateResult.retryAfter.toString(),
-                    },
-                }
-            );
-        }
-    } else {
-        rateLimitHeaders["X-RateLimit-Remaining"] = "unlimited";
-    }
+    const { headers: rateLimitHeaders, limitedResponse } = applyRateLimit(request);
+    if (limitedResponse) return limitedResponse;
 
     try {
         const stats = await getWordlistStats();
@@ -71,13 +67,9 @@ export async function GET(request: Request) {
                 service: "Türkçe Kelime Listesi Güvenli Şifre Oluşturucu API",
                 version: "1.0.0",
                 endpoint: "/api/generate-password",
-                authenticated: isUnlimited,
                 rateLimit: {
                     limit: 60,
                     window: "1 dakika (60 saniye)",
-                    unlimited: isUnlimited,
-                    bypassInfo:
-                        "İsteklerinize 'Authorization: Bearer <jwt_token>' başlığı ekleyerek rate limiti kaldırabilirsiniz.",
                 },
                 stats,
                 usage: {
@@ -126,62 +118,10 @@ export async function POST(request: Request) {
         // Body might be empty or invalid JSON, will use defaults
     }
 
-    // 1. JWT Token Check (Strictly Authorization: Bearer <token>)
-    const token = extractToken(request);
-    let isUnlimited = false;
+    const { headers: rateLimitHeaders, limitedResponse } = applyRateLimit(request);
+    if (limitedResponse) return limitedResponse;
 
-    if (token) {
-        const authResult = await verifyJwtToken(token);
-        if (authResult.valid) {
-            isUnlimited = true;
-        } else {
-            return NextResponse.json(
-                {
-                    error: "Yetkilendirme başarısız",
-                    details: authResult.reason || "Geçersiz veya süresi dolmuş JWT token.",
-                },
-                {
-                    status: 401,
-                    headers: corsHeaders,
-                }
-            );
-        }
-    }
-
-    // 2. Rate Limiting (applied if not authenticated with valid JWT)
-    let rateLimitHeaders: Record<string, string> = {
-        ...corsHeaders,
-        "X-RateLimit-Limit": isUnlimited ? "unlimited" : "60",
-    };
-
-    if (!isUnlimited) {
-        const clientIp = getClientIp(request);
-        const rateResult = checkRateLimit(`wordlist_api_${clientIp}`, 60, 60_000);
-
-        rateLimitHeaders["X-RateLimit-Remaining"] = rateResult.remaining.toString();
-        rateLimitHeaders["X-RateLimit-Reset"] = rateResult.resetAt.toString();
-
-        if (!rateResult.allowed) {
-            return NextResponse.json(
-                {
-                    error: "İstek limiti aşıldı. Dakikada maksimum 60 istek gönderebilirsiniz.",
-                    message: "Sınırsız istek göndermek için geçerli bir JWT token kullanın.",
-                    retryAfter: rateResult.retryAfter,
-                },
-                {
-                    status: 429,
-                    headers: {
-                        ...rateLimitHeaders,
-                        "Retry-After": rateResult.retryAfter.toString(),
-                    },
-                }
-            );
-        }
-    } else {
-        rateLimitHeaders["X-RateLimit-Remaining"] = "unlimited";
-    }
-
-    // 3. Generate Password
+    // Generate Password
     try {
         const options: GeneratePasswordOptions = {
             wordCount: typeof body.wordCount === "number" ? body.wordCount : 3,
@@ -195,10 +135,7 @@ export async function POST(request: Request) {
         const result = await generateWordlistPassword(options);
 
         return NextResponse.json(
-            {
-                ...result,
-                isRateLimitBypassed: isUnlimited,
-            },
+            result,
             {
                 status: 200,
                 headers: rateLimitHeaders,

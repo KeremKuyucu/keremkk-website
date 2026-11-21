@@ -111,7 +111,7 @@ export const projectsByCategoryEN: { [key: string]: Project[] } = {
     ],
     CopilotButton: [
         {
-            imageUrl: "/imgs/projects/copilotbutton.png",
+            imageUrl: "/imgs/projects/copilotbutton.jpg",
             altText: "Copilot Button Controller",
             title: "Copilot Button - Windows Native Controller",
             description: "High-performance C++20 Win32 native tool converting the Windows 11 Copilot key into a game-safe mic mute, media controller, and OSD overlay.",
@@ -143,7 +143,7 @@ export const projectsByCategoryEN: { [key: string]: Project[] } = {
             features: ["Direct Message ID Sharing", "No External Database Required", "Zero-storage Web Client", "Open source"],
             techStack: ["Next.js", "TypeScript", "Tailwind CSS"],
             githubLink: "https://github.com/KeremKuyucu/discordStorage-share",
-            viewLink: "https://discordstorage-share.vercel.app/1553713886568644802",
+            viewLink: "https://discordstorage-share.vercel.app",
         }
     ],
     EglYillik: [
@@ -160,6 +160,7 @@ export const projectsByCategoryEN: { [key: string]: Project[] } = {
             ],
             techStack: ["Next.js", "Supabase", "Resend", "Tailwind CSS", "TypeScript"],
             githubLink: "https://github.com/KeremKuyucu/egl-yillik",
+            viewLink: "https://egl.keremkuyucu.com.tr",
         }
     ]
 };
@@ -193,7 +194,7 @@ export const projectsByCategoryTR: { [key: string]: Project[] } = {
     ],
     CopilotButton: [
         {
-            imageUrl: "/imgs/projects/copilotbutton.png",
+            imageUrl: "/imgs/projects/copilotbutton.jpg",
             altText: "Copilot Button Controller",
             title: "Copilot Button - Windows Yerel Kontrolörü",
             description: "Windows 11 Copilot tuşunu C++20 Win32 API ile oyun korumalı mikrofon susturma, medya kontrolü ve OSD eylemlerine dönüştüren yerel sistem aracı.",
@@ -241,6 +242,7 @@ export const projectsByCategoryTR: { [key: string]: Project[] } = {
             ],
             techStack: ["Next.js", "Supabase", "Resend", "Tailwind CSS", "TypeScript"],
             githubLink: "https://github.com/KeremKuyucu/egl-yillik",
+            viewLink: "https://egl.keremkuyucu.com.tr",
         }
     ]
 };

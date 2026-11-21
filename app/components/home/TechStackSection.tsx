@@ -29,8 +29,8 @@ const TechStackSection: React.FC<TechStackSectionProps> = ({ lang = "en" }) => {
                             className="group relative p-6 rounded-2xl bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border border-gray-200 dark:border-gray-800 hover:border-violet-500/50 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-violet-500/10"
                         >
                             <tech.icon
-                                className="text-4xl sm:text-5xl mx-auto mb-4 transition-all duration-300 group-hover:scale-110"
-                                style={{ color: tech.color }}
+                                className="text-4xl sm:text-5xl mx-auto mb-4 text-gray-900 dark:text-white transition-all duration-300 group-hover:scale-110"
+                                style={tech.color !== "currentColor" ? { color: tech.color } : undefined}
                             />
                             <p className="text-center font-medium text-gray-700 dark:text-gray-300">
                                 {tech.name}

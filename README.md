@@ -80,8 +80,8 @@ Configure these in `.env.local` for local development (or in your hosting provid
 | Variable | Description |
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL (also falls back to `SUPABASE_URL` on the server) |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase public anon key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server-side only) |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase public publishable key (`sb_publishable_...`) |
+| `SUPABASE_SECRET_KEY` | Supabase secret key (`sb_secret_...`, server-side only) |
 
 ### AI Features
 
@@ -99,12 +99,10 @@ Configure these in `.env.local` for local development (or in your hosting provid
 | `NOTIFICATION_FROM_EMAIL` | Verified sender address for outgoing notifications |
 | `NOTIFICATION_TO_EMAIL` | Default recipient address for alert notifications |
 
-### Optional API & Auth Variables
+### Optional API Variables
 
 | Variable | Description |
 | --- | --- |
-| `SUPABASE_JWT_SECRET` | Supabase JWT secret for verifying bearer tokens on `/api/generate-password` |
-| `JWT_SECRET` | Custom JWT secret / token for bypassing rate limits on `/api/generate-password` |
 | `GITHUB_TOKEN` | GitHub personal access token to avoid unauthenticated rate limits on `/api/github` |
 
 ## License

@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import Navbar from "@/app/components/layout/Navbar";
 import FooterComponent from "@/app/components/layout/Footer";
 import HeroSection from "@/app/components/home/HeroSection";
+import FeaturedProjectsSection from "@/app/components/home/FeaturedProjectsSection";
 import TechStackSection from "@/app/components/home/TechStackSection";
 import { Language } from "@/app/data/translations";
 
@@ -34,6 +35,7 @@ export default function HomePageClient({ lang = "en" }: HomePageClientProps) {
     <main className="min-h-screen bg-gray-50 dark:bg-black transition-colors duration-300 overflow-x-hidden">
       <Navbar />
       <HeroSection lang={lang} />
+      <FeaturedProjectsSection lang={lang} />
       <TechStackSection lang={lang} />
       <FooterComponent />
     </main>
