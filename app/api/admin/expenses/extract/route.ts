@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateSession, extractAuthToken } from "@/lib/server-utils";
 import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { extractTextItems } from "unpdf";
 import {
     EXPENSE_CATEGORIES as CATEGORIES,
@@ -340,36 +340,80 @@ function findColumn(
 
 // ---------- Spreadsheet Parser ----------
 
-function parseSpreadsheet(
+function extractExcelCellValue(value: ExcelJS.CellValue): unknown {
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    if (value instanceof Date) {
+        return value;
+    }
+
+    if (
+        typeof value === "number" ||
+        typeof value === "string" ||
+        typeof value === "boolean"
+    ) {
+        return value;
+    }
+
+    if (typeof value === "object") {
+        if ("richText" in value && Array.isArray(value.richText)) {
+            return value.richText.map((part) => part.text ?? "").join("");
+        }
+
+        if ("result" in value) {
+            return extractExcelCellValue(
+                value.result as ExcelJS.CellValue
+            );
+        }
+
+        if ("text" in value) {
+            return extractExcelCellValue(
+                value.text as ExcelJS.CellValue
+            );
+        }
+
+        if ("error" in value) {
+            return "";
+        }
+    }
+
+    return String(value);
+}
+
+async function parseSpreadsheet(
     arrayBuffer: ArrayBuffer
-): {
+): Promise<{
     expenses: ParsedSpreadsheetExpense[];
     period: string;
     headerSensitiveTerms: string[];
-} {
-    const workbook = XLSX.read(
-        new Uint8Array(arrayBuffer),
-        {
-            type: "array",
-            cellDates: true,
-        }
-    );
+}> {
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(arrayBuffer);
 
     const allExpenses: ParsedSpreadsheetExpense[] = [];
 
     const detectedPeriods = new Set<string>();
     const headerSensitiveTerms = new Set<string>();
 
-    for (const sheetName of workbook.SheetNames) {
-        const sheet = workbook.Sheets[sheetName];
+    for (const sheet of workbook.worksheets) {
+        const sheetName = sheet.name;
 
-        // Ham satırları al.
-        const rows = XLSX.utils.sheet_to_json<
-            unknown[]
-        >(sheet, {
-            header: 1,
-            defval: "",
-            raw: true,
+        // Ham satırları al (0-indexed dense array, boş hücreler "").
+        const rows: unknown[][] = [];
+
+        sheet.eachRow({ includeEmpty: false }, (row) => {
+            const maxCol = Math.max(sheet.columnCount, row.cellCount);
+            const rowValues: unknown[] = [];
+
+            for (let col = 1; col <= maxCol; col++) {
+                rowValues.push(
+                    extractExcelCellValue(row.getCell(col).value)
+                );
+            }
+
+            rows.push(rowValues);
         });
 
         if (!rows.length) {
@@ -1320,13 +1364,26 @@ export async function POST(
         // ==========================================================
 
         if (isSpreadsheet) {
-            const {
-                expenses: parsedExpenses,
-                period,
-                headerSensitiveTerms,
-            } = parseSpreadsheet(
-                arrayBuffer
-            );
+            let parsedExpenses: ParsedSpreadsheetExpense[];
+            let period: string;
+            let headerSensitiveTerms: string[];
+
+            try {
+                const parsed = await parseSpreadsheet(arrayBuffer);
+                parsedExpenses = parsed.expenses;
+                period = parsed.period;
+                headerSensitiveTerms = parsed.headerSensitiveTerms;
+            } catch (err) {
+                console.error("[Expense Extract] ExcelJS parse error:", err);
+                return NextResponse.json(
+                    {
+                        error: fileName.endsWith(".xls")
+                            ? "Eski .xls formatı desteklenmiyor. Lütfen dosyayı .xlsx olarak kaydedip tekrar yükleyin."
+                            : "Excel dosyası okunamadı. Geçerli bir .xlsx dosyası olduğundan emin olun.",
+                    },
+                    { status: 400 }
+                );
+            }
 
             console.log(
                 `[Expense Extract] Parsed spreadsheet: ${parsedExpenses.length} expense transactions`
