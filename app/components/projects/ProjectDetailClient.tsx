@@ -129,7 +129,7 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
                 .filter((name): name is string => name !== null);
             if (repoNames.length === 0) return;
             try {
-                const response = await fetch(`/api/github?repos=${repoNames.join(",")}`);
+                const response = await fetch(`/api/github?repos=${repoNames.join(",")}&lang=${lang}`);
                 if (response.ok) {
                     const data = await response.json();
                     setGithubData(data);
@@ -139,7 +139,7 @@ const ProjectDetailClient: React.FC<ProjectDetailClientProps> = ({
             }
         };
         fetchGithubData();
-    }, [projects]);
+    }, [projects, lang]);
 
     const getGhData = (githubLink?: string) => {
         if (!githubLink) return null;

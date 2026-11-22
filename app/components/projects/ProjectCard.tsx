@@ -317,7 +317,7 @@ const ProjelerSection: React.FC<ProjelerSectionProps> = ({ lang = "en" }) => {
       }
 
       try {
-        const response = await fetch(`/api/github?repos=${repoNames.join(",")}`);
+        const response = await fetch(`/api/github?repos=${repoNames.join(",")}&lang=${lang}`);
         if (response.ok) {
           const data = await response.json();
           setGithubData(data);
@@ -330,7 +330,7 @@ const ProjelerSection: React.FC<ProjelerSectionProps> = ({ lang = "en" }) => {
     };
 
     fetchGithubData();
-  }, [projectsByCategory]);
+  }, [projectsByCategory, lang]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

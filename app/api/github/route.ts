@@ -28,7 +28,7 @@ interface RepoInfo {
 // Not: next: { revalidate: 3600 } ile Next.js Data Cache kullanılıyor,
 // serverless'ta in-memory Map çalışmadığı için kaldırıldı.
 
-function getRelativeTime(dateString: string): string {
+function getRelativeTime(dateString: string, lang: 'en' | 'tr' = 'en'): string {
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -40,13 +40,23 @@ function getRelativeTime(dateString: string): string {
     const diffMonths = Math.floor(diffDays / 30);
     const diffYears = Math.floor(diffDays / 365);
 
-    if (diffYears > 0) return `${diffYears} yıl önce`;
-    if (diffMonths > 0) return `${diffMonths} ay önce`;
-    if (diffWeeks > 0) return `${diffWeeks} hafta önce`;
-    if (diffDays > 0) return `${diffDays} gün önce`;
-    if (diffHours > 0) return `${diffHours} saat önce`;
-    if (diffMinutes > 0) return `${diffMinutes} dakika önce`;
-    return 'Az önce';
+    if (lang === 'tr') {
+        if (diffYears > 0) return `${diffYears} yıl önce`;
+        if (diffMonths > 0) return `${diffMonths} ay önce`;
+        if (diffWeeks > 0) return `${diffWeeks} hafta önce`;
+        if (diffDays > 0) return `${diffDays} gün önce`;
+        if (diffHours > 0) return `${diffHours} saat önce`;
+        if (diffMinutes > 0) return `${diffMinutes} dakika önce`;
+        return 'Az önce';
+    }
+
+    if (diffYears > 0) return `${diffYears} ${diffYears === 1 ? 'year' : 'years'} ago`;
+    if (diffMonths > 0) return `${diffMonths} ${diffMonths === 1 ? 'month' : 'months'} ago`;
+    if (diffWeeks > 0) return `${diffWeeks} ${diffWeeks === 1 ? 'week' : 'weeks'} ago`;
+    if (diffDays > 0) return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`;
+    if (diffHours > 0) return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`;
+    if (diffMinutes > 0) return `${diffMinutes} ${diffMinutes === 1 ? 'minute' : 'minutes'} ago`;
+    return 'Just now';
 }
 
 export async function GET(request: Request) {
@@ -65,6 +75,7 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const repos = searchParams.get('repos');
+    const lang: 'en' | 'tr' = searchParams.get('lang') === 'tr' ? 'tr' : 'en';
 
     if (!repos) {
         return NextResponse.json({ error: 'No repos provided' }, { status: 400 });
@@ -102,7 +113,7 @@ export async function GET(request: Request) {
             if (response.ok) {
                 const data: GitHubRepoData = await response.json();
                 const repoInfo: RepoInfo = {
-                    lastCommit: getRelativeTime(data.pushed_at),
+                    lastCommit: getRelativeTime(data.pushed_at, lang),
                     isArchived: data.archived,
                     stars: data.stargazers_count,
                     forks: data.forks_count,
@@ -116,7 +127,7 @@ export async function GET(request: Request) {
                 results[repo] = repoInfo;
             } else {
                 results[repo] = {
-                    lastCommit: 'Bilinmiyor',
+                    lastCommit: lang === 'tr' ? 'Bilinmiyor' : 'Unknown',
                     isArchived: false,
                     stars: 0,
                     forks: 0,
@@ -130,7 +141,7 @@ export async function GET(request: Request) {
         } catch (error) {
             console.error(`Error fetching ${repo}:`, error);
             results[repo] = {
-                lastCommit: 'Bilinmiyor',
+                lastCommit: lang === 'tr' ? 'Bilinmiyor' : 'Unknown',
                 isArchived: false,
                 stars: 0,
                 forks: 0,
