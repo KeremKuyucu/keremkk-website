@@ -23,7 +23,6 @@ Built with Next.js (App Router), React 19, TypeScript, Tailwind CSS v4, and Supa
     - **Expense Tracker** — Track expenses and extract transactions from PDFs, spreadsheets, and images using Google Gemini, `unpdf`, and `exceljs` with built-in PII redaction.
     - **Subscriptions** — Recurring subscription tracking.
     - **Short Links** — Create and manage `/go/[slug]` redirects.
-    - **Password Generator** — UI and public REST API (`/api/generate-password`) for Turkish wordlist passphrases, with IP rate limiting and optional JWT bypass.
     - **Uptime Monitor** — Service health checks (`/api/monitor`), scheduled daily via Vercel Cron (`vercel.json`), with email alerts via Resend.
 
 ## Tech Stack

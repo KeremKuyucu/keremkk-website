@@ -20,8 +20,7 @@ import {
     FaChevronRight,
     FaExternalLinkAlt,
     FaShieldAlt,
-    FaBug,
-    FaKey
+    FaBug
 } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { createClient } from "@/lib/supabase/client";
@@ -123,11 +122,6 @@ const LinkManager = dynamic<AdminModuleProps>(
     { loading: () => <ModuleLoadingSkeleton />, ssr: false }
 );
 
-const WordlistManager = dynamic<AdminModuleProps>(
-    () => import("@/app/components/admin/WordlistManager"),
-    { loading: () => <ModuleLoadingSkeleton />, ssr: false }
-);
-
 const MonitorManager = dynamic<AdminModuleProps>(
     () => import("@/app/components/admin/MonitorManager"),
     { loading: () => <ModuleLoadingSkeleton />, ssr: false }
@@ -189,12 +183,6 @@ const MODULES: AdminModule[] = [
         label: "Kısa Linkler",
         icon: FaLink,
         component: LinkManager
-    },
-    {
-        id: "wordlist",
-        label: "Şifre Üretici",
-        icon: FaKey,
-        component: WordlistManager
     },
     {
         id: "monitor",
